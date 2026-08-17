@@ -1,0 +1,10 @@
+# DeepSeek v4 Pro — reasoning-tier variant
+# Served via Bahulam Gateway → OpenRouter → Fireworks (fallback DeepSeek)
+model_id: deepseek/deepseek-v4-pro
+family: deepseek
+provider_hint:
+  order: [Fireworks, DeepSeek]
+  allow_fallbacks: true
+context_window: 65536
+notes: |
+  Reasoning-tier. Standard sub-agent for plan/debug/refactor roles in multi-agent configs.

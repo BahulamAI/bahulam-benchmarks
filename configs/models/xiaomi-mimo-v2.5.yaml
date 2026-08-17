@@ -1,0 +1,13 @@
+# Xiaomi MiMo v2.5 — 7B reasoning model
+# Served via Bahulam Gateway → OpenRouter → GMICloud
+model_id: xiaomi/mimo-v2.5
+family: mimo
+provider_hint:
+  order: [GMICloud]
+  allow_fallbacks: true
+context_window: 65536
+notes: |
+  Primary model for the v8 benchmark series. Best performer on SWE-bench Verified (67.8%)
+  and SWE-bench Lite (62.0%) among tested models. Cache behavior on GMICloud degrades
+  with turn count (~97% on <20-turn conversations, ~46% on 60+ turns) — investigate
+  provider pinning if throughput matters.

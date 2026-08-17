@@ -1,0 +1,15 @@
+# Single-agent baseline pattern
+# One primary agent handles all tool calls directly. No delegation.
+pattern: single-agent
+description: |
+  Primary agent uses the full tool schema (43 tools including explore/plan/verify/debug/refactor
+  meta-tools) but is not prompt-steered to delegate. Model decides when (if ever) to invoke
+  a peer sub-agent.
+primary:
+  model: xiaomi/mimo-v2.5
+sub_agents: null  # available in schema but no explicit routing
+prompts:
+  system_prompt_layer: default  # workspace.yaml default
+  harness_task_prefix: |
+    Use search_code to find the relevant file, read_file to understand the code,
+    then edit_file with ABSOLUTE paths to fix it. You MUST call edit_file.

@@ -1,0 +1,39 @@
+# 2026-07_v1-flash-300
+# Backfilled from swebench-v1-flash-300 on 2026-08-17.
+run_id: 2026-07_v1-flash-300
+suite: swe-bench-lite
+dataset: princeton-nlp/SWE-bench_Lite
+subset: full-300
+instances_submitted: 300
+
+harness:
+  name: swe-bench-harness
+  config: ../../../../configs/harness/swe-harness.yaml
+  instance_timeout_s: 600
+  parallel_workers: 1
+
+agent:
+  pattern: single-agent
+  config: ../../../../configs/agent/single-agent.yaml
+  primary_model: deepseek/deepseek-v4-flash
+
+runtime:
+  type: cloud-backend
+  # Cloud-backend runs pre-date the public @bahulam/code npm package.
+
+gateway:
+  url: https://gateway.bahulam.ai/v1
+  provider: openrouter
+
+infrastructure:
+  vm_size: unknown
+  vm: unknown
+
+timing:
+  harness_started_at: null
+  harness_completed_at: null
+  docker_eval_completed_at: null
+
+notes: |
+  Historical run backfilled from codekepler-npm/benchmark/results/runs/swebench-v1-flash-300/.
+  Resolved: 92/300 = 30.7%.

@@ -1,0 +1,16 @@
+# Standard SWE-bench harness (Bahulam)
+# Uses codekepler-npm/benchmark/swe-bench/harness.py
+# Spawns a fresh runtime per instance. Native predictions.json output.
+# Best for leaderboard submissions.
+harness_name: swe-bench-harness
+harness_repo: codekepler-npm
+harness_path: benchmark/swe-bench/harness.py
+harness_flags:
+  timeout_per_instance_s: 600
+  parallel: 1
+  dataset: lite  # lite | verified | full
+  output_format: swebench-native  # predictions.json with instance_id + model_patch + model_name
+notes: |
+  Prefer this harness when the run is going to swebench.com. It emits predictions.json
+  in the exact schema the official evaluator expects. Trades cache efficiency for
+  determinism (fresh runtime per instance).

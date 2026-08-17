@@ -1,0 +1,24 @@
+# Local eval scratch
+/scratch/
+*.log
+.DS_Store
+
+# Docker eval artifacts we DON'T check in (huge)
+**/logs/run_evaluation/
+**/logs/build_images/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.pytest_cache/
+
+# Editor
+.vscode/
+.idea/
+
+# Local overrides
+.env
+.env.local

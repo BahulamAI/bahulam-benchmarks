@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-07_v8-mimo-verified-500",
+  "cost_usd_total": 3.7079,
+  "cost_usd_per_instance": 0.007416,
+  "cost_usd_per_resolved": 0.010938,
+  "tokens": {
+    "input": 407695001,
+    "output": 3951201,
+    "cache_read": 397238848,
+    "cache_write": 0,
+    "cache_hit_rate": 0.4935
+  },
+  "duration": {
+    "harness_s": 47160,
+    "docker_eval_s": 39240,
+    "wall_clock_total_s": 86400
+  },
+  "compute": {
+    "vm_size": "Standard_D16s_v3",
+    "vm_hours": 24,
+    "vm_cost_estimate_usd": 18.48
+  },
+  "activity": {
+    "total_tools_invoked": 13552,
+    "sub_agent_invocations": 4,
+    "avg_duration_per_instance_s": 304.3
+  }
+}

@@ -1,0 +1,17 @@
+# Persistent SWE-bench harness (Bahulam)
+# Uses codekepler-npm/benchmark/model-comparison/run-persistent.mjs
+# One Node.js process, one bundled runtime, one session across all instances.
+# Fastest for cache-warming; not a patch-collection harness (use swe-harness.yaml for that).
+harness_name: run-persistent
+harness_repo: codekepler-npm
+harness_path: benchmark/model-comparison/run-persistent.mjs
+harness_flags:
+  timeout_per_instance_s: 900
+  route: platform
+  # patches are collected via `git diff` from ~/.kepler-bench-repos/<instance>/ post-run
+notes: |
+  This harness maximizes prompt-cache reuse across instances (all Qs share the same
+  session). It measures speed and cost efficiently but does NOT emit `model_patch` in
+  the SSE completion event — collect via git-diff of the working trees.
+
+  For submitting to swebench.com, use swe-harness.yaml (native predictions.json).

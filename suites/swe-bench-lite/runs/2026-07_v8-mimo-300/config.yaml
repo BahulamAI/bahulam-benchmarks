@@ -1,0 +1,5 @@
+run_id: 2026-07_v8-mimo-300
+suite: swe-bench-lite
+# Backfill only — config metadata was already in manifest.json.
+runtime:
+  type: cloud-backend

@@ -1,0 +1,5 @@
+run_id: 2026-07-28_mimo-hard10-multirole
+suite: swe-bench-lite
+# Backfill only — config metadata was already in manifest.json.
+runtime:
+  type: cloud-backend

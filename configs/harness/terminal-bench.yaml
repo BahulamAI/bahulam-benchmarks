@@ -1,0 +1,14 @@
+# Terminal-bench harness (Bahulam)
+# Uses codekepler-npm/benchmark/terminal-bench/kepler_agent.py + terminal-bench Python package
+# Requires a runtime listening on a fixed port (default 8001).
+harness_name: terminal-bench
+harness_repo: codekepler-npm
+harness_path: benchmark/terminal-bench/kepler_agent.py
+harness_flags:
+  dataset: terminal-bench-core==0.1.1
+  runtime_port: 8001
+  backend_url: http://127.0.0.1:8001
+notes: |
+  The runtime is spawned once per run and listens on the given port; kepler_agent.py
+  is imported by `tb run --agent-import-path kepler_agent:KeplerAgent`. See
+  suites/terminal-bench/README.md for the full invocation.

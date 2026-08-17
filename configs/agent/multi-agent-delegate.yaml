@@ -1,0 +1,28 @@
+# Multi-agent delegation pattern
+# Primary is prompt-steered to invoke explore/plan/verify/debug/refactor sub-agents.
+# Result on hard-10: 0/10 (regression vs single-agent). Retained for reference only.
+pattern: multi-agent-delegate
+status: reference-only
+description: |
+  Primary agent prompted to call explore(query) FIRST for any code-modifying task,
+  then plan(task) if 3+ files affected. Sub-agents run on cheaper flash/pro models.
+
+  Empirical result: sub-agents fire consistently (~50 sub-agent tool calls per instance)
+  but explore-loop overruns and primary re-verifies findings, exceeding per-instance
+  timeout budget on 6/10 hard-10 instances. Do not use for benchmarking without further
+  tuning of explore max_iterations + trust-peer prompt.
+primary:
+  model: xiaomi/mimo-v2.5
+  thinking_budget_tokens: 2000
+sub_agents:
+  explore: {model: deepseek/deepseek-v4-flash, max_iterations: 30}
+  plan: {model: deepseek/deepseek-v4-pro, max_iterations: 15}
+  verify: {model: deepseek/deepseek-v4-flash, max_iterations: 15}
+  debug: {model: deepseek/deepseek-v4-pro, max_iterations: 15}
+  refactor: {model: deepseek/deepseek-v4-pro, max_iterations: 15}
+prompts:
+  system_prompt_layer: delegation-first  # adds explicit DELEGATION-FIRST preamble
+  harness_task_prefix: |
+    Call explore(query) FIRST to locate the affected module and get file:line refs.
+    If the change touches 3+ files, call plan(task) BEFORE editing.
+    Only then use edit_file. You MUST invoke at least one of explore or plan before editing.

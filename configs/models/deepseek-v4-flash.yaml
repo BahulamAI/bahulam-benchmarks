@@ -1,0 +1,11 @@
+# DeepSeek v4 Flash — fast/cheap variant
+# Served via Bahulam Gateway → OpenRouter → Fireworks (fallback DeepSeek)
+model_id: deepseek/deepseek-v4-flash
+family: deepseek
+provider_hint:
+  order: [Fireworks, DeepSeek]
+  allow_fallbacks: true
+context_window: 65536
+notes: |
+  Fast-tier default. Standard sub-agent for explore/verify roles in multi-agent configs.
+  Baseline SWE-bench Lite results ~30-43% depending on run.

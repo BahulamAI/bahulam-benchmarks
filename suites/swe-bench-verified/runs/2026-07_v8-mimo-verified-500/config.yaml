@@ -1,0 +1,55 @@
+# SWE-bench Verified 500 — mimo v2.5 v8 series
+# Source: codekepler-npm/benchmark/results/runs/swebench-v8-mimo-v2.5-verified-500/
+run_id: 2026-07_v8-mimo-verified-500
+suite: swe-bench-verified
+dataset: princeton-nlp/SWE-bench_Verified
+subset: full-500
+instances_submitted: 500
+
+harness:
+  name: swe-bench-harness
+  config: ../../../../configs/harness/swe-harness.yaml
+  instance_timeout_s: 600
+  parallel_workers: 4
+
+agent:
+  pattern: single-agent
+  config: ../../../../configs/agent/single-agent.yaml
+  primary_model: xiaomi/mimo-v2.5
+  # Sub-agent roles were mapped but rarely invoked (4 sub-agent invocations across 500 instances)
+  sub_agent_map:
+    explore: deepseek/deepseek-v4-flash
+    plan: deepseek/deepseek-v4-flash
+
+runtime:
+  type: cloud-backend
+  # Cloud-backend runs pre-date the public @bahulam/code npm package.
+  # For bundled-runtime runs, this section instead records `bahulam_version: 2.6.x`.
+
+gateway:
+  url: https://gateway.bahulam.ai/v1
+  provider: openrouter
+
+infrastructure:
+  vm_size: Standard_D16s_v3
+  vm: 'swebench-eval-vm-2 (172.202.17.40)'  # decommissioned since
+  region: centralus
+
+timing:
+  harness_started_at: '2026-07-21T23:22:00Z'
+  harness_completed_at: '2026-07-22T12:28:00Z'
+  docker_eval_completed_at: '2026-07-22T23:22:00Z'
+  harness_duration_s: 47160  # ~13 hours
+
+docker_eval:
+  strategy: >
+    10 primary batches of 50 (max_workers=4) + 3 rerun sub-batches +
+    4 retry-slow sub-batches (max_workers=2). Docker eval batched due
+    to disk pressure. See batch-reports/ in source for per-batch outputs.
+  max_workers: 4
+
+notes: |
+  Best SWE-bench Verified result to date. 67.8% resolve rate over 500 instances at
+  $0.011/resolved. Sub-agent delegation was available in schema but rarely used by mimo
+  (only 4 sub-agent invocations across 500 instances) — behavior is effectively
+  single-agent primary-only. Publishable to swebench.com/verified leaderboard.

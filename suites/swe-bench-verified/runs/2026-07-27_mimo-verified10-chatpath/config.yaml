@@ -1,0 +1,39 @@
+# 2026-07-27_mimo-verified10-chatpath
+# Backfilled from mimo-verified10-chatpath-20260727 on 2026-08-17.
+run_id: 2026-07-27_mimo-verified10-chatpath
+suite: swe-bench-lite
+dataset: princeton-nlp/SWE-bench_Lite
+subset: verified-10
+instances_submitted: 10
+
+harness:
+  name: swe-bench-harness
+  config: ../../../../configs/harness/swe-harness.yaml
+  instance_timeout_s: 600
+  parallel_workers: 1
+
+agent:
+  pattern: single-agent
+  config: ../../../../configs/agent/single-agent.yaml
+  primary_model: xiaomi/mimo-v2.5
+
+runtime:
+  type: cloud-backend
+  # Cloud-backend runs pre-date the public @bahulam/code npm package.
+
+gateway:
+  url: https://gateway.bahulam.ai/v1
+  provider: openrouter
+
+infrastructure:
+  vm_size: unknown
+  vm: unknown
+
+timing:
+  harness_started_at: null
+  harness_completed_at: null
+  docker_eval_completed_at: null
+
+notes: |
+  Historical run backfilled from codekepler-npm/benchmark/results/runs/mimo-verified10-chatpath-20260727/.
+  Resolved: 7/10 = 70.0%.

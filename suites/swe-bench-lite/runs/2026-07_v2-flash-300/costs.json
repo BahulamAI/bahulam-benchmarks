@@ -1,0 +1,15 @@
+{
+  "cost_usd_total": null,
+  "duration_s": 0,
+  "tokens": {
+    "input": null,
+    "output": null,
+    "cache_read": null,
+    "cache_hit_rate": null
+  },
+  "activity": {
+    "total_tools_invoked": null,
+    "sub_agent_invocations": null,
+    "avg_duration_per_instance_s": 166.0
+  }
+}

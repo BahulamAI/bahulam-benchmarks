@@ -1,0 +1,15 @@
+{
+  "cost_usd_total": 0.0639,
+  "duration_s": 3550,
+  "tokens": {
+    "input": 7156274,
+    "output": 50319,
+    "cache_read": 6939392,
+    "cache_hit_rate": 0.9697
+  },
+  "activity": {
+    "total_tools_invoked": null,
+    "sub_agent_invocations": null,
+    "avg_duration_per_instance_s": 355.0
+  }
+}
