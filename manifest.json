@@ -55,6 +55,23 @@
   ],
   "runs": [
     {
+      "run_id": "2026-08-19_bundled-mimo-300-2.6.14",
+      "suite": "swe-bench-lite",
+      "date": "2026-08-19",
+      "subset": "full-300",
+      "model": "xiaomi/mimo-v2.5",
+      "runtime": "bundled",
+      "bahulam_version": "2.6.14",
+      "agent_pattern": "single-agent",
+      "resolved": 176,
+      "submitted": 300,
+      "resolved_pct": 58.7,
+      "cost_usd": 1.6,
+      "duration_s": 144000,
+      "notes": "First SWE-bench Lite 300 result on the public @bahulam/code npm bundled runtime path. 244/300 patches produced (81.3%), 176 resolved. Retried 61 timeouts at 900s (10 recovered). Comparable-to-slightly-below v8-mimo-300 cloud-backend baseline of 62%.",
+      "path": "suites/swe-bench-lite/runs/2026-08-19_bundled-mimo-300-2.6.14"
+    },
+    {
       "run_id": "2026-07_v1-flash-300",
       "suite": "swe-bench-lite",
       "date": "2026-07",

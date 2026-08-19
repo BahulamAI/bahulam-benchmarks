@@ -1,0 +1,21 @@
+{
+  "cost_harness_estimate_usd": 75.15,
+  "cost_real_dashboard_usd_approx": 1.6,
+  "resolved": 176,
+  "submitted": 300,
+  "patched": 244,
+  "tokens": {
+    "input": 132851572,
+    "output": 1329167,
+    "cache_read": 126927237,
+    "cache_hit_rate_pct": 95.5
+  },
+  "activity": {
+    "total_tools_invoked": 5146,
+    "avg_duration_per_instance_s": 231.5
+  },
+  "duration": {
+    "harness_total_wall_clock_s": 69459.90000000001,
+    "notes": "Includes original run + 900s retry + evals. Wall-clock from start (Aug 17 18:23 UTC) to publish is ~40 hours across intermittent activity."
+  }
+}
