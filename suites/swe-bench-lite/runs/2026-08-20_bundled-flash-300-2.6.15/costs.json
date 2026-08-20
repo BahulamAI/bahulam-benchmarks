@@ -1,0 +1,18 @@
+{
+  "cost_harness_estimate_usd": 3.83,
+  "cost_real_dashboard_usd_approx": 0.08,
+  "resolved": 164,
+  "submitted": 300,
+  "patched": 216,
+  "cost_real_per_resolved_usd": 0.00049,
+  "tokens": {
+    "input": 145442888,
+    "output": 2490325,
+    "cache_read": 136774912,
+    "cache_hit_rate_pct": 94.0
+  },
+  "duration": {
+    "harness_total_s": 94008,
+    "wall_clock_hours_parallel3": 10.5
+  }
+}

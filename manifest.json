@@ -55,6 +55,23 @@
   ],
   "runs": [
     {
+      "run_id": "2026-08-20_bundled-flash-300-2.6.15",
+      "suite": "swe-bench-lite",
+      "date": "2026-08-20",
+      "subset": "full-300",
+      "model": "deepseek/deepseek-v4-flash",
+      "runtime": "bundled",
+      "bahulam_version": "2.6.15",
+      "agent_pattern": "single-agent",
+      "resolved": 164,
+      "submitted": 300,
+      "resolved_pct": 54.7,
+      "cost_usd": 0.08,
+      "duration_s": 37800,
+      "notes": "Cost-efficiency row: 54.7% resolve at ~$0.08 total (~$0.0005/resolved). +18pp over best prior flash baseline (36.8%). Resolve-per-patch 75.9% is highest of any run. Single pass, no retry.",
+      "path": "suites/swe-bench-lite/runs/2026-08-20_bundled-flash-300-2.6.15"
+    },
+    {
       "run_id": "2026-08-19_bundled-mimo-300-2.6.14",
       "suite": "swe-bench-lite",
       "date": "2026-08-19",

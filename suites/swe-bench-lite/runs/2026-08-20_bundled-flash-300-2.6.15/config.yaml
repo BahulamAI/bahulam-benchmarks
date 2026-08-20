@@ -1,0 +1,52 @@
+# SWE-bench Lite 300 — deepseek-v4-flash on @bahulam/code@2.6.15 bundled CLI
+# The cost-efficiency reference row: 54.7% resolve at ~$0.08 total.
+run_id: 2026-08-20_bundled-flash-300-2.6.15
+suite: swe-bench-lite
+dataset: princeton-nlp/SWE-bench_Lite
+subset: full-300
+instances_submitted: 300
+
+harness:
+  name: swe-bench-harness
+  config: ../../../../configs/harness/swe-harness.yaml
+  instance_timeout_s: 600
+  parallel_workers: 3
+
+agent:
+  pattern: single-agent
+  config: ../../../../configs/agent/single-agent.yaml
+  primary_model: deepseek/deepseek-v4-flash
+
+runtime:
+  type: bundled
+  bahulam_version: '2.6.15'
+  install: 'npm install @bahulam/code@2.6.15 @bahulam/runtime-linux-x64@2.6.15'
+
+gateway:
+  url: https://gateway.bahulam.ai/v1
+  provider: openrouter
+  observed_upstream: Fireworks
+
+infrastructure:
+  vm_size: Standard_D16s_v3
+  vm: swebench-eval-vm (172.173.113.58)
+  region: centralus
+  os: Ubuntu 22.04.5 LTS
+
+timing:
+  harness_started_at: '2026-08-19T12:19:31Z'
+  harness_completed_at: '2026-08-19T22:49:00Z'
+  docker_eval_completed_at: '2026-08-20T02:43:00Z'
+  wall_clock_hours: 10.5
+
+notes: |
+  Single-pass run (no retry) at 600s timeout, 3 parallel workers.
+  216/300 patches produced (72%). Docker eval done in 2 batches (main +
+  115-instance retry after a Docker Hub anonymous-pull rate limit).
+
+  Result: 164/300 (54.7%) — an 18pp jump over the best prior cloud flash
+  baseline (v4-flash-300: 36.8%), at a total real gateway cost of ~$0.08.
+  Resolve-per-patch 75.9% is the highest of any run in this repo.
+
+  Cost per resolved instance: ~$0.0005. Cache hit rate ~94% (Fireworks
+  honors prompt-cache markers consistently).
