@@ -1,0 +1,100 @@
+# Screening gates — ALL must pass for a model to be added to the approved list.
+# Applied by scripts/verify-and-report.py after the screen + docker eval complete.
+#
+# Rationale for each threshold is in the `reason` field. When adjusting a
+# threshold, update the reason and note the empirical evidence.
+
+pre_flight:
+  # Cheap checks run BEFORE any billed inference. If either fails, screen aborts.
+  - id: tools_param_accepted
+    check: probe_gateway_with_tools
+    reason: |
+      Post a single 20-token tool_use request. If the provider strips `tools`
+      or returns HTTP 400, the model can't drive a coding agent — reject at
+      step 0 without spending screening budget. Would have blocked
+      minimax/minimax-m3 (standard endpoint doesn't accept `tools`).
+
+  - id: pricing_snapshot
+    check: fetch_openrouter_endpoints
+    reason: |
+      Read live /api/v1/models/<slug>/endpoints. Store input/output/cache
+      per-1M prices in the report. Prevents publishing $/resolved figures
+      against stale pricing.
+
+gates:
+  - metric: resolve_rate
+    op: ">="
+    value: 0.30
+    reason: |
+      Below the July 2026 flash-cloud baseline of 30.7%. Not worth burning
+      $10-500 on a full-300.
+
+  - metric: cache_hit_pct
+    op: ">="
+    value: 0.70
+    reasoning_model_value: 0.80
+    reason: |
+      Below 70% means the provider isn't honoring prompt-cache markers or
+      the model emits non-deterministic prefixes. Blows up cost 5-10x at
+      full-300 scale. Reasoning models get a tighter gate (80%) because
+      stochastic thinking traces degrade cache hit at scale, not improve it.
+
+  - metric: tool_call_emission_rate
+    op: ">="
+    value: 0.90
+    reason: |
+      Fraction of instances where the model emitted at least one tool_call
+      before the 600s timeout. Below 90% means the model is stuck in
+      reasoning loops (see the -0731 failure mode where 42% of instances
+      returned 0 tool calls at 600s).
+
+  - metric: cost_per_resolved_usd
+    op: "<="
+    value: 2.00
+    reason: |
+      Flash-2.6.15 is $0.071/resolved (dashboard-verified). MiMo v2.5 is
+      ~$0.10 (est). $2/resolved leaves 25-30x headroom for models that
+      trade cost for quality.
+
+  - metric: dashboard_cost_usd
+    op: "<="
+    value: 5.00
+    reason: |
+      Hard budget cap on the screen itself. Above this, the screening
+      workflow is not economically viable — 100+ screens/year would exceed
+      $500 without commensurate signal.
+
+  - metric: cost_delta_pct
+    op: "<="
+    value: 500
+    reason: |
+      abs(dashboard_cost - harness_estimate) / harness_estimate * 100.
+      If harness self-cost is off by >5x from the dashboard, we can't
+      project full-300 spend reliably from screen numbers.
+
+  - metric: resolve_per_patch
+    op: ">="
+    value: 0.60
+    reason: |
+      Of patches actually produced, at least 60% must resolve. Below this
+      the model is generating patches that don't fix the underlying bug —
+      a symptom of missing test-execution feedback or bad reasoning.
+
+  - metric: reasoning_token_ratio
+    op: "<="
+    value: 3.0
+    applies_to: reasoning_models
+    reason: |
+      billed_output_tokens / assistant_text_tokens. Catches the OpenAI
+      reasoning-token billing bug (3.6-9x inflation) and MiniMax-M3
+      thinking-trace inflation before full-300 detonates the budget.
+
+# Projections applied to screen outcome to estimate full-300 behavior.
+projection:
+  # Full-300 has ~10x the instances but tail difficulty (sympy, sphinx)
+  # historically inflates spend an extra ~1.5x. Don't project linearly.
+  full_300_cost_multiplier: 15.0
+
+  # Reasoning models cache WORSE at scale than at screen scale (more
+  # opportunities for stochastic thinking to invalidate the completion prefix).
+  cache_hit_scale_penalty_reasoning: 0.10
