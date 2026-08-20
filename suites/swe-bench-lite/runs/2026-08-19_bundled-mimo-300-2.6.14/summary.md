@@ -15,8 +15,8 @@ First result on the public `@bahulam/code` npm bundled runtime path — this is 
 | Error | 1 |
 | Patches produced | 244 / 300 (81.3 %) |
 | Resolve rate over patches | 176 / 244 = 72.1 % |
-| Cost harness estimate | $75 |
-| Cost real (dashboard-calibrated ~×1/50) | ~$1.60 |
+| Cost harness estimate | $75 (known to over-report; harness doesn't model provider caching) |
+| Cost real (dashboard) | not separately metered — see note below |
 | Cache hit rate | 95 %+ |
 | Avg per-instance wall-clock | ~4-5 min |
 
@@ -37,6 +37,24 @@ First result on the public `@bahulam/code` npm bundled runtime path — this is 
 - This is what end users install (`npm install @bahulam/code`)
 - Publishing cloud-backend numbers overstates what customers experience
 - 58.7% on public CLI is competitive with most non-frontier scaffolds
+
+## Cost note
+
+**No verified dollar figure is published for this run.** The run happened in a
+window (~40 hours real-time, spanning credit exhaustion + top-up + interactive
+debugging + parallel mid-eval traffic) where mimo requests overlapped
+significant non-benchmark gateway usage. The provider dashboard totals for
+that window can't be cleanly attributed to this run.
+
+The harness's self-reported $75 estimate is known to over-report by a large
+multiple (it doesn't model provider-side prompt caching; the flash run's
+harness estimate was $3.83 vs dashboard-verified $11.60, so harness numbers
+are not linearly scalable in either direction — the ratio depends on cache
+patterns and model pricing).
+
+The follow-on flash run (2026-08-20) was run in a clean, isolated window
+and IS dashboard-verified at $11.60 / $0.071 per resolved. See that run
+directory for the cost story.
 
 ## Run history (this run took ~40 hours real-time with pauses)
 

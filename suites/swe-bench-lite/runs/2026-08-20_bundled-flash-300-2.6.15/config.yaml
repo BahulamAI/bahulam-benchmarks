@@ -45,8 +45,11 @@ notes: |
   115-instance retry after a Docker Hub anonymous-pull rate limit).
 
   Result: 164/300 (54.7%) — an 18pp jump over the best prior cloud flash
-  baseline (v4-flash-300: 36.8%), at a total real gateway cost of ~$0.08.
-  Resolve-per-patch 75.9% is the highest of any run in this repo.
+  baseline (v4-flash-300: 36.8%).
 
-  Cost per resolved instance: ~$0.0005. Cache hit rate ~94% (Fireworks
-  honors prompt-cache markers consistently).
+  Cost (dashboard-verified from OpenRouter for the run window):
+    total spend $12.90, minus ~10% concurrent eval/probe traffic = $11.60
+    for the run itself. $11.60 / 164 resolved = $0.071 per resolved issue.
+    94.3% cache hit, ~10K requests, 323M tokens, $0.04 blended per 1M.
+
+  Resolve-per-patch 75.9% is the highest of any run in this repo.

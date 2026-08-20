@@ -1,10 +1,9 @@
 {
   "cost_harness_estimate_usd": 3.83,
-  "cost_real_dashboard_usd_approx": 0.08,
   "resolved": 164,
   "submitted": 300,
   "patched": 216,
-  "cost_real_per_resolved_usd": 0.00049,
+  "cost_real_per_resolved_usd": 0.071,
   "tokens": {
     "input": 145442888,
     "output": 2490325,
@@ -14,5 +13,7 @@
   "duration": {
     "harness_total_s": 94008,
     "wall_clock_hours_parallel3": 10.5
-  }
+  },
+  "cost_real_dashboard_usd": 11.6,
+  "cost_real_source": "OpenRouter dashboard for run window 2026-08-19 12:19 \u2192 22:49 UTC: $12.90 total spend, 10K requests, 323M tokens, 94.3% cache hit rate, $0.04 blended per 1M tokens. ~10% attributed to concurrent evals/probes \u2192 $11.60 run cost."
 }

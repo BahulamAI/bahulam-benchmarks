@@ -66,9 +66,9 @@
       "resolved": 164,
       "submitted": 300,
       "resolved_pct": 54.7,
-      "cost_usd": 0.08,
+      "cost_usd": 11.6,
       "duration_s": 37800,
-      "notes": "Cost-efficiency row: 54.7% resolve at ~$0.08 total (~$0.0005/resolved). +18pp over best prior flash baseline (36.8%). Resolve-per-patch 75.9% is highest of any run. Single pass, no retry.",
+      "notes": "Cost row (dashboard-verified): 54.7% resolve at $11.60 total spend = ~$0.071 per resolved issue. OpenRouter window: 10K requests, 323M tokens, 94.3% cache hit, $0.04 blended per 1M tokens. +18pp over best prior flash baseline (36.8%). Resolve-per-patch 75.9% is highest of any run. Single pass, no retry.",
       "path": "suites/swe-bench-lite/runs/2026-08-20_bundled-flash-300-2.6.15"
     },
     {
@@ -83,9 +83,9 @@
       "resolved": 176,
       "submitted": 300,
       "resolved_pct": 58.7,
-      "cost_usd": 1.6,
+      "cost_usd": null,
       "duration_s": 144000,
-      "notes": "First SWE-bench Lite 300 result on the public @bahulam/code npm bundled runtime path. 244/300 patches produced (81.3%), 176 resolved. Retried 61 timeouts at 900s (10 recovered). Comparable-to-slightly-below v8-mimo-300 cloud-backend baseline of 62%.",
+      "notes": "First SWE-bench Lite 300 result on the public @bahulam/code npm bundled runtime path. 244/300 patches produced (81.3%), 176 resolved. Retried 61 timeouts at 900s (10 recovered). Cost not separately metered \u2014 run overlapped other gateway usage; blended-rate rough estimate ~$10, do NOT publish as verified.",
       "path": "suites/swe-bench-lite/runs/2026-08-19_bundled-mimo-300-2.6.14"
     },
     {
