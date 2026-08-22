@@ -1,0 +1,218 @@
+{
+  "schema_version": 1,
+  "benchmark": "swe-bench-lite",
+  "model": "stealth/ox-alpha",
+  "timestamp": "2026-08-22T19:07:38.505415",
+  "results": [
+    {
+      "instance_id": "astropy__astropy-12907",
+      "repo": "astropy/astropy",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T16:40:38.974459",
+      "kepler": {
+        "success": false,
+        "duration_s": 1200,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "status": "bahulam_failed",
+      "error": "Timeout"
+    },
+    {
+      "instance_id": "django__django-10924",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T17:18:32.922601",
+      "kepler": {
+        "success": true,
+        "duration_s": 470.0,
+        "cost_usd": 0.274397,
+        "tools": 19,
+        "tool_breakdown": {
+          "search_code": 2,
+          "grep": 2,
+          "shell": 12,
+          "read_file": 2,
+          "edit_file": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 336857,
+          "output_tokens": 6932,
+          "cache_read": 311168,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/django/db/models/fields/__init__.py b/django/db/models/fields/__init__.py\nindex 0c64748ccd..4d7eb11151 100644\n--- a/django/db/models/fields/__init__.py\n+++ b/django/db/models/fields/__init__.py\n@@ -1709,7 +1709,7 @@ class FilePathField(Field):\n \n     def formfield(self, **kwargs):\n         return super().formfield(**{\n-            'path': self.path,\n+            'path': self.path() if callable(self.path) else self.path,\n             'match': self.match,\n             'recursive': self.recursive,\n             'form_class': forms.FilePathField,\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-11099",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T17:31:13.070214",
+      "kepler": {
+        "success": true,
+        "duration_s": 85.4,
+        "cost_usd": 0.057053,
+        "tools": 6,
+        "tool_breakdown": {
+          "search_code": 1,
+          "read_file": 1,
+          "edit_file": 2,
+          "run_tests": 1,
+          "shell": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 110028,
+          "output_tokens": 852,
+          "cache_read": 105856,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 23,
+      "model_patch": "diff --git a/django/contrib/auth/validators.py b/django/contrib/auth/validators.py\nindex b4878cfd45..1304f20a60 100644\n--- a/django/contrib/auth/validators.py\n+++ b/django/contrib/auth/validators.py\n@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _\n \n @deconstructible\n class ASCIIUsernameValidator(validators.RegexValidator):\n-    regex = r'^[\\w.@+-]+$'\n+    regex = r'\\A[\\w.@+-]+\\Z'\n     message = _(\n         'Enter a valid username. This value may contain only English letters, '\n         'numbers, and @/./+/-/_ characters.'\n@@ -17,7 +17,7 @@ class ASCIIUsernameValidator(validators.RegexValidator):\n \n @deconstructible\n class UnicodeUsernameValidator(validators.RegexValidator):\n-    regex = r'^[\\w.@+-]+$'\n+    regex = r'\\A[\\w.@+-]+\\Z'\n     message = _(\n         'Enter a valid username. This value may contain only letters, '\n         'numbers, and @/./+/-/_ characters.'\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-11620",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T17:47:07.377099",
+      "kepler": {
+        "success": true,
+        "duration_s": 500.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-11422",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T17:38:04.005008",
+      "kepler": {
+        "success": true,
+        "duration_s": 1124.7,
+        "cost_usd": 0.7336,
+        "tools": 29,
+        "tool_breakdown": {
+          "search_code": 4,
+          "get_project_overview": 1,
+          "read_file": 4,
+          "shell": 12,
+          "grep": 1,
+          "web_search": 2,
+          "web_fetch": 2,
+          "edit_file": 2,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 630412,
+          "output_tokens": 28382,
+          "cache_read": 586432,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 23,
+      "model_patch": "diff --git a/django/utils/autoreload.py b/django/utils/autoreload.py\nindex 7ca0d68fae..9cdc4edb4e 100644\n--- a/django/utils/autoreload.py\n+++ b/django/utils/autoreload.py\n@@ -114,7 +114,16 @@ def iter_modules_and_files(modules, extra_files):\n         # During debugging (with PyDev) the 'typing.io' and 'typing.re' objects\n         # are added to sys.modules, however they are types not modules and so\n         # cause issues here.\n-        if not isinstance(module, ModuleType) or getattr(module, '__spec__', None) is None:\n+        if not isinstance(module, ModuleType):\n+            continue\n+        if module.__name__ == '__main__':\n+            # __main__ (usually manage.py) doesn't always have a __spec__ set.\n+            # Handle this by falling back to using __file__, resolved below.\n+            # See https://docs.python.org/reference/import.html#main-spec\n+            if getattr(module, '__file__', None):\n+                sys_file_paths.append(module.__file__)\n+            continue\n+        if getattr(module, '__spec__', None) is None:\n             continue\n         spec = module.__spec__\n         # Modules could be loaded from places without a concrete location. If\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-11905",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T18:08:52.358596",
+      "kepler": {
+        "success": true,
+        "duration_s": 1148.0,
+        "cost_usd": 0,
+        "tools": 21,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "read_file": 4,
+          "grep": 3,
+          "search_files": 5,
+          "shell": 5
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 2,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-12113",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T18:27:53.472222",
+      "kepler": {
+        "success": true,
+        "duration_s": 500.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-12497",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T18:47:57.897419",
+      "kepler": {
+        "success": true,
+        "duration_s": 293.0,
+        "cost_usd": 0.275625,
+        "tools": 19,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "grep": 5,
+          "shell": 6,
+          "read_file": 2,
+          "edit_file": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 377875,
+          "output_tokens": 2992,
+          "cache_read": 334400,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 23,
+      "model_patch": "diff --git a/django/db/models/fields/related.py b/django/db/models/fields/related.py\nindex 8ddbb5ba68..536b3dd601 100644\n--- a/django/db/models/fields/related.py\n+++ b/django/db/models/fields/related.py\n@@ -1309,7 +1309,7 @@ class ManyToManyField(RelatedField):\n                              \"through_fields keyword argument.\") % (self, from_model_name),\n                             hint=(\n                                 'If you want to create a recursive relationship, '\n-                                'use ForeignKey(\"%s\", symmetrical=False, through=\"%s\").'\n+                                'use ManyToManyField(\"%s\", through=\"%s\").'\n                             ) % (\n                                 RECURSIVE_RELATIONSHIP_CONSTANT,\n                                 relationship_model_name,\n@@ -1329,7 +1329,7 @@ class ManyToManyField(RelatedField):\n                             \"through_fields keyword argument.\" % (self, to_model_name),\n                             hint=(\n                                 'If you want to create a recursive relationship, '\n-                                'use ForeignKey(\"%s\", symmetrical=False, through=\"%s\").'\n+                                'use ManyToManyField(\"%s\", through=\"%s\").'\n                             ) % (\n                                 RECURSIVE_RELATIONSHIP_CONSTANT,\n                                 relationship_model_name,\n",
+      "status": "patched"
+    }
+  ]
+}

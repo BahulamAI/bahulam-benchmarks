@@ -1,0 +1,258 @@
+{
+  "schema_version": 1,
+  "benchmark": "swe-bench-lite",
+  "model": "stealth/ox-alpha",
+  "timestamp": "2026-08-22T19:07:38.505415",
+  "results": [
+    {
+      "instance_id": "astropy__astropy-14365",
+      "repo": "astropy/astropy",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T16:40:38.975230",
+      "kepler": {
+        "success": true,
+        "duration_s": 1099.5,
+        "cost_usd": 1.102166,
+        "tools": 67,
+        "tool_breakdown": {
+          "search_code": 5,
+          "get_project_overview": 1,
+          "analyze_code": 1,
+          "read_file": 6,
+          "edit_file": 2,
+          "grep": 1,
+          "run_tests": 1,
+          "shell": 50
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 1,
+        "usage": {
+          "input_tokens": 1782204,
+          "output_tokens": 20036,
+          "cache_read": 1683328,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 23,
+      "model_patch": "diff --git a/astropy/io/ascii/qdp.py b/astropy/io/ascii/qdp.py\nindex 83a4f004aa..5324dc81cc 100644\n--- a/astropy/io/ascii/qdp.py\n+++ b/astropy/io/ascii/qdp.py\n@@ -68,7 +68,7 @@ def _line_type(line, delimiter=None):\n     _new_re = rf\"NO({sep}NO)+\"\n     _data_re = rf\"({_decimal_re}|NO|[-+]?nan)({sep}({_decimal_re}|NO|[-+]?nan))*)\"\n     _type_re = rf\"^\\s*((?P<command>{_command_re})|(?P<new>{_new_re})|(?P<data>{_data_re})?\\s*(\\!(?P<comment>.*))?\\s*$\"\n-    _line_type_re = re.compile(_type_re)\n+    _line_type_re = re.compile(_type_re, re.IGNORECASE)\n     line = line.strip()\n     if not line:\n         return \"comment\"\n@@ -306,7 +306,7 @@ def _get_tables_from_qdp_file(qdp_file, input_colnames=None, delimiter=None):\n \n             values = []\n             for v in line.split(delimiter):\n-                if v == \"NO\":\n+                if v.upper() == \"NO\":\n                     values.append(np.ma.masked)\n                 else:\n                     # Understand if number is int or float\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "astropy__astropy-7746",
+      "repo": "astropy/astropy",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T17:00:49.255680",
+      "kepler": {
+        "success": true,
+        "duration_s": 1055.8,
+        "cost_usd": 0.822394,
+        "tools": 54,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "grep": 1,
+          "shell": 39,
+          "read_file": 6,
+          "edit_file": 4
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 1277625,
+          "output_tokens": 17467,
+          "cache_read": 1212032,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 24,
+      "model_patch": "diff --git a/astropy/wcs/wcs.py b/astropy/wcs/wcs.py\nindex d3a06f2b31..8149cc8c5b 100644\n--- a/astropy/wcs/wcs.py\n+++ b/astropy/wcs/wcs.py\n@@ -1212,6 +1212,9 @@ reduce these to 2 dimensions using the naxis kwarg.\n         \"\"\"\n \n         def _return_list_of_arrays(axes, origin):\n+            if any(x.size == 0 for x in axes):\n+                return axes\n+\n             try:\n                 axes = np.broadcast_arrays(*axes)\n             except ValueError:\n@@ -1235,6 +1238,8 @@ reduce these to 2 dimensions using the naxis kwarg.\n                 raise ValueError(\n                     \"When providing two arguments, the array must be \"\n                     \"of shape (N, {0})\".format(self.naxis))\n+            if 0 in xy.shape:\n+                return np.empty_like(xy)\n             if ra_dec_order and sky == 'input':\n                 xy = self._denormalize_sky(xy)\n             result = func(xy, origin)\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-11179",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T17:34:17.660765",
+      "kepler": {
+        "success": true,
+        "duration_s": 215.7,
+        "cost_usd": 0.191803,
+        "tools": 15,
+        "tool_breakdown": {
+          "read_file": 2,
+          "grep": 3,
+          "search_code": 2,
+          "get_project_overview": 1,
+          "edit_file": 1,
+          "shell": 6
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 281360,
+          "output_tokens": 2664,
+          "cache_read": 256384,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 13,
+      "model_patch": "diff --git a/django/db/models/deletion.py b/django/db/models/deletion.py\nindex 92fe4affb9..3a462f1c4c 100644\n--- a/django/db/models/deletion.py\n+++ b/django/db/models/deletion.py\n@@ -277,6 +277,7 @@ class Collector:\n             if self.can_fast_delete(instance):\n                 with transaction.mark_for_rollback_on_error():\n                     count = sql.DeleteQuery(model).delete_batch([instance.pk], self.using)\n+                setattr(instance, model._meta.pk.attname, None)\n                 return count, {model._meta.label: count}\n \n         with transaction.atomic(using=self.using, savepoint=False):\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-11283",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T17:36:10.408771",
+      "kepler": {
+        "success": true,
+        "duration_s": 597.7,
+        "cost_usd": 0.412418,
+        "tools": 22,
+        "tool_breakdown": {
+          "search_code": 4,
+          "get_project_overview": 1,
+          "read_file": 4,
+          "web_fetch": 2,
+          "edit_file": 4,
+          "shell": 7
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 448194,
+          "output_tokens": 11745,
+          "cache_read": 410496,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 62,
+      "model_patch": "diff --git a/django/contrib/auth/migrations/0011_update_proxy_permissions.py b/django/contrib/auth/migrations/0011_update_proxy_permissions.py\nindex 0e66649695..9334179b9a 100644\n--- a/django/contrib/auth/migrations/0011_update_proxy_permissions.py\n+++ b/django/contrib/auth/migrations/0011_update_proxy_permissions.py\n@@ -1,5 +1,16 @@\n-from django.db import migrations\n+import sys\n+\n+from django.core.management.color import color_style\n+from django.db import DEFAULT_DB_ALIAS, migrations, transaction\n from django.db.models import Q\n+from django.db.utils import IntegrityError\n+\n+WARNING = \"\"\"\n+A problem arose migrating proxy model permissions for {old} to {new}.\n+Permission(s) for {new} already existed.\n+Codenames Q: {query}\n+Ensure to audit ALL permissions for {old} and {new}.\n+\"\"\"\n \n \n def update_proxy_model_permissions(apps, schema_editor, reverse=False):\n@@ -7,8 +18,10 @@ def update_proxy_model_permissions(apps, schema_editor, reverse=False):\n     Update the content_type of proxy model permissions to use the ContentType\n     of the proxy model.\n     \"\"\"\n+    style = color_style()\n     Permission = apps.get_model('auth', 'Permission')\n     ContentType = apps.get_model('contenttypes', 'ContentType')\n+    alias = schema_editor.connection.alias if schema_editor else DEFAULT_DB_ALIAS\n     for Model in apps.get_models():\n         opts = Model._meta\n         if not opts.proxy:\n@@ -20,14 +33,21 @@ def update_proxy_model_permissions(apps, schema_editor, reverse=False):\n         permissions_query = Q(codename__in=proxy_default_permissions_codenames)\n         for codename, name in opts.permissions:\n             permissions_query = permissions_query | Q(codename=codename, name=name)\n-        concrete_content_type = ContentType.objects.get_for_model(Model, for_concrete_model=True)\n-        proxy_content_type = ContentType.objects.get_for_model(Model, for_concrete_model=False)\n+        content_type_manager = ContentType.objects.db_manager(alias)\n+        concrete_content_type = content_type_manager.get_for_model(Model, for_concrete_model=True)\n+        proxy_content_type = content_type_manager.get_for_model(Model, for_concrete_model=False)\n         old_content_type = proxy_content_type if reverse else concrete_content_type\n         new_content_type = concrete_content_type if reverse else proxy_content_type\n-        Permission.objects.filter(\n-            permissions_query,\n-            content_type=old_content_type,\n-        ).update(content_type=new_content_type)\n+        try:\n+            with transaction.atomic(using=alias):\n+                Permission.objects.using(alias).filter(\n+                    permissions_query,\n+                    content_type=old_content_type,\n+                ).update(content_type=new_content_type)\n+        except IntegrityError:\n+            old = '{}_{}'.format(old_content_type.app_label, old_content_type.model)\n+            new = '{}_{}'.format(new_content_type.app_label, new_content_type.model)\n+            sys.stdout.write(style.WARNING(WARNING.format(old=old, new=new, query=permissions_query)))\n \n \n def revert_proxy_model_permissions(apps, schema_editor):\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-11848",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T18:06:36.047765",
+      "kepler": {
+        "success": true,
+        "duration_s": 191.0,
+        "cost_usd": 0.158282,
+        "tools": 10,
+        "tool_breakdown": {
+          "get_project_overview": 2,
+          "search_code": 3,
+          "read_file": 1,
+          "edit_file": 1,
+          "run_tests": 1,
+          "shell": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 174893,
+          "output_tokens": 3498,
+          "cache_read": 155136,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 21,
+      "model_patch": "diff --git a/django/utils/http.py b/django/utils/http.py\nindex 572cfb4347..c2187c33b2 100644\n--- a/django/utils/http.py\n+++ b/django/utils/http.py\n@@ -176,10 +176,12 @@ def parse_http_date(date):\n     try:\n         year = int(m.group('year'))\n         if year < 100:\n-            if year < 70:\n-                year += 2000\n+            current_year = datetime.datetime.utcnow().year\n+            current_century = current_year - (current_year % 100)\n+            if year - (current_year % 100) > 50:\n+                year += current_century - 100\n             else:\n-                year += 1900\n+                year += current_century\n         month = MONTHS.index(m.group('mon').lower()) + 1\n         day = int(m.group('day'))\n         hour = int(m.group('hour'))\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-11964",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T18:17:12.767966",
+      "kepler": {
+        "success": true,
+        "duration_s": 638.0,
+        "cost_usd": 0.224887,
+        "tools": 9,
+        "tool_breakdown": {
+          "search_code": 2,
+          "analyze_code": 1,
+          "read_file": 2,
+          "edit_file": 1,
+          "run_tests": 2,
+          "shell": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 116814,
+          "output_tokens": 5661,
+          "cache_read": 77952,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 20,
+      "model_patch": "diff --git a/django/db/models/enums.py b/django/db/models/enums.py\nindex bbe362a6ab..0fe35d7549 100644\n--- a/django/db/models/enums.py\n+++ b/django/db/models/enums.py\n@@ -60,6 +60,14 @@ class ChoicesMeta(enum.EnumMeta):\n \n class Choices(enum.Enum, metaclass=ChoicesMeta):\n     \"\"\"Class for creating enumerated choices.\"\"\"\n+\n+    def __str__(self):\n+        \"\"\"\n+        Use value when cast to str, instead the default value returned by\n+        enum.Enum.\n+        \"\"\"\n+        return str(self.value)\n+\n     pass\n \n \n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-12286",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T18:39:56.785516",
+      "kepler": {
+        "success": true,
+        "duration_s": 234.2,
+        "cost_usd": 0.33032,
+        "tools": 17,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "read_file": 3,
+          "edit_file": 1,
+          "shell": 9
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 320946,
+          "output_tokens": 3843,
+          "cache_read": 255616,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 16,
+      "model_patch": "diff --git a/django/core/checks/translation.py b/django/core/checks/translation.py\nindex 138ed07ff8..e3e23183c8 100644\n--- a/django/core/checks/translation.py\n+++ b/django/core/checks/translation.py\n@@ -57,5 +57,9 @@ def check_language_settings_consistent(app_configs, **kwargs):\n     \"\"\"Error if language settings are not consistent with each other.\"\"\"\n     available_tags = {i for i, _ in settings.LANGUAGES} | {'en-us'}\n     if settings.LANGUAGE_CODE not in available_tags:\n-        return [E004]\n+        # If the sublanguage specified is not available but the base language\n+        # is, use the base language, e.g. 'de' for 'de-at'.\n+        base_language = settings.LANGUAGE_CODE.split('-')[0]\n+        if base_language not in available_tags:\n+            return [E004]\n     return []\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-12700",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T18:54:13.358477",
+      "kepler": {
+        "success": true,
+        "duration_s": 791.8,
+        "cost_usd": 0.606803,
+        "tools": 22,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "read_file": 3,
+          "edit_file": 3,
+          "shell": 8,
+          "grep": 1,
+          "web_fetch": 3
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 441705,
+          "output_tokens": 18894,
+          "cache_read": 371008,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 23,
+      "model_patch": "diff --git a/django/views/debug.py b/django/views/debug.py\nindex e6b7d4d821..d57e6bca79 100644\n--- a/django/views/debug.py\n+++ b/django/views/debug.py\n@@ -84,6 +84,8 @@ class SafeExceptionReporterFilter:\n         \"\"\"\n         Cleanse an individual setting key/value of sensitive content. If the\n         value is a dictionary, recursively cleanse the keys in that dictionary.\n+        If the value is a list or tuple, recursively cleanse the values in\n+        that iterable.\n         \"\"\"\n         try:\n             if self.hidden_settings.search(key):\n@@ -92,6 +94,8 @@ class SafeExceptionReporterFilter:\n                 cleansed = {k: self.cleanse_setting(k, v) for k, v in value.items()}\n             else:\n                 cleansed = value\n+            if isinstance(cleansed, (list, tuple)):\n+                cleansed = [self.cleanse_setting('', v) for v in cleansed]\n         except TypeError:\n             # If the key isn't regex-able, just return as-is.\n             cleansed = value\n",
+      "status": "patched"
+    }
+  ]
+}

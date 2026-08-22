@@ -1,0 +1,239 @@
+{
+  "schema_version": 1,
+  "benchmark": "swe-bench-lite",
+  "model": "stealth/ox-alpha",
+  "timestamp": "2026-08-22T19:07:38.505415",
+  "results": [
+    {
+      "instance_id": "astropy__astropy-14995",
+      "repo": "astropy/astropy",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T16:59:09.423533",
+      "kepler": {
+        "success": true,
+        "duration_s": 964.7,
+        "cost_usd": 1.055356,
+        "tools": 67,
+        "tool_breakdown": {
+          "search_code": 5,
+          "get_project_overview": 1,
+          "read_file": 7,
+          "edit_file": 1,
+          "shell": 51,
+          "write_file": 1,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 1847717,
+          "output_tokens": 16934,
+          "cache_read": 1756224,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/astropy/nddata/mixins/ndarithmetic.py b/astropy/nddata/mixins/ndarithmetic.py\nindex 4153dfccb2..69d77148e5 100644\n--- a/astropy/nddata/mixins/ndarithmetic.py\n+++ b/astropy/nddata/mixins/ndarithmetic.py\n@@ -522,6 +522,8 @@ class NDArithmeticMixin:\n             return deepcopy(operand.mask)\n         elif operand is None:\n             return deepcopy(self.mask)\n+        elif operand.mask is None:\n+            return deepcopy(self.mask)\n         else:\n             # Now lets calculate the resulting mask (operation enforces copy)\n             return handle_mask(self.mask, operand.mask, **kwds)\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-10914",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T17:15:21.103455",
+      "kepler": {
+        "success": true,
+        "duration_s": 742.9,
+        "cost_usd": 0.72013,
+        "tools": 51,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "grep": 3,
+          "shell": 36,
+          "read_file": 4,
+          "edit_file": 4
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 1064529,
+          "output_tokens": 13467,
+          "cache_read": 990912,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 77,
+      "model_patch": "diff --git a/django/conf/global_settings.py b/django/conf/global_settings.py\nindex acee9887d2..bdeec80610 100644\n--- a/django/conf/global_settings.py\n+++ b/django/conf/global_settings.py\n@@ -304,7 +304,7 @@ FILE_UPLOAD_TEMP_DIR = None\n \n # The numeric mode to set newly-uploaded files to. The value should be a mode\n # you'd pass directly to os.chmod; see https://docs.python.org/library/os.html#files-and-directories.\n-FILE_UPLOAD_PERMISSIONS = None\n+FILE_UPLOAD_PERMISSIONS = 0o644\n \n # The numeric mode to assign to newly-created directories, when uploading files.\n # The value should be a mode as you'd pass to os.chmod;\ndiff --git a/docs/howto/deployment/checklist.txt b/docs/howto/deployment/checklist.txt\nindex c31bcac62a..b307076b62 100644\n--- a/docs/howto/deployment/checklist.txt\n+++ b/docs/howto/deployment/checklist.txt\n@@ -154,16 +154,6 @@ server never attempts to interpret them. For instance, if a user uploads a\n \n Now is a good time to check your backup strategy for these files.\n \n-:setting:`FILE_UPLOAD_PERMISSIONS`\n-----------------------------------\n-\n-With the default file upload settings, files smaller than\n-:setting:`FILE_UPLOAD_MAX_MEMORY_SIZE` may be stored with a different mode\n-than larger files as described in :setting:`FILE_UPLOAD_PERMISSIONS`.\n-\n-Setting :setting:`FILE_UPLOAD_PERMISSIONS` ensures all files are uploaded with\n-the same permissions.\n-\n HTTPS\n =====\n \ndiff --git a/docs/ref/settings.txt b/docs/ref/settings.txt\nindex 46e99af993..099deeaf56 100644\n--- a/docs/ref/settings.txt\n+++ b/docs/ref/settings.txt\n@@ -1484,17 +1484,12 @@ This value mirrors the functionality and caveats of the\n ``FILE_UPLOAD_PERMISSIONS``\n ---------------------------\n \n-Default: ``None``\n+Default: ``0o644``\n \n-The numeric mode (i.e. ``0o644``) to set newly uploaded files to. For\n+The numeric mode to set newly uploaded files to. For\n more information about what these modes mean, see the documentation for\n :func:`os.chmod`.\n \n-If this isn't given or is ``None``, you'll get operating-system\n-dependent behavior. On most platforms, temporary files will have a mode\n-of ``0o600``, and files saved from memory will be saved using the\n-system's standard umask.\n-\n For security reasons, these permissions aren't applied to the temporary files\n that are stored in :setting:`FILE_UPLOAD_TEMP_DIR`.\n \ndiff --git a/tests/file_storage/tests.py b/tests/file_storage/tests.py\nindex 434869554c..ee878df332 100644\n--- a/tests/file_storage/tests.py\n+++ b/tests/file_storage/tests.py\n@@ -892,12 +892,11 @@ class FileStoragePermissions(unittest.TestCase):\n         actual_mode = os.stat(self.storage.path(name))[0] & 0o777\n         self.assertEqual(actual_mode, 0o654)\n \n-    @override_settings(FILE_UPLOAD_PERMISSIONS=None)\n     def test_file_upload_default_permissions(self):\n         self.storage = FileSystemStorage(self.storage_dir)\n         fname = self.storage.save(\"some_file\", ContentFile(\"data\"))\n         mode = os.stat(self.storage.path(fname))[0] & 0o777\n-        self.assertEqual(mode, 0o666 & ~self.umask)\n+        self.assertEqual(mode, 0o644)\n \n     @override_settings(FILE_UPLOAD_DIRECTORY_PERMISSIONS=0o765)\n     def test_file_upload_directory_permissions(self):\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-11049",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T17:27:55.227639",
+      "kepler": {
+        "success": true,
+        "duration_s": 370.2,
+        "cost_usd": 0.380911,
+        "tools": 27,
+        "tool_breakdown": {
+          "search_code": 2,
+          "grep": 3,
+          "shell": 13,
+          "read_file": 6,
+          "edit_file": 3
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 453388,
+          "output_tokens": 6152,
+          "cache_read": 396864,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/django/db/models/fields/__init__.py b/django/db/models/fields/__init__.py\nindex f32ce64629..71005490f3 100644\n--- a/django/db/models/fields/__init__.py\n+++ b/django/db/models/fields/__init__.py\n@@ -1587,7 +1587,7 @@ class DurationField(Field):\n     empty_strings_allowed = False\n     default_error_messages = {\n         'invalid': _(\"'%(value)s' value has an invalid format. It must be in \"\n-                     \"[DD] [HH:[MM:]]ss[.uuuuuu] format.\")\n+                     \"[DD] [[HH:]MM:]ss[.uuuuuu] format.\")\n     }\n     description = _(\"Duration\")\n \n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-11564",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T17:40:36.791373",
+      "kepler": {
+        "success": true,
+        "duration_s": 377.2,
+        "cost_usd": 0.168411,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 15177,
+          "output_tokens": 8192,
+          "cache_read": 0,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-11742",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T17:57:00.705201",
+      "kepler": {
+        "success": false,
+        "duration_s": 1200,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "status": "bahulam_failed",
+      "error": "Timeout"
+    },
+    {
+      "instance_id": "django__django-11999",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T18:18:32.509072",
+      "kepler": {
+        "success": true,
+        "duration_s": 549.9,
+        "cost_usd": 0.275964,
+        "tools": 16,
+        "tool_breakdown": {
+          "get_project_overview": 2,
+          "search_code": 3,
+          "read_file": 1,
+          "edit_file": 1,
+          "shell": 9
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 293239,
+          "output_tokens": 5657,
+          "cache_read": 255040,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 24,
+      "model_patch": "diff --git a/django/db/models/fields/__init__.py b/django/db/models/fields/__init__.py\nindex ee45bb941e..155b72cf0c 100644\n--- a/django/db/models/fields/__init__.py\n+++ b/django/db/models/fields/__init__.py\n@@ -763,8 +763,16 @@ class Field(RegisterLookupMixin):\n             if not getattr(cls, self.attname, None):\n                 setattr(cls, self.attname, self.descriptor_class(self))\n         if self.choices is not None:\n-            setattr(cls, 'get_%s_display' % self.name,\n-                    partialmethod(cls._get_FIELD_display, field=self))\n+            # Don't override a get_FOO_display() method defined explicitly on\n+            # this class, but don't check methods derived from inheritance, to\n+            # allow overriding inherited choices. For more complex inheritance\n+            # structures users should override contribute_to_class().\n+            if 'get_%s_display' % self.name not in cls.__dict__:\n+                setattr(\n+                    cls,\n+                    'get_%s_display' % self.name,\n+                    partialmethod(cls._get_FIELD_display, field=self),\n+                )\n \n     def get_filter_kwargs_for_object(self, obj):\n         \"\"\"\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-12284",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T18:36:24.960813",
+      "kepler": {
+        "success": true,
+        "duration_s": 664.1,
+        "cost_usd": 0.377724,
+        "tools": 21,
+        "tool_breakdown": {
+          "search_code": 2,
+          "grep": 3,
+          "shell": 7,
+          "read_file": 2,
+          "web_fetch": 4,
+          "web_search": 2,
+          "edit_file": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 442829,
+          "output_tokens": 9019,
+          "cache_read": 402240,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 18,
+      "model_patch": "diff --git a/django/db/models/fields/__init__.py b/django/db/models/fields/__init__.py\nindex 1a55d3d417..6bd95f542c 100644\n--- a/django/db/models/fields/__init__.py\n+++ b/django/db/models/fields/__init__.py\n@@ -764,7 +764,11 @@ class Field(RegisterLookupMixin):\n             if not getattr(cls, self.attname, None):\n                 setattr(cls, self.attname, self.descriptor_class(self))\n         if self.choices is not None:\n-            if not hasattr(cls, 'get_%s_display' % self.name):\n+            # Don't override a get_FOO_display() method defined explicitly on\n+            # this class, but don't check methods derived from inheritance, to\n+            # allow overriding inherited choices. For more complex inheritance\n+            # structures users should override contribute_to_class().\n+            if 'get_%s_display' % self.name not in cls.__dict__:\n                 setattr(\n                     cls,\n                     'get_%s_display' % self.name,\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-12308",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T18:43:23.167814",
+      "kepler": {
+        "success": true,
+        "duration_s": 639.3,
+        "cost_usd": 0.587425,
+        "tools": 25,
+        "tool_breakdown": {
+          "search_code": 4,
+          "get_project_overview": 1,
+          "grep": 3,
+          "read_file": 2,
+          "web_search": 2,
+          "shell": 7,
+          "web_fetch": 5,
+          "edit_file": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 596848,
+          "output_tokens": 19106,
+          "cache_read": 551744,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 17,
+      "model_patch": "diff --git a/django/contrib/admin/utils.py b/django/contrib/admin/utils.py\nindex e4ddc8f017..021a086e65 100644\n--- a/django/contrib/admin/utils.py\n+++ b/django/contrib/admin/utils.py\n@@ -398,6 +398,11 @@ def display_for_field(value, field, empty_value_display):\n         return formats.number_format(value)\n     elif isinstance(field, models.FileField) and value:\n         return format_html('<a href=\"{}\">{}</a>', value.url, value)\n+    elif isinstance(field, models.JSONField) and value:\n+        try:\n+            return field.get_prep_value(value)\n+        except TypeError:\n+            return display_for_value(value, empty_value_display)\n     else:\n         return display_for_value(value, empty_value_display)\n \n",
+      "status": "patched"
+    }
+  ]
+}

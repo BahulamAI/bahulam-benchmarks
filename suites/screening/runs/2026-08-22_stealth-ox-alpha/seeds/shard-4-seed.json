@@ -1,0 +1,246 @@
+{
+  "schema_version": 1,
+  "benchmark": "swe-bench-lite",
+  "model": "stealth/ox-alpha",
+  "timestamp": "2026-08-22T19:07:38.505415",
+  "results": [
+    {
+      "instance_id": "astropy__astropy-14182",
+      "repo": "astropy/astropy",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T16:40:38.974725",
+      "kepler": {
+        "success": true,
+        "duration_s": 1109.9,
+        "cost_usd": 1.135617,
+        "tools": 77,
+        "tool_breakdown": {
+          "search_code": 2,
+          "grep": 3,
+          "shell": 59,
+          "read_file": 10,
+          "web_fetch": 1,
+          "edit_file": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 2129327,
+          "output_tokens": 15948,
+          "cache_read": 2033920,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 65,
+      "model_patch": "diff --git a/astropy/io/ascii/rst.py b/astropy/io/ascii/rst.py\nindex abdeba8efb..3e012fe525 100644\n--- a/astropy/io/ascii/rst.py\n+++ b/astropy/io/ascii/rst.py\n@@ -27,7 +27,6 @@ class SimpleRSTHeader(FixedWidthHeader):\n \n \n class SimpleRSTData(FixedWidthData):\n-    start_line = 3\n     end_line = -1\n     splitter_class = FixedWidthTwoLineDataSplitter\n \n@@ -46,6 +45,18 @@ class RST(FixedWidth):\n           2    4.5  Worlds\n         ==== ===== ======\n \n+    Like other fixed-width formats, when writing a table you can provide ``header_rows``\n+    to specify a list of table rows to output as the header. For example::\n+\n+    >>> tbl.write(sys.stdout, format=\"ascii.rst\", header_rows=['name', 'unit'])\n+    ===== ========\n+    wave response\n+      nm       ct\n+    ===== ========\n+    350.0 0.7\n+    950.0 1.2\n+    ===== ========\n+\n     Currently there is no support for reading tables which utilize continuation lines,\n     or for ones which define column spans through the use of an additional\n     line of dashes in the header.\n@@ -57,10 +68,28 @@ class RST(FixedWidth):\n     data_class = SimpleRSTData\n     header_class = SimpleRSTHeader\n \n-    def __init__(self):\n-        super().__init__(delimiter_pad=None, bookend=False)\n+    def __init__(self, header_rows=None):\n+        super().__init__(delimiter_pad=None, bookend=False, header_rows=header_rows)\n \n     def write(self, lines):\n+        \"\"\"\n+        Write the table data in RST format including header and footer separator lines.\n+\n+        Parameters\n+        ----------\n+        lines : list of str\n+            The formatted table lines to be written.\n+\n+        Returns\n+        -------\n+        list[str]\n+            The complete RST table with header separator, table content, and\n+            footer separator line.\n+        \"\"\"\n         lines = super().write(lines)\n-        lines = [lines[1]] + lines + [lines[1]]\n-        return lines\n+        idx = len(self.header.header_rows)\n+        return [lines[idx]] + lines + [lines[idx]]\n+\n+    def read(self, table):\n+        self.data.start_line = 2 + len(self.header.header_rows)\n+        return super().read(table)\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-11039",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T17:27:55.039992",
+      "kepler": {
+        "success": true,
+        "duration_s": 185.3,
+        "cost_usd": 0.153517,
+        "tools": 13,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "read_file": 3,
+          "edit_file": 1,
+          "shell": 5
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 238678,
+          "output_tokens": 1736,
+          "cache_read": 217984,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/django/core/management/commands/sqlmigrate.py b/django/core/management/commands/sqlmigrate.py\nindex f0b663222a..b51d1739a4 100644\n--- a/django/core/management/commands/sqlmigrate.py\n+++ b/django/core/management/commands/sqlmigrate.py\n@@ -56,7 +56,7 @@ class Command(BaseCommand):\n         targets = [(app_label, migration.name)]\n \n         # Show begin/end around output only for atomic migrations\n-        self.output_transaction = migration.atomic\n+        self.output_transaction = migration.atomic and connection.features.can_rollback_ddl\n \n         # Make a plan that represents just the requested migrations and show SQL\n         # for it\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-11133",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T17:32:50.108496",
+      "kepler": {
+        "success": true,
+        "duration_s": 189.2,
+        "cost_usd": 0.175146,
+        "tools": 13,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "read_file": 1,
+          "edit_file": 3,
+          "shell": 3,
+          "run_tests": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 1,
+        "usage": {
+          "input_tokens": 245720,
+          "output_tokens": 2334,
+          "cache_read": 221120,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 23,
+      "model_patch": "diff --git a/django/http/response.py b/django/http/response.py\nindex 6a84e193ba..5588f90f4d 100644\n--- a/django/http/response.py\n+++ b/django/http/response.py\n@@ -231,6 +231,8 @@ class HttpResponseBase:\n         # - when self._charset != 'utf-8' it re-encodes the content\n         if isinstance(value, bytes):\n             return bytes(value)\n+        if isinstance(value, memoryview):\n+            return bytes(value)\n         if isinstance(value, str):\n             return bytes(value.encode(self.charset))\n         # Handle non-string types.\n@@ -309,7 +311,7 @@ class HttpResponse(HttpResponseBase):\n     @content.setter\n     def content(self, value):\n         # Consume iterators upon assignment to allow repeated iteration.\n-        if hasattr(value, '__iter__') and not isinstance(value, (bytes, str)):\n+        if hasattr(value, '__iter__') and not isinstance(value, (bytes, str, memoryview)):\n             content = b''.join(self.make_bytes(chunk) for chunk in value)\n             if hasattr(value, 'close'):\n                 try:\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-11583",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T17:46:18.953251",
+      "kepler": {
+        "success": true,
+        "duration_s": 644.0,
+        "cost_usd": 0.349147,
+        "tools": 24,
+        "tool_breakdown": {
+          "search_code": 4,
+          "web_search": 1,
+          "get_project_overview": 1,
+          "read_file": 1,
+          "edit_file": 1,
+          "shell": 15,
+          "grep": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 461694,
+          "output_tokens": 8882,
+          "cache_read": 433024,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 18,
+      "model_patch": "diff --git a/django/utils/autoreload.py b/django/utils/autoreload.py\nindex 25c3b44250..1b7e8838db 100644\n--- a/django/utils/autoreload.py\n+++ b/django/utils/autoreload.py\n@@ -143,6 +143,12 @@ def iter_modules_and_files(modules, extra_files):\n             # The module could have been removed, don't fail loudly if this\n             # is the case.\n             continue\n+        except ValueError as e:\n+            # A path may contain an embedded null byte, which pathlib's\n+            # resolve() raises ValueError for; skip such files.\n+            if str(e) != 'embedded null byte':\n+                raise\n+            continue\n         results.add(resolved_path)\n     return frozenset(results)\n \n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-11815",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T18:01:38.644933",
+      "kepler": {
+        "success": true,
+        "duration_s": 422.3,
+        "cost_usd": 0.298616,
+        "tools": 14,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "read_file": 2,
+          "grep": 1,
+          "edit_file": 1,
+          "shell": 6
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 253045,
+          "output_tokens": 7764,
+          "cache_read": 213696,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 17,
+      "model_patch": "diff --git a/django/db/migrations/serializer.py b/django/db/migrations/serializer.py\nindex 27b5cbd379..4622b0fcd8 100644\n--- a/django/db/migrations/serializer.py\n+++ b/django/db/migrations/serializer.py\n@@ -120,9 +120,9 @@ class EnumSerializer(BaseSerializer):\n     def serialize(self):\n         enum_class = self.value.__class__\n         module = enum_class.__module__\n-        v_string, v_imports = serializer_factory(self.value.value).serialize()\n+        v_string, v_imports = serializer_factory(self.value.name).serialize()\n         imports = {'import %s' % module, *v_imports}\n-        return \"%s.%s(%s)\" % (module, enum_class.__name__, v_string), imports\n+        return \"%s.%s[%s]\" % (module, enum_class.__name__, v_string), imports\n \n \n class FloatSerializer(BaseSimpleSerializer):\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-11910",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T18:10:01.486089",
+      "kepler": {
+        "success": true,
+        "duration_s": 499.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-12125",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T18:28:02.429115",
+      "kepler": {
+        "success": true,
+        "duration_s": 703.7,
+        "cost_usd": 0.30832,
+        "tools": 21,
+        "tool_breakdown": {
+          "search_code": 7,
+          "get_project_overview": 1,
+          "read_file": 4,
+          "shell": 9
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 330985,
+          "output_tokens": 9573,
+          "cache_read": 306752,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-12470",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T18:47:39.940811",
+      "kepler": {
+        "success": true,
+        "duration_s": 1187.1,
+        "cost_usd": 0.681103,
+        "tools": 29,
+        "tool_breakdown": {
+          "search_code": 2,
+          "grep": 3,
+          "shell": 12,
+          "read_file": 3,
+          "web_search": 4,
+          "web_fetch": 3,
+          "edit_file": 1,
+          "write_file": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 735344,
+          "output_tokens": 18411,
+          "cache_read": 667072,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 21,
+      "model_patch": "diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py\nindex 92213a4e67..735ca92182 100644\n--- a/django/db/models/sql/compiler.py\n+++ b/django/db/models/sql/compiler.py\n@@ -711,7 +711,14 @@ class SQLCompiler:\n         # If we get to this point and the field is a relation to another model,\n         # append the default ordering for that model unless the attribute name\n         # of the field is specified.\n-        if field.is_relation and opts.ordering and getattr(field, 'attname', None) != name:\n+        # If the field is the pk shortcut, avoid appending the default\n+        # ordering of the related model, as the pk refers to the concrete\n+        # column of the joined table (e.g. the parent link of a model using\n+        # multi-table inheritance).\n+        if (\n+            field.is_relation and opts.ordering and\n+            getattr(field, 'attname', None) != name and name != 'pk'\n+        ):\n             # Firstly, avoid infinite loops.\n             already_seen = already_seen or set()\n             join_tuple = tuple(getattr(self.query.alias_map[j], 'join_cols', None) for j in joins)\n",
+      "status": "patched"
+    }
+  ]
+}
