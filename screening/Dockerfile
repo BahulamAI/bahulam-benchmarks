@@ -53,11 +53,13 @@ RUN npm install -g "@bahulam/code@${BAHULAM_CODE_VERSION}" \
 COPY vendor/benchmark/  /opt/bahulam-cli/benchmark/
 
 # --- Screen script + configs + benchmarks push ---
+# CACHE_BUST 2026-08-22-1926 (bumps this line invalidates the COPY layer)
 COPY screen.py                         /opt/screen/screen.py
 COPY configs/                          /opt/screen/configs/
 COPY scripts/entrypoint.sh             /opt/screen/entrypoint.sh
 COPY scripts/push-to-benchmarks.sh     /opt/screen/push-to-benchmarks.sh
-RUN chmod +x /opt/screen/entrypoint.sh /opt/screen/push-to-benchmarks.sh
+RUN chmod +x /opt/screen/entrypoint.sh /opt/screen/push-to-benchmarks.sh \
+    && sha256sum /opt/screen/entrypoint.sh /opt/screen/push-to-benchmarks.sh
 
 WORKDIR /opt/screen
 

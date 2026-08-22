@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
-# Push a completed screen dir to the public bahulam-benchmarks repo
-# on a fresh per-run branch (screening/<run_id>). Called from entrypoint.sh
-# after screen.py finishes. Skips silently if BENCHMARKS_GH_TOKEN is missing.
+# Push a completed screen dir to the public bahulam-benchmarks repo.
+# One branch per candidate model (screening/<run_id>). Sharded runs
+# push their artifacts into a shard-<N>/ subdir under the same branch,
+# with retry-on-race so concurrent shards don't collide on the ref.
+# Called from entrypoint.sh after screen.py finishes. Skips silently
+# if BENCHMARKS_GH_TOKEN is missing.
 #
 # Env inputs:
-#   BENCHMARKS_GH_TOKEN   Fine-grained PAT with Contents:write on BahulamAI/bahulam-benchmarks
+#   BENCHMARKS_GH_TOKEN   Fine-grained PAT with Contents:write on the repo
 #   CANDIDATE_MODEL       model slug
 #   OUT                   /data/screen-<slug>-<date> (set by entrypoint.sh)
 #
@@ -13,6 +16,8 @@
 #   BENCHMARKS_BASE       default main
 #   BENCHMARKS_GH_USER    default screening-bot
 #   BENCHMARKS_GH_EMAIL   default screening@bahulam.ai
+#   SHARD_ID              1..N — when set, artifacts go to shard-<N>/
+#                         subdir and commit uses retry-on-race push
 set -euo pipefail
 
 if [[ -z "${BENCHMARKS_GH_TOKEN:-}" ]]; then
@@ -32,6 +37,7 @@ REPO="${BENCHMARKS_REPO:-BahulamAI/bahulam-benchmarks}"
 BASE="${BENCHMARKS_BASE:-main}"
 GH_USER="${BENCHMARKS_GH_USER:-screening-bot}"
 GH_EMAIL="${BENCHMARKS_GH_EMAIL:-screening@bahulam.ai}"
+SHARD="${SHARD_ID:-}"
 
 # Prefer the run_id already present in screening-report.json (single source of truth).
 RUN_ID=""
@@ -45,22 +51,35 @@ if [[ -z "$RUN_ID" ]]; then
 fi
 
 BRANCH="screening/${RUN_ID}"
-DEST_REL="suites/screening/runs/${RUN_ID}"
+RUN_DIR_REL="suites/screening/runs/${RUN_ID}"
+if [[ -n "$SHARD" ]]; then
+  DEST_REL="${RUN_DIR_REL}/shard-${SHARD}"
+else
+  DEST_REL="$RUN_DIR_REL"
+fi
 WORK="/tmp/benchmarks-push"
 rm -rf "$WORK"
 
-echo "[push] repo=$REPO base=$BASE branch=$BRANCH dest=$DEST_REL"
+echo "[push] repo=$REPO base=$BASE branch=$BRANCH shard=${SHARD:-none} dest=$DEST_REL"
 
 # Shallow clone to keep bandwidth low; the token stays only in the remote URL
 # for this working copy (never committed, never printed).
-git clone --quiet --depth 1 --branch "$BASE" \
-  "https://x-access-token:${BENCHMARKS_GH_TOKEN}@github.com/${REPO}.git" \
-  "$WORK"
+REMOTE="https://x-access-token:${BENCHMARKS_GH_TOKEN}@github.com/${REPO}.git"
+git clone --quiet --depth 1 --branch "$BASE" "$REMOTE" "$WORK"
 
 cd "$WORK"
 git config user.email "$GH_EMAIL"
 git config user.name  "$GH_USER"
-git checkout -b "$BRANCH"
+
+# If a shard branch already exists on origin (another shard got there first),
+# check it out and add our shard-N/ subdir. Otherwise create the branch off BASE.
+if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+  git fetch --quiet --depth 1 origin "$BRANCH":"$BRANCH"
+  git checkout --quiet "$BRANCH"
+  echo "[push] branch $BRANCH already exists — adding shard on top"
+else
+  git checkout --quiet -b "$BRANCH"
+fi
 
 mkdir -p "$DEST_REL"
 
@@ -89,15 +108,48 @@ fi
 
 VERDICT="$(jq -r '.gates_verdict // "UNKNOWN"' "$DEST_REL/screening-report.json" 2>/dev/null || echo UNKNOWN)"
 PATCHED="$(jq -r '.metrics.patched // 0' "$DEST_REL/screening-report.json" 2>/dev/null || echo 0)"
+SUBMITTED="$(jq -r '.metrics.instances_submitted // 0' "$DEST_REL/screening-report.json" 2>/dev/null || echo 0)"
 COST="$(jq -r '.metrics.harness_cost_usd // 0' "$DEST_REL/screening-report.json" 2>/dev/null || echo 0)"
 
-git commit --quiet -m "screening: ${RUN_ID} (${VERDICT}, patched=${PATCHED}/30, harness=\$${COST})" \
+if [[ -n "$SHARD" ]]; then
+  MSG="screening: ${RUN_ID} shard-${SHARD} (${VERDICT}, patched=${PATCHED}/${SUBMITTED}, harness=\$${COST})"
+else
+  MSG="screening: ${RUN_ID} (${VERDICT}, patched=${PATCHED}/${SUBMITTED}, harness=\$${COST})"
+fi
+
+git commit --quiet -m "$MSG" \
   -m "Auto-pushed by Railway screening service. Docker eval + gate verdict pending on VM." \
   -m "Signed-off-by: ${GH_USER} <${GH_EMAIL}>"
 
+# Retry-on-race: another shard may have pushed between our fetch and now.
+# Rebase our commit on top and try again, up to 5 times.
 echo "[push] pushing to origin ${BRANCH}"
-# --set-upstream so subsequent VM merges can `git pull` naturally
-git push --quiet --set-upstream origin "$BRANCH"
+push_ok=0
+for attempt in 1 2 3 4 5; do
+  if git push --quiet --set-upstream origin "$BRANCH" 2>/tmp/push.err; then
+    push_ok=1
+    break
+  fi
+  if grep -qE "non-fast-forward|fetch first|Updates were rejected" /tmp/push.err; then
+    echo "[push] attempt $attempt: race with another shard, rebasing"
+    git pull --quiet --rebase origin "$BRANCH" || {
+      echo "[push] rebase failed — aborting"
+      cat /tmp/push.err
+      exit 1
+    }
+    # Backoff jitter so shards don't collide immediately.
+    sleep $((RANDOM % 5 + 1))
+  else
+    echo "[push] push failed with non-race error:"
+    cat /tmp/push.err
+    exit 1
+  fi
+done
+
+if [[ "$push_ok" -ne 1 ]]; then
+  echo "[push] gave up after 5 attempts"
+  exit 1
+fi
 
 echo "[push] DONE — branch ready for VM verify + PR merge"
 echo "[push] compare: https://github.com/${REPO}/compare/${BASE}...${BRANCH}"
