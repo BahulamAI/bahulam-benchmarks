@@ -1,0 +1,140 @@
+{
+  "schema_version": 2,
+  "run_id": "2026-08-22_deepseek-deepseek-v4-flash",
+  "run_started_at": "2026-08-22T16:33:32.590957Z",
+  "run_finished_at": "2026-08-22T16:41:47.479219Z",
+  "wall_clock_seconds": 494.9,
+  "stage": "railway-inference-complete",
+  "gates_verdict": "PENDING-VM",
+  "gates_pending_vm": [
+    "resolve_rate",
+    "resolve_per_patch",
+    "dashboard_cost_usd",
+    "cost_delta_pct"
+  ],
+  "model": {
+    "slug": "deepseek/deepseek-v4-flash"
+  },
+  "harness": {
+    "cli_version": "0.1.1",
+    "cli_package": "@bahulam/code@0.1.1",
+    "harness_git_sha": "vendored-unpinned",
+    "gateway_url": "https://gateway.bahulam.ai/v1",
+    "dataset": "swe-bench-lite",
+    "instance_file": "screening-5.txt",
+    "instance_count": 5,
+    "parallel": 3,
+    "timeout_s": 600
+  },
+  "environment": {
+    "hostname": "54e28b42c356",
+    "railway_deployment_id": "ecaecafc-6bef-489e-95a5-60126d416a17",
+    "railway_service_id": "36522563-51b6-4eab-a5e7-6af5e2b5984f",
+    "railway_project_id": "5752685d-0c17-4c9f-9a3c-887b58f1be68",
+    "railway_region": null,
+    "python": "3.11.16"
+  },
+  "preflight": {
+    "http": 200,
+    "passed": true,
+    "reason": null,
+    "sample_response": {
+      "finish_reason": "tool_calls",
+      "has_tool_calls": true,
+      "provider": "AtlasCloud"
+    }
+  },
+  "pricing_snapshot_path": "pricing.json",
+  "totals": {
+    "input_tokens": 3246079,
+    "output_tokens": 51280,
+    "cache_read_tokens": 3029504,
+    "cache_write_tokens": 0,
+    "reasoning_tokens": 0,
+    "tools_invoked": 132,
+    "sub_agent_invocations": 0,
+    "harness_cost_usd": 0.0871,
+    "stagnation_triggers": 8
+  },
+  "distributions": {
+    "cost_usd": {
+      "n": 5,
+      "mean": 0.0174,
+      "median": 0.0153,
+      "p95": 0.0287,
+      "min": 0.0075,
+      "max": 0.0287,
+      "sum": 0.0871
+    },
+    "duration_s": {
+      "n": 5,
+      "mean": 174.84,
+      "median": 141.8,
+      "p95": 332.0,
+      "min": 82.1,
+      "max": 332.0,
+      "sum": 874.2
+    },
+    "input_tokens": {
+      "n": 5,
+      "mean": 649215.8,
+      "median": 529138,
+      "p95": 1178184,
+      "min": 259485,
+      "max": 1178184,
+      "sum": 3246079
+    },
+    "output_tokens": {
+      "n": 5,
+      "mean": 10256.0,
+      "median": 5872,
+      "p95": 24818,
+      "min": 3260,
+      "max": 24818,
+      "sum": 51280
+    },
+    "tools_per_instance": {
+      "n": 5,
+      "mean": 26.4,
+      "median": 21.0,
+      "p95": 44.0,
+      "min": 18.0,
+      "max": 44.0,
+      "sum": 132.0
+    }
+  },
+  "cache": {
+    "cache_read_tokens": 3029504,
+    "cache_write_tokens": 0,
+    "cache_hit_ratio_input": 0.9333
+  },
+  "tool_breakdown": {
+    "search_code": 31,
+    "get_project_overview": 6,
+    "analyze_code": 1,
+    "grep": 21,
+    "read_file": 35,
+    "edit_file": 10,
+    "run_tests": 7,
+    "shell": 19,
+    "git_diff": 2
+  },
+  "outcome_counts": {
+    "patched": 5
+  },
+  "metrics": {
+    "instances_submitted": 5,
+    "patched": 5,
+    "patch_rate": 1.0,
+    "tool_call_emission_rate": 1.0,
+    "zero_tool_timeout_count": 0,
+    "avg_duration_s": 174.8,
+    "avg_input_tokens": 649215,
+    "avg_output_tokens": 10256,
+    "cache_hit_pct": 0.9333,
+    "reasoning_token_ratio": 0,
+    "harness_cost_usd": 0.0871,
+    "harness_cost_per_patched_usd": 0.0174,
+    "total_tools_invoked": 132
+  }
+}

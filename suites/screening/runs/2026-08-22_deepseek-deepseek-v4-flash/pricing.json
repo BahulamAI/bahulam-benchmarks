@@ -1,0 +1,141 @@
+{
+  "http": 200,
+  "endpoints": [
+    {
+      "provider": "StreamLake",
+      "input_usd_per_1m": 0.060059999999999995,
+      "output_usd_per_1m": 0.12011999999999999,
+      "cache_read_usd_per_1m": 0.012012,
+      "context_length": 1024000,
+      "supports_tools": true
+    },
+    {
+      "provider": "Baidu",
+      "input_usd_per_1m": 0.0602,
+      "output_usd_per_1m": 0.1204,
+      "cache_read_usd_per_1m": 0.01204,
+      "context_length": 1048576,
+      "supports_tools": true
+    },
+    {
+      "provider": "DigitalOcean",
+      "input_usd_per_1m": 0.0679,
+      "output_usd_per_1m": 0.16799999999999998,
+      "cache_read_usd_per_1m": 0.016800000000000002,
+      "context_length": 1048576,
+      "supports_tools": true
+    },
+    {
+      "provider": "GMICloud",
+      "input_usd_per_1m": 0.08399999999999999,
+      "output_usd_per_1m": 0.16799999999999998,
+      "cache_read_usd_per_1m": 0.016800000000000002,
+      "context_length": 1048575,
+      "supports_tools": true
+    },
+    {
+      "provider": "Sail Research",
+      "input_usd_per_1m": 0.09,
+      "output_usd_per_1m": 0.18,
+      "cache_read_usd_per_1m": 0.02,
+      "context_length": 1048576,
+      "supports_tools": true
+    },
+    {
+      "provider": "DeepInfra",
+      "input_usd_per_1m": 0.09,
+      "output_usd_per_1m": 0.18,
+      "cache_read_usd_per_1m": 0.018,
+      "context_length": 1048576,
+      "supports_tools": true
+    },
+    {
+      "provider": "SiliconFlow",
+      "input_usd_per_1m": 0.13,
+      "output_usd_per_1m": 0.28,
+      "cache_read_usd_per_1m": 0.028,
+      "context_length": 1048576,
+      "supports_tools": true
+    },
+    {
+      "provider": "Alibaba",
+      "input_usd_per_1m": 0.134,
+      "output_usd_per_1m": 0.268,
+      "cache_read_usd_per_1m": 0.026799999999999997,
+      "context_length": 1000000,
+      "supports_tools": true
+    },
+    {
+      "provider": "Venice",
+      "input_usd_per_1m": 0.13799999999999998,
+      "output_usd_per_1m": 0.275,
+      "cache_read_usd_per_1m": 0.028,
+      "context_length": 1000000,
+      "supports_tools": true
+    },
+    {
+      "provider": "Novita",
+      "input_usd_per_1m": 0.14,
+      "output_usd_per_1m": 0.28,
+      "cache_read_usd_per_1m": 0.028,
+      "context_length": 1048576,
+      "supports_tools": true
+    },
+    {
+      "provider": "AtlasCloud",
+      "input_usd_per_1m": 0.14,
+      "output_usd_per_1m": 0.28,
+      "cache_read_usd_per_1m": 0.028,
+      "context_length": 1048576,
+      "supports_tools": true
+    },
+    {
+      "provider": "CoreWeave",
+      "input_usd_per_1m": 0.14,
+      "output_usd_per_1m": 0.28,
+      "cache_read_usd_per_1m": 0.07,
+      "context_length": 1048576,
+      "supports_tools": true
+    },
+    {
+      "provider": "Parasail",
+      "input_usd_per_1m": 0.14,
+      "output_usd_per_1m": 0.28,
+      "cache_read_usd_per_1m": 0.07,
+      "context_length": 1048576,
+      "supports_tools": true
+    },
+    {
+      "provider": "Mancer 2",
+      "input_usd_per_1m": 0.14,
+      "output_usd_per_1m": 0.44999999999999996,
+      "cache_read_usd_per_1m": null,
+      "context_length": 1048576,
+      "supports_tools": true
+    },
+    {
+      "provider": "Phala",
+      "input_usd_per_1m": 0.19999999999999998,
+      "output_usd_per_1m": 0.39999999999999997,
+      "cache_read_usd_per_1m": 0.07,
+      "context_length": 1048576,
+      "supports_tools": true
+    },
+    {
+      "provider": "Azure",
+      "input_usd_per_1m": 0.21,
+      "output_usd_per_1m": 0.56,
+      "cache_read_usd_per_1m": 0.031,
+      "context_length": 1048576,
+      "supports_tools": true
+    },
+    {
+      "provider": "Cloudflare",
+      "input_usd_per_1m": 0.44,
+      "output_usd_per_1m": 1.32,
+      "cache_read_usd_per_1m": 0.014,
+      "context_length": 384000,
+      "supports_tools": true
+    }
+  ]
+}
