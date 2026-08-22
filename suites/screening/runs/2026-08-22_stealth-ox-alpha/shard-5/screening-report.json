@@ -1,0 +1,149 @@
+{
+  "schema_version": 2,
+  "run_id": "2026-08-22_stealth-ox-alpha",
+  "run_started_at": "2026-08-22T19:22:19.361081Z",
+  "run_finished_at": "2026-08-22T20:49:35.295261Z",
+  "wall_clock_seconds": 5235.9,
+  "stage": "railway-inference-complete",
+  "gates_verdict": "PENDING-VM",
+  "gates_pending_vm": [
+    "resolve_rate",
+    "resolve_per_patch",
+    "dashboard_cost_usd",
+    "cost_delta_pct"
+  ],
+  "model": {
+    "slug": "stealth/ox-alpha"
+  },
+  "harness": {
+    "cli_version": "0.1.1",
+    "cli_package": "@bahulam/code@0.1.1",
+    "harness_git_sha": "vendored-unpinned",
+    "gateway_url": "https://gateway.bahulam.ai/v1",
+    "dataset": "swe-bench-lite",
+    "instance_file": "screening-300-shard5.txt",
+    "instance_count": 60,
+    "parallel": 6,
+    "timeout_s": 1200
+  },
+  "environment": {
+    "hostname": "0ec194dc7528",
+    "railway_deployment_id": "b00b2e45-0959-45a0-9bac-2472efcf85f5",
+    "railway_service_id": "384373ac-daf2-4829-8f30-4e51b86f7799",
+    "railway_project_id": "5752685d-0c17-4c9f-9a3c-887b58f1be68",
+    "railway_region": null,
+    "python": "3.11.16"
+  },
+  "preflight": {
+    "http": 200,
+    "passed": true,
+    "reason": null,
+    "sample_response": {
+      "finish_reason": "tool_calls",
+      "has_tool_calls": true,
+      "provider": "Stealth"
+    }
+  },
+  "pricing_snapshot_path": "pricing.json",
+  "totals": {
+    "input_tokens": 40453071,
+    "output_tokens": 549961,
+    "cache_read_tokens": 38646464,
+    "cache_write_tokens": 0,
+    "reasoning_tokens": 0,
+    "tools_invoked": 1458,
+    "sub_agent_invocations": 0,
+    "harness_cost_usd": 25.2632,
+    "stagnation_triggers": 7
+  },
+  "distributions": {
+    "cost_usd": {
+      "n": 60,
+      "mean": 0.4211,
+      "median": 0.2387,
+      "p95": 1.2021,
+      "min": 0,
+      "max": 2.5263,
+      "sum": 25.2632
+    },
+    "duration_s": {
+      "n": 60,
+      "mean": 568.235,
+      "median": 498.65,
+      "p95": 1200,
+      "min": 6.9,
+      "max": 1200,
+      "sum": 34094.1
+    },
+    "input_tokens": {
+      "n": 60,
+      "mean": 674217.85,
+      "median": 353240.0,
+      "p95": 2342793,
+      "min": 0,
+      "max": 5397266,
+      "sum": 40453071
+    },
+    "output_tokens": {
+      "n": 60,
+      "mean": 9166.0167,
+      "median": 5124.0,
+      "p95": 29942,
+      "min": 0,
+      "max": 33896,
+      "sum": 549961
+    },
+    "tools_per_instance": {
+      "n": 60,
+      "mean": 24.3,
+      "median": 17.5,
+      "p95": 79.0,
+      "min": 0.0,
+      "max": 101.0,
+      "sum": 1458.0
+    }
+  },
+  "cache": {
+    "cache_read_tokens": 38646464,
+    "cache_write_tokens": 0,
+    "cache_hit_ratio_input": 0.9553
+  },
+  "tool_breakdown": {
+    "search_code": 125,
+    "get_project_overview": 33,
+    "read_file": 218,
+    "edit_file": 106,
+    "shell": 762,
+    "grep": 97,
+    "analyze_code": 13,
+    "web_search": 30,
+    "web_fetch": 38,
+    "list_files": 5,
+    "run_tests": 9,
+    "git_diff": 11,
+    "write_file": 8,
+    "git_status": 1,
+    "search_files": 1,
+    "lint_check": 1
+  },
+  "outcome_counts": {
+    "bahulam_failed": 9,
+    "patched": 38,
+    "no_changes": 13
+  },
+  "metrics": {
+    "instances_submitted": 60,
+    "patched": 38,
+    "patch_rate": 0.6333,
+    "tool_call_emission_rate": 0.8167,
+    "zero_tool_timeout_count": 11,
+    "avg_duration_s": 568.2,
+    "avg_input_tokens": 674217,
+    "avg_output_tokens": 9166,
+    "cache_hit_pct": 0.9553,
+    "reasoning_token_ratio": 0,
+    "harness_cost_usd": 25.2632,
+    "harness_cost_per_patched_usd": 0.6648,
+    "total_tools_invoked": 1458
+  }
+}
