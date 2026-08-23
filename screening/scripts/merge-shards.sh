@@ -172,10 +172,22 @@ if raw_p.exists():
     }
     n = len(results)
     patched = sum(1 for r in results if r.get("model_patch"))
+    # tool_call_emission_rate = fraction of instances where the CLI called
+    # at least one tool. Aligns with screen.py's schema (zero-tool timeouts
+    # are the "gave up" signal). Denominator is total submitted, not patched.
+    zero_tool = sum(
+        1 for r in results
+        if ((r.get("kepler") or {}).get("tools") or 0) == 0
+        and ((r.get("kepler") or {}).get("duration_s") or 0) >= 500
+    )
+    tool_emit_rate = round((n - zero_tool) / n, 4) if n else 0
+
     merged["metrics"] = {
         "instances_submitted": n,
         "patched": patched,
         "patch_rate": round(patched / n, 4) if n else 0,
+        "tool_call_emission_rate": tool_emit_rate,
+        "zero_tool_timeout_count": zero_tool,
         "avg_duration_s": round(sum(merged["distributions"]["duration_s"].get("sum") for _ in [1]) / n, 1) if n else 0,
         "avg_input_tokens": int(totals["input_tokens"] / n) if n else 0,
         "avg_output_tokens": int(totals["output_tokens"] / n) if n else 0,

@@ -61,6 +61,14 @@ for N in 1 2 3 4 5; do
   if echo "$EXISTING" | grep -q "^$SVC"; then
     echo "[shard-$N] service exists — updating env vars"
     railway service link "$SVC" >/dev/null
+    SEED_ARG=()
+    if [[ -n "$SEED_URL" ]]; then
+      SEED_ARG=(--set "SHARD_SEED_URL=$SEED_URL")
+    else
+      # Explicitly delete any stale seed URL from a previous run.
+      # Correct CLI syntax: `railway variable delete <KEY>` (singular).
+      railway variable delete SHARD_SEED_URL 2>/dev/null || true
+    fi
     railway variables --set "B0_TOKEN=$B0_TOKEN" \
                       --set "BENCHMARKS_GH_TOKEN=$BENCHMARKS_GH_TOKEN" \
                       --set "BENCHMARKS_REPO=BahulamAI/bahulam-benchmarks" \
@@ -72,7 +80,7 @@ for N in 1 2 3 4 5; do
                       --set "CANDIDATE_MODEL=$MODEL" \
                       --set "SCREENING_INSTANCE_FILE=$INSTANCE_FILE" \
                       --set "SHARD_ID=$N" \
-                      --set "SHARD_SEED_URL=$SEED_URL" \
+                      ${SEED_ARG[@]+"${SEED_ARG[@]}"} \
                       --set "SALVAGE_MODE=0" >/dev/null
   else
     echo "[shard-$N] service missing — creating"

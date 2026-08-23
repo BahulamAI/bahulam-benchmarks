@@ -73,10 +73,16 @@ def evaluate_gates(metrics: dict, gates: list, is_reasoning: bool) -> tuple[list
     """Return (per-gate results, overall verdict)."""
     results = []
     all_pass = True
+    is_free = (metrics.get("dashboard_cost_usd") or 0) == 0
     for g in gates:
         applies = g.get("applies_to")
         if applies == "reasoning_models" and not is_reasoning:
             results.append({"metric": g["metric"], "skipped": True, "reason": "n/a for non-reasoning model"})
+            continue
+        # Cost-verification gates are not applicable to free-tier models
+        # (no dashboard cost to reconcile against harness estimate).
+        if is_free and g["metric"] in ("cost_delta_pct", "dashboard_cost_usd"):
+            results.append({"metric": g["metric"], "skipped": True, "reason": "n/a for free-tier model"})
             continue
 
         threshold = g.get("reasoning_model_value") if is_reasoning and g.get("reasoning_model_value") is not None else g["value"]
