@@ -1,0 +1,1826 @@
+{
+  "benchmark": "swe-bench-lite",
+  "model": "xiaomi/mimo-v2.5",
+  "timestamp": "2026-08-23T03:28:17.662006",
+  "total": 60,
+  "passed": 53,
+  "failed": 0,
+  "errors": 7,
+  "pass_rate": 88.3,
+  "total_cost_usd": 24.056,
+  "avg_cost_usd": 0.401,
+  "results": [
+    {
+      "instance_id": "django__django-11179",
+      "repo": "django/django",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:03:34.462502",
+      "kepler": {
+        "success": true,
+        "duration_s": 128.3,
+        "cost_usd": 0.129033,
+        "tools": 10,
+        "tool_breakdown": {
+          "read_file": 3,
+          "edit_file": 1,
+          "run_tests": 3,
+          "search_code": 1,
+          "shell": 1,
+          "grep": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 204221,
+          "output_tokens": 1454,
+          "cache_read": 187200,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 13,
+      "model_patch": "diff --git a/django/db/models/deletion.py b/django/db/models/deletion.py\nindex 92fe4affb9..3a462f1c4c 100644\n--- a/django/db/models/deletion.py\n+++ b/django/db/models/deletion.py\n@@ -277,6 +277,7 @@ class Collector:\n             if self.can_fast_delete(instance):\n                 with transaction.mark_for_rollback_on_error():\n                     count = sql.DeleteQuery(model).delete_batch([instance.pk], self.using)\n+                setattr(instance, model._meta.pk.attname, None)\n                 return count, {model._meta.label: count}\n \n         with transaction.atomic(using=self.using, savepoint=False):\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "astropy__astropy-14365",
+      "repo": "astropy/astropy",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:03:34.461824",
+      "kepler": {
+        "success": true,
+        "duration_s": 154.7,
+        "cost_usd": 0.188725,
+        "tools": 13,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "read_file": 4,
+          "edit_file": 1,
+          "run_tests": 2,
+          "shell": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 308774,
+          "output_tokens": 1872,
+          "cache_read": 283584,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/astropy/io/ascii/qdp.py b/astropy/io/ascii/qdp.py\nindex 83a4f004aa..768beb0de9 100644\n--- a/astropy/io/ascii/qdp.py\n+++ b/astropy/io/ascii/qdp.py\n@@ -68,7 +68,7 @@ def _line_type(line, delimiter=None):\n     _new_re = rf\"NO({sep}NO)+\"\n     _data_re = rf\"({_decimal_re}|NO|[-+]?nan)({sep}({_decimal_re}|NO|[-+]?nan))*)\"\n     _type_re = rf\"^\\s*((?P<command>{_command_re})|(?P<new>{_new_re})|(?P<data>{_data_re})?\\s*(\\!(?P<comment>.*))?\\s*$\"\n-    _line_type_re = re.compile(_type_re)\n+    _line_type_re = re.compile(_type_re, re.IGNORECASE)\n     line = line.strip()\n     if not line:\n         return \"comment\"\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "astropy__astropy-7746",
+      "repo": "astropy/astropy",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:03:34.462285",
+      "kepler": {
+        "success": true,
+        "duration_s": 193.7,
+        "cost_usd": 0.225325,
+        "tools": 16,
+        "tool_breakdown": {
+          "search_code": 2,
+          "analyze_code": 1,
+          "read_file": 2,
+          "edit_file": 1,
+          "run_tests": 1,
+          "shell": 7,
+          "get_project_overview": 1,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 366105,
+          "output_tokens": 3640,
+          "cache_read": 343552,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 24,
+      "model_patch": "diff --git a/astropy/wcs/wcs.py b/astropy/wcs/wcs.py\nindex d3a06f2b31..d2dfce1ea5 100644\n--- a/astropy/wcs/wcs.py\n+++ b/astropy/wcs/wcs.py\n@@ -1218,6 +1218,9 @@ reduce these to 2 dimensions using the naxis kwarg.\n                 raise ValueError(\n                     \"Coordinate arrays are not broadcastable to each other\")\n \n+            if axes[0].size == 0:\n+                return [np.empty(axes[0].shape) for x in axes]\n+\n             xy = np.hstack([x.reshape((x.size, 1)) for x in axes])\n \n             if ra_dec_order and sky == 'input':\n@@ -1235,6 +1238,8 @@ reduce these to 2 dimensions using the naxis kwarg.\n                 raise ValueError(\n                     \"When providing two arguments, the array must be \"\n                     \"of shape (N, {0})\".format(self.naxis))\n+            if xy.size == 0:\n+                return xy.reshape(xy.shape[:-1] + (self.naxis,))\n             if ra_dec_order and sky == 'input':\n                 xy = self._denormalize_sky(xy)\n             result = func(xy, origin)\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-11848",
+      "repo": "django/django",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:03:34.463862",
+      "kepler": {
+        "success": true,
+        "duration_s": 184.0,
+        "cost_usd": 0.199009,
+        "tools": 12,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "read_file": 4,
+          "edit_file": 1,
+          "run_tests": 3
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 261171,
+          "output_tokens": 3922,
+          "cache_read": 238272,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 20,
+      "model_patch": "diff --git a/django/utils/http.py b/django/utils/http.py\nindex 572cfb4347..59705c440c 100644\n--- a/django/utils/http.py\n+++ b/django/utils/http.py\n@@ -176,10 +176,10 @@ def parse_http_date(date):\n     try:\n         year = int(m.group('year'))\n         if year < 100:\n-            if year < 70:\n-                year += 2000\n-            else:\n-                year += 1900\n+            year += (\n+                1900 if year + 2000 > datetime.datetime.utcnow().year + 50\n+                else 2000\n+            )\n         month = MONTHS.index(m.group('mon').lower()) + 1\n         day = int(m.group('day'))\n         hour = int(m.group('hour'))\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-11283",
+      "repo": "django/django",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:03:34.463548",
+      "kepler": {
+        "success": true,
+        "duration_s": 200.1,
+        "cost_usd": 0.243389,
+        "tools": 19,
+        "tool_breakdown": {
+          "search_code": 5,
+          "get_project_overview": 1,
+          "read_file": 4,
+          "edit_file": 2,
+          "run_tests": 1,
+          "shell": 6
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 360313,
+          "output_tokens": 4459,
+          "cache_read": 334976,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 32,
+      "model_patch": "diff --git a/django/contrib/auth/migrations/0011_update_proxy_permissions.py b/django/contrib/auth/migrations/0011_update_proxy_permissions.py\nindex 0e66649695..c26a7b0fb5 100644\n--- a/django/contrib/auth/migrations/0011_update_proxy_permissions.py\n+++ b/django/contrib/auth/migrations/0011_update_proxy_permissions.py\n@@ -24,10 +24,24 @@ def update_proxy_model_permissions(apps, schema_editor, reverse=False):\n         proxy_content_type = ContentType.objects.get_for_model(Model, for_concrete_model=False)\n         old_content_type = proxy_content_type if reverse else concrete_content_type\n         new_content_type = concrete_content_type if reverse else proxy_content_type\n-        Permission.objects.filter(\n+        old_content_type_permissions = Permission.objects.filter(\n             permissions_query,\n             content_type=old_content_type,\n-        ).update(content_type=new_content_type)\n+        )\n+        new_content_type_permissions = Permission.objects.filter(\n+            permissions_query,\n+            content_type=new_content_type,\n+        )\n+        # If there are already permissions with the target content_type,\n+        # deleting them would cause an IntegrityError. Delete them first\n+        # and print a reminder to audit relevant permissions.\n+        if new_content_type_permissions.exists():\n+            print(\n+                'A problem arose migrating proxy model permissions for model %s:%s'\n+                % (opts.app_label, opts.model_name)\n+            )\n+            new_content_type_permissions.delete()\n+        old_content_type_permissions.update(content_type=new_content_type)\n \n \n def revert_proxy_model_permissions(apps, schema_editor):\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-12856",
+      "repo": "django/django",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:07:10.286218",
+      "kepler": {
+        "success": true,
+        "duration_s": 18.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-12286",
+      "repo": "django/django",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:06:26.002468",
+      "kepler": {
+        "success": true,
+        "duration_s": 116.5,
+        "cost_usd": 0.14826,
+        "tools": 10,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "read_file": 4,
+          "edit_file": 1,
+          "run_tests": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 218839,
+          "output_tokens": 2001,
+          "cache_read": 199360,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 13,
+      "model_patch": "diff --git a/django/core/checks/translation.py b/django/core/checks/translation.py\nindex 138ed07ff8..67c858f17b 100644\n--- a/django/core/checks/translation.py\n+++ b/django/core/checks/translation.py\n@@ -57,5 +57,6 @@ def check_language_settings_consistent(app_configs, **kwargs):\n     \"\"\"Error if language settings are not consistent with each other.\"\"\"\n     available_tags = {i for i, _ in settings.LANGUAGES} | {'en-us'}\n     if settings.LANGUAGE_CODE not in available_tags:\n-        return [E004]\n+        if settings.LANGUAGE_CODE.split('-')[0] not in available_tags:\n+            return [E004]\n     return []\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-13321",
+      "repo": "django/django",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:07:45.586221",
+      "kepler": {
+        "success": true,
+        "duration_s": 98.7,
+        "cost_usd": 0.134499,
+        "tools": 9,
+        "tool_breakdown": {
+          "read_file": 4,
+          "edit_file": 1,
+          "run_tests": 2,
+          "shell": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 199716,
+          "output_tokens": 1625,
+          "cache_read": 181120,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 15,
+      "model_patch": "diff --git a/django/contrib/sessions/backends/base.py b/django/contrib/sessions/backends/base.py\nindex 187e14b1b7..cbdacd2c16 100644\n--- a/django/contrib/sessions/backends/base.py\n+++ b/django/contrib/sessions/backends/base.py\n@@ -132,8 +132,8 @@ class SessionBase:\n \n     def _legacy_decode(self, session_data):\n         # RemovedInDjango40Warning: pre-Django 3.1 format will be invalid.\n-        encoded_data = base64.b64decode(session_data.encode('ascii'))\n         try:\n+            encoded_data = base64.b64decode(session_data.encode('ascii'))\n             # could produce ValueError if there is no ':'\n             hash, serialized = encoded_data.split(b':', 1)\n             expected_hash = self._hash(serialized)\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-12700",
+      "repo": "django/django",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:07:05.263024",
+      "kepler": {
+        "success": true,
+        "duration_s": 191.2,
+        "cost_usd": 0.246901,
+        "tools": 20,
+        "tool_breakdown": {
+          "search_code": 4,
+          "get_project_overview": 1,
+          "read_file": 3,
+          "grep": 1,
+          "edit_file": 1,
+          "run_tests": 2,
+          "shell": 8
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 427063,
+          "output_tokens": 3658,
+          "cache_read": 403392,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 16,
+      "model_patch": "diff --git a/django/views/debug.py b/django/views/debug.py\nindex e6b7d4d821..22cdbfb103 100644\n--- a/django/views/debug.py\n+++ b/django/views/debug.py\n@@ -90,6 +90,10 @@ class SafeExceptionReporterFilter:\n                 cleansed = self.cleansed_substitute\n             elif isinstance(value, dict):\n                 cleansed = {k: self.cleanse_setting(k, v) for k, v in value.items()}\n+            elif isinstance(value, (list, tuple)):\n+                cleansed = [self.cleanse_setting(key, v) for v in value]\n+                if isinstance(value, tuple):\n+                    cleansed = tuple(cleansed)\n             else:\n                 cleansed = value\n         except TypeError:\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-11964",
+      "repo": "django/django",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:06:14.774283",
+      "kepler": {
+        "success": true,
+        "duration_s": 343.7,
+        "cost_usd": 0.482249,
+        "tools": 25,
+        "tool_breakdown": {
+          "search_code": 8,
+          "get_project_overview": 1,
+          "read_file": 12,
+          "edit_file": 1,
+          "run_tests": 2,
+          "shell": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 1,
+        "usage": {
+          "input_tokens": 456063,
+          "output_tokens": 15633,
+          "cache_read": 414976,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 15,
+      "model_patch": "diff --git a/django/db/models/enums.py b/django/db/models/enums.py\nindex bbe362a6ab..ec0cc6c2bf 100644\n--- a/django/db/models/enums.py\n+++ b/django/db/models/enums.py\n@@ -60,7 +60,8 @@ class ChoicesMeta(enum.EnumMeta):\n \n class Choices(enum.Enum, metaclass=ChoicesMeta):\n     \"\"\"Class for creating enumerated choices.\"\"\"\n-    pass\n+    def __str__(self):\n+        return str(self.value)\n \n \n class IntegerChoices(int, Choices):\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-13768",
+      "repo": "django/django",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:09:40.171845",
+      "kepler": {
+        "success": true,
+        "duration_s": 161.7,
+        "cost_usd": 0.205367,
+        "tools": 14,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "read_file": 5,
+          "edit_file": 3,
+          "run_tests": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 297741,
+          "output_tokens": 3702,
+          "cache_read": 275328,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 28,
+      "model_patch": "diff --git a/django/dispatch/dispatcher.py b/django/dispatch/dispatcher.py\nindex b7d9d26389..bff9017fb9 100644\n--- a/django/dispatch/dispatcher.py\n+++ b/django/dispatch/dispatcher.py\n@@ -1,7 +1,10 @@\n+import logging\n import threading\n import warnings\n import weakref\n \n+logger = logging.getLogger('django.dispatch')\n+\n from django.utils.deprecation import RemovedInDjango40Warning\n from django.utils.inspect import func_accepts_kwargs\n \n@@ -208,6 +211,11 @@ class Signal:\n             try:\n                 response = receiver(signal=self, sender=sender, **named)\n             except Exception as err:\n+                logger.exception(\n+                    'Error calling %s in Signal.send_robust() (%s)',\n+                    receiver.__qualname__,\n+                    err,\n+                )\n                 responses.append((receiver, err))\n             else:\n                 responses.append((receiver, response))\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-13401",
+      "repo": "django/django",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:08:40.517521",
+      "kepler": {
+        "success": true,
+        "duration_s": 246.7,
+        "cost_usd": 0.301047,
+        "tools": 31,
+        "tool_breakdown": {
+          "get_project_overview": 2,
+          "search_code": 5,
+          "read_file": 2,
+          "edit_file": 2,
+          "shell": 19,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 534594,
+          "output_tokens": 4735,
+          "cache_read": 508800,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 37,
+      "model_patch": "diff --git a/django/db/models/fields/__init__.py b/django/db/models/fields/__init__.py\nindex 28374272f4..fa5bf8e023 100644\n--- a/django/db/models/fields/__init__.py\n+++ b/django/db/models/fields/__init__.py\n@@ -516,17 +516,28 @@ class Field(RegisterLookupMixin):\n     def __eq__(self, other):\n         # Needed for @total_ordering\n         if isinstance(other, Field):\n-            return self.creation_counter == other.creation_counter\n+            return (\n+                self.creation_counter == other.creation_counter\n+                and self.model == other.model\n+            )\n         return NotImplemented\n \n     def __lt__(self, other):\n         # This is needed because bisect does not take a comparison function.\n         if isinstance(other, Field):\n-            return self.creation_counter < other.creation_counter\n+            # Prevent comparing fields of different models.\n+            if self.creation_counter != other.creation_counter:\n+                return self.creation_counter < other.creation_counter\n+            if self.model is not None and other.model is not None:\n+                return self.model._meta.label < other.model._meta.label\n+            return self.model is not None\n         return NotImplemented\n \n     def __hash__(self):\n-        return hash(self.creation_counter)\n+        # Combine creation_counter and model to ensure fields from\n+        # different models (even with the same creation_counter) have\n+        # different hashes, consistent with __eq__.\n+        return hash((self.creation_counter, self.model))\n \n     def __deepcopy__(self, memodict):\n         # We don't have to deepcopy very much here, since most things are not\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-14752",
+      "repo": "django/django",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:13:03.004441",
+      "kepler": {
+        "success": true,
+        "duration_s": 105.1,
+        "cost_usd": 0.128561,
+        "tools": 11,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "read_file": 4,
+          "edit_file": 2,
+          "run_tests": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 183660,
+          "output_tokens": 1353,
+          "cache_read": 163968,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 29,
+      "model_patch": "diff --git a/django/contrib/admin/views/autocomplete.py b/django/contrib/admin/views/autocomplete.py\nindex 3903e4c98c..1744271cbc 100644\n--- a/django/contrib/admin/views/autocomplete.py\n+++ b/django/contrib/admin/views/autocomplete.py\n@@ -26,12 +26,22 @@ class AutocompleteJsonView(BaseListView):\n         context = self.get_context_data()\n         return JsonResponse({\n             'results': [\n-                {'id': str(getattr(obj, to_field_name)), 'text': str(obj)}\n+                self.serialize_result(obj, to_field_name)\n                 for obj in context['object_list']\n             ],\n             'pagination': {'more': context['page_obj'].has_next()},\n         })\n \n+    def serialize_result(self, obj, to_field_name):\n+        \"\"\"\n+        Convert the object to a dictionary suitable for the autocomplete\n+        JSON response. Subclasses can override this to add extra fields.\n+        \"\"\"\n+        return {\n+            'id': str(getattr(obj, to_field_name)),\n+            'text': str(obj),\n+        }\n+\n     def get_paginator(self, *args, **kwargs):\n         \"\"\"Use the ModelAdmin's paginator.\"\"\"\n         return self.model_admin.get_paginator(self.request, *args, **kwargs)\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-14730",
+      "repo": "django/django",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:12:37.042132",
+      "kepler": {
+        "success": true,
+        "duration_s": 216.6,
+        "cost_usd": 0.304079,
+        "tools": 23,
+        "tool_breakdown": {
+          "search_code": 6,
+          "get_project_overview": 1,
+          "read_file": 5,
+          "grep": 5,
+          "edit_file": 1,
+          "run_tests": 4,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 478155,
+          "output_tokens": 5615,
+          "cache_read": 449856,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 22,
+      "model_patch": "diff --git a/django/db/models/fields/related.py b/django/db/models/fields/related.py\nindex febaadbb5b..f124c2db56 100644\n--- a/django/db/models/fields/related.py\n+++ b/django/db/models/fields/related.py\n@@ -1258,6 +1258,16 @@ class ManyToManyField(RelatedField):\n                 )\n             )\n \n+        if self.remote_field.symmetrical and self.remote_field.related_name:\n+            warnings.append(\n+                checks.Warning(\n+                    'related_name has no effect on ManyToManyField with '\n+                    'a symmetrical relationship, e.g. to \"self\".',\n+                    obj=self,\n+                    id='fields.W345',\n+                )\n+            )\n+\n         return warnings\n \n     def _check_relationship_model(self, from_model=None, **kwargs):\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-15252",
+      "repo": "django/django",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:15:03.615050",
+      "kepler": {
+        "success": true,
+        "duration_s": 139.5,
+        "cost_usd": 0.237879,
+        "tools": 20,
+        "tool_breakdown": {
+          "get_project_overview": 2,
+          "search_code": 4,
+          "read_file": 9,
+          "edit_file": 2,
+          "run_tests": 3
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 1,
+        "usage": {
+          "input_tokens": 385450,
+          "output_tokens": 2935,
+          "cache_read": 356480,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 21,
+      "model_patch": "diff --git a/django/db/migrations/recorder.py b/django/db/migrations/recorder.py\nindex 1a37c6b7d0..4bd3d1bc7c 100644\n--- a/django/db/migrations/recorder.py\n+++ b/django/db/migrations/recorder.py\n@@ -1,5 +1,5 @@\n from django.apps.registry import Apps\n-from django.db import DatabaseError, models\n+from django.db import DatabaseError, models, router\n from django.utils.functional import classproperty\n from django.utils.timezone import now\n \n@@ -63,6 +63,8 @@ class MigrationRecorder:\n         if self.has_table():\n             return\n         # Make the table\n+        if not router.allow_migrate(self.connection.alias, self.Migration._meta.app_label):\n+            return\n         try:\n             with self.connection.schema_editor() as editor:\n                 editor.create_model(self.Migration)\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-15320",
+      "repo": "django/django",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:16:29.977783",
+      "kepler": {
+        "success": true,
+        "duration_s": 126.0,
+        "cost_usd": 0.131009,
+        "tools": 9,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "read_file": 1,
+          "edit_file": 1,
+          "run_tests": 3
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 196785,
+          "output_tokens": 1391,
+          "cache_read": 177856,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 13,
+      "model_patch": "diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py\nindex 6f26dff0e0..201e4832f2 100644\n--- a/django/db/models/expressions.py\n+++ b/django/db/models/expressions.py\n@@ -1150,6 +1150,7 @@ class Subquery(BaseExpression, Combinable):\n     def __init__(self, queryset, output_field=None, **extra):\n         # Allow the usage of both QuerySet and sql.Query objects.\n         self.query = getattr(queryset, 'query', queryset)\n+        self.query.subquery = True\n         self.extra = extra\n         super().__init__(output_field)\n \n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-14155",
+      "repo": "django/django",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:12:14.008424",
+      "kepler": {
+        "success": true,
+        "duration_s": 580.7,
+        "cost_usd": 0.838391,
+        "tools": 50,
+        "tool_breakdown": {
+          "get_project_overview": 2,
+          "search_code": 4,
+          "read_file": 10,
+          "grep": 3,
+          "list_files": 1,
+          "run_tests": 1,
+          "shell": 26,
+          "edit_file": 2,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 1607749,
+          "output_tokens": 15477,
+          "cache_read": 1561856,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 19,
+      "model_patch": "diff --git a/django/urls/resolvers.py b/django/urls/resolvers.py\nindex 9b00e24509..9c5c7868e1 100644\n--- a/django/urls/resolvers.py\n+++ b/django/urls/resolvers.py\n@@ -60,8 +60,11 @@ class ResolverMatch:\n \n     def __repr__(self):\n         return \"ResolverMatch(func=%s, args=%s, kwargs=%s, url_name=%s, app_names=%s, namespaces=%s, route=%s)\" % (\n-            self._func_path, self.args, self.kwargs, self.url_name,\n-            self.app_names, self.namespaces, self.route,\n+            repr(self.func) if isinstance(self.func, functools.partial) else self._func_path,\n+            self.args, self.kwargs,\n+            \"'%s'\" % self.url_name if self.url_name is not None else self.url_name,\n+            self.app_names, self.namespaces,\n+            \"'%s'\" % self.route if self.route is not None else self.route,\n         )\n \n \n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-15902",
+      "repo": "django/django",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:18:51.681318",
+      "kepler": {
+        "success": true,
+        "duration_s": 215.3,
+        "cost_usd": 0.337481,
+        "tools": 29,
+        "tool_breakdown": {
+          "search_code": 9,
+          "get_project_overview": 1,
+          "read_file": 14,
+          "edit_file": 2,
+          "run_tests": 3
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 1,
+        "usage": {
+          "input_tokens": 583122,
+          "output_tokens": 5315,
+          "cache_read": 552448,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 16,
+      "model_patch": "diff --git a/django/forms/formsets.py b/django/forms/formsets.py\nindex 3adbc6979a..43bcfa393f 100644\n--- a/django/forms/formsets.py\n+++ b/django/forms/formsets.py\n@@ -40,6 +40,10 @@ class ManagementForm(Form):\n     MIN_NUM_FORMS = IntegerField(required=False, widget=HiddenInput)\n     MAX_NUM_FORMS = IntegerField(required=False, widget=HiddenInput)\n \n+    @property\n+    def template_name(self):\n+        return \"django/forms/div.html\"\n+\n     def clean(self):\n         cleaned_data = super().clean()\n         # When the management form is invalid, we don't know how many forms\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-16139",
+      "repo": "django/django",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:22:10.186721",
+      "kepler": {
+        "success": true,
+        "duration_s": 74.4,
+        "cost_usd": 0.120086,
+        "tools": 9,
+        "tool_breakdown": {
+          "search_code": 4,
+          "get_project_overview": 1,
+          "read_file": 2,
+          "edit_file": 1,
+          "run_tests": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 158512,
+          "output_tokens": 1440,
+          "cache_read": 139648,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 16,
+      "model_patch": "diff --git a/django/contrib/auth/forms.py b/django/contrib/auth/forms.py\nindex b3cfc6723c..a0abdcdde8 100644\n--- a/django/contrib/auth/forms.py\n+++ b/django/contrib/auth/forms.py\n@@ -163,7 +163,9 @@ class UserChangeForm(forms.ModelForm):\n         super().__init__(*args, **kwargs)\n         password = self.fields.get(\"password\")\n         if password:\n-            password.help_text = password.help_text.format(\"../password/\")\n+            password.help_text = password.help_text.format(\n+                \"../../%s/password/\" % self.instance.pk\n+            )\n         user_permissions = self.fields.get(\"user_permissions\")\n         if user_permissions:\n             user_permissions.queryset = user_permissions.queryset.select_related(\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-13220",
+      "repo": "django/django",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:07:26.422051",
+      "kepler": {
+        "success": true,
+        "duration_s": 1039.2,
+        "cost_usd": 1.033762,
+        "tools": 52,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "read_file": 8,
+          "edit_file": 4,
+          "run_tests": 6,
+          "shell": 30
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 1,
+        "usage": {
+          "input_tokens": 1969484,
+          "output_tokens": 20229,
+          "cache_read": 1917824,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 65,
+      "model_patch": "diff --git a/django/core/exceptions.py b/django/core/exceptions.py\nindex dc084b8692..21bdc872cd 100644\n--- a/django/core/exceptions.py\n+++ b/django/core/exceptions.py\n@@ -174,6 +174,59 @@ class ValidationError(Exception):\n                     message %= error.params\n                 yield str(message)\n \n+    @staticmethod\n+    def _key(error):\n+        \"\"\"\n+        Return a hashable representation of a single-message ValidationError\n+        suitable for comparison and hashing. Dict params are converted to\n+        frozensets so key order doesn't matter.\n+        \"\"\"\n+        params_key = frozenset(error.params.items()) if error.params else None\n+        return (error.message, error.code, params_key)\n+\n+    def __eq__(self, other):\n+        if not isinstance(other, ValidationError):\n+            return NotImplemented\n+        if hasattr(self, 'error_dict'):\n+            if not hasattr(other, 'error_dict'):\n+                return False\n+            if set(self.error_dict) != set(other.error_dict):\n+                return False\n+            for field in self.error_dict:\n+                key_self = sorted(self._key(e) for e in self.error_dict[field])\n+                key_other = sorted(self._key(e) for e in other.error_dict[field])\n+                if key_self != key_other:\n+                    return False\n+            return True\n+        elif hasattr(self, 'message'):\n+            if not hasattr(other, 'message'):\n+                return False\n+            return (\n+                self.message == other.message\n+                and self.code == other.code\n+                and self.params == other.params\n+            )\n+        elif hasattr(self, 'error_list'):\n+            if not hasattr(other, 'error_list') or hasattr(other, 'message'):\n+                return False\n+            key_self = sorted(self._key(e) for e in self.error_list)\n+            key_other = sorted(self._key(e) for e in other.error_list)\n+            return key_self == key_other\n+        return NotImplemented\n+\n+    def __hash__(self):\n+        if hasattr(self, 'error_dict'):\n+            return hash(frozenset(\n+                (field, tuple(self._key(e) for e in errors))\n+                for field, errors in self.error_dict.items()\n+            ))\n+        elif hasattr(self, 'message'):\n+            params_key = frozenset(self.params.items()) if self.params else None\n+            return hash((self.message, self.code, params_key))\n+        elif hasattr(self, 'error_list'):\n+            return hash(tuple(sorted(self._key(e) for e in self.error_list)))\n+        return hash(())\n+\n     def __str__(self):\n         if hasattr(self, 'error_dict'):\n             return repr(dict(self))\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-22835",
+      "repo": "matplotlib/matplotlib",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:25:01.692376",
+      "kepler": {
+        "success": true,
+        "duration_s": 115.2,
+        "cost_usd": 0.192725,
+        "tools": 15,
+        "tool_breakdown": {
+          "search_code": 4,
+          "get_project_overview": 1,
+          "read_file": 2,
+          "edit_file": 1,
+          "run_tests": 3,
+          "shell": 4
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 332280,
+          "output_tokens": 2080,
+          "cache_read": 309376,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 23,
+      "model_patch": "diff --git a/lib/matplotlib/artist.py b/lib/matplotlib/artist.py\nindex 1f33b9d3ec..2caf6572e3 100644\n--- a/lib/matplotlib/artist.py\n+++ b/lib/matplotlib/artist.py\n@@ -1304,10 +1304,13 @@ class Artist:\n             normed = self.norm(data)\n             if np.isfinite(normed):\n                 # Midpoints of neighboring color intervals.\n-                neighbors = self.norm.inverse(\n-                    (int(self.norm(data) * n) + np.array([0, 1])) / n)\n-                delta = abs(neighbors - data).max()\n-                g_sig_digits = cbook._g_sig_digits(data, delta)\n+                try:\n+                    neighbors = self.norm.inverse(\n+                        (int(self.norm(data) * n) + np.array([0, 1])) / n)\n+                    delta = abs(neighbors - data).max()\n+                    g_sig_digits = cbook._g_sig_digits(data, delta)\n+                except ValueError:\n+                    g_sig_digits = 3  # Consistent with default below.\n             else:\n                 g_sig_digits = 3  # Consistent with default below.\n             return \"[{:-#.{}g}]\".format(data, g_sig_digits)\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-13964",
+      "repo": "django/django",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:10:32.531502",
+      "kepler": {
+        "success": false,
+        "duration_s": 1200,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "status": "bahulam_failed",
+      "error": "Timeout"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-23964",
+      "repo": "matplotlib/matplotlib",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:27:13.485323",
+      "kepler": {
+        "success": true,
+        "duration_s": 351.0,
+        "cost_usd": 0.441414,
+        "tools": 43,
+        "tool_breakdown": {
+          "search_code": 1,
+          "read_file": 2,
+          "edit_file": 2,
+          "shell": 37,
+          "grep": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 989076,
+          "output_tokens": 4758,
+          "cache_read": 961920,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 15,
+      "model_patch": "diff --git a/lib/matplotlib/backends/backend_ps.py b/lib/matplotlib/backends/backend_ps.py\nindex f209e811f1..8937e677fd 100644\n--- a/lib/matplotlib/backends/backend_ps.py\n+++ b/lib/matplotlib/backends/backend_ps.py\n@@ -666,7 +666,8 @@ grestore\n                     (item.x, item.ft_object.get_glyph_name(item.glyph_idx))\n                 )\n             # append the last entry\n-            stream.append(curr_stream)\n+            if curr_stream is not None:\n+                stream.append(curr_stream)\n \n         self.set_color(*gc.get_rgb())\n \n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-25442",
+      "repo": "matplotlib/matplotlib",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:33:21.534606",
+      "kepler": {
+        "success": true,
+        "duration_s": 94.8,
+        "cost_usd": 0.158282,
+        "tools": 9,
+        "tool_breakdown": {
+          "read_file": 2,
+          "search_code": 2,
+          "get_project_overview": 1,
+          "edit_file": 1,
+          "run_tests": 1,
+          "shell": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 202689,
+          "output_tokens": 2927,
+          "cache_read": 182848,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 29,
+      "model_patch": "diff --git a/lib/matplotlib/offsetbox.py b/lib/matplotlib/offsetbox.py\nindex 77768e7383..5f588c6cc7 100644\n--- a/lib/matplotlib/offsetbox.py\n+++ b/lib/matplotlib/offsetbox.py\n@@ -1558,14 +1558,15 @@ class DraggableBase:\n \n     def disconnect(self):\n         \"\"\"Disconnect the callbacks.\"\"\"\n-        for cid in self.cids:\n-            self.canvas.mpl_disconnect(cid)\n-        try:\n-            c1 = self._c1\n-        except AttributeError:\n-            pass\n-        else:\n-            self.canvas.mpl_disconnect(c1)\n+        if self.ref_artist.figure is not None:\n+            for cid in self.cids:\n+                self.canvas.mpl_disconnect(cid)\n+            try:\n+                c1 = self._c1\n+            except AttributeError:\n+                pass\n+            else:\n+                self.canvas.mpl_disconnect(c1)\n \n     def save_offset(self):\n         pass\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-16910",
+      "repo": "django/django",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:23:39.792586",
+      "kepler": {
+        "success": true,
+        "duration_s": 717.5,
+        "cost_usd": 1.123777,
+        "tools": 62,
+        "tool_breakdown": {
+          "get_project_overview": 2,
+          "search_code": 14,
+          "analyze_code": 2,
+          "read_file": 16,
+          "grep": 10,
+          "shell": 10,
+          "edit_file": 1,
+          "run_tests": 6,
+          "read_attachment": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 1,
+        "usage": {
+          "input_tokens": 2386376,
+          "output_tokens": 15393,
+          "cache_read": 2320832,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 18,
+      "model_patch": "diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py\nindex 781dfd5499..17cf265b22 100644\n--- a/django/db/models/sql/query.py\n+++ b/django/db/models/sql/query.py\n@@ -779,6 +779,12 @@ class Query(BaseExpression):\n         # Only include fields mentioned in the mask.\n         for field_name, field_mask in mask.items():\n             field = opts.get_field(field_name)\n+            # For reverse relations, opts.get_field() returns a\n+            # ForeignObjectRel, but the select mask must be keyed by the\n+            # actual field on the related model (e.g. ForeignKey or\n+            # OneToOneField) to match what get_related_selections() uses.\n+            if hasattr(field, \"field\"):\n+                field = field.field\n             field_select_mask = select_mask.setdefault(field, {})\n             if field_mask:\n                 if not field.is_relation:\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "mwaskom__seaborn-3010",
+      "repo": "mwaskom/seaborn",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:35:52.853850",
+      "kepler": {
+        "success": true,
+        "duration_s": 91.5,
+        "cost_usd": 0.136338,
+        "tools": 10,
+        "tool_breakdown": {
+          "get_project_overview": 1,
+          "read_file": 4,
+          "edit_file": 2,
+          "shell": 2,
+          "run_tests": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 2,
+        "usage": {
+          "input_tokens": 199841,
+          "output_tokens": 1665,
+          "cache_read": 180800,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 19,
+      "model_patch": "diff --git a/seaborn/_stats/regression.py b/seaborn/_stats/regression.py\nindex 7b7ddc8d..510e0992 100644\n--- a/seaborn/_stats/regression.py\n+++ b/seaborn/_stats/regression.py\n@@ -21,9 +21,10 @@ class PolyFit(Stat):\n \n     def _fit_predict(self, data):\n \n-        x = data[\"x\"]\n-        y = data[\"y\"]\n-        if x.nunique() <= self.order:\n+        drop = data[[\"x\", \"y\"]].isna().any(axis=1)\n+        x = data.loc[~drop, \"x\"]\n+        y = data.loc[~drop, \"y\"]\n+        if len(x) <= self.order:\n             # TODO warn?\n             xx = yy = []\n         else:\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-15738",
+      "repo": "django/django",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:17:38.826876",
+      "kepler": {
+        "success": false,
+        "duration_s": 1200,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "status": "bahulam_failed",
+      "error": "Timeout"
+    },
+    {
+      "instance_id": "mwaskom__seaborn-2848",
+      "repo": "mwaskom/seaborn",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:35:12.256952",
+      "kepler": {
+        "success": true,
+        "duration_s": 307.9,
+        "cost_usd": 0.511102,
+        "tools": 27,
+        "tool_breakdown": {
+          "get_project_overview": 2,
+          "search_code": 8,
+          "analyze_code": 2,
+          "read_file": 7,
+          "grep": 1,
+          "edit_file": 1,
+          "run_tests": 6
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 2,
+        "usage": {
+          "input_tokens": 760813,
+          "output_tokens": 10451,
+          "cache_read": 714112,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-23987",
+      "repo": "matplotlib/matplotlib",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:30:48.113085",
+      "kepler": {
+        "success": true,
+        "duration_s": 697.3,
+        "cost_usd": 1.351166,
+        "tools": 70,
+        "tool_breakdown": {
+          "search_code": 10,
+          "get_project_overview": 1,
+          "grep": 8,
+          "analyze_code": 1,
+          "shell": 36,
+          "read_file": 11,
+          "edit_file": 2,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 1,
+        "usage": {
+          "input_tokens": 3097282,
+          "output_tokens": 16750,
+          "cache_read": 3034048,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 25,
+      "model_patch": "diff --git a/lib/matplotlib/figure.py b/lib/matplotlib/figure.py\nindex 5bbb786984..4e280eb5f4 100644\n--- a/lib/matplotlib/figure.py\n+++ b/lib/matplotlib/figure.py\n@@ -2416,8 +2416,8 @@ class Figure(FigureBase):\n                     \"The Figure parameters 'layout' and 'constrained_layout' \"\n                     \"cannot be used together. Please use 'layout' only.\")\n             self.set_layout_engine(layout=layout)\n-        elif tight_layout is not None:\n-            if constrained_layout is not None:\n+        elif tight_layout is not None and tight_layout is not False:\n+            if constrained_layout is not None and constrained_layout is not False:\n                 _api.warn_external(\n                     \"The Figure parameters 'tight_layout' and \"\n                     \"'constrained_layout' cannot be used together. Please use \"\n@@ -2425,7 +2425,7 @@ class Figure(FigureBase):\n             self.set_layout_engine(layout='tight')\n             if isinstance(tight_layout, dict):\n                 self.get_layout_engine().set(**tight_layout)\n-        elif constrained_layout is not None:\n+        elif constrained_layout is not None and constrained_layout is not False:\n             self.set_layout_engine(layout='constrained')\n             if isinstance(constrained_layout, dict):\n                 self.get_layout_engine().set(**constrained_layout)\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-16400",
+      "repo": "django/django",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:22:42.947923",
+      "kepler": {
+        "success": false,
+        "duration_s": 1200,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "status": "bahulam_failed",
+      "error": "Timeout"
+    },
+    {
+      "instance_id": "pydata__xarray-4248",
+      "repo": "pydata/xarray",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:37:53.969906",
+      "kepler": {
+        "success": true,
+        "duration_s": 395.5,
+        "cost_usd": 0.602317,
+        "tools": 36,
+        "tool_breakdown": {
+          "get_project_overview": 2,
+          "search_code": 8,
+          "read_file": 7,
+          "edit_file": 5,
+          "run_tests": 6,
+          "shell": 7,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 1031183,
+          "output_tokens": 11971,
+          "cache_read": 989184,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 50,
+      "model_patch": "diff --git a/xarray/core/formatting.py b/xarray/core/formatting.py\nindex 28eaae5f..48e971a1 100644\n--- a/xarray/core/formatting.py\n+++ b/xarray/core/formatting.py\n@@ -278,7 +278,8 @@ def summarize_variable(\n             raise TypeError(f\"`max_width` value of `{max_width}` is not a valid int\")\n         else:\n             max_width = max_width_options\n-    first_col = pretty_print(f\"  {marker} {name} \", col_width)\n+    name_str = f\"{name}, in {var.attrs['units']}\" if var.attrs.get(\"units\") else name\n+    first_col = pretty_print(f\"  {marker} {name_str} \", col_width)\n     if var.dims:\n         dims_str = \"({}) \".format(\", \".join(map(str, var.dims)))\n     else:\n@@ -347,8 +348,11 @@ def _get_col_items(mapping):\n \n     col_items = []\n     for k, v in mapping.items():\n-        col_items.append(k)\n         var = getattr(v, \"variable\", v)\n+        col_items.append(k)\n+        attrs = getattr(var, \"attrs\", {})\n+        if attrs.get(\"units\"):\n+            col_items.append(f\"{k}, in {attrs['units']}\")\n         if isinstance(var, IndexVariable):\n             level_names = var.to_index_variable().level_names\n             if level_names is not None:\n@@ -364,7 +368,7 @@ def _calculate_col_width(col_items):\n \n def _mapping_repr(mapping, title, summarizer, col_width=None):\n     if col_width is None:\n-        col_width = _calculate_col_width(mapping)\n+        col_width = _calculate_col_width(_get_col_items(mapping))\n     summary = [f\"{title}:\"]\n     if mapping:\n         summary += [summarizer(k, v, col_width) for k, v in mapping.items()]\ndiff --git a/xarray/core/formatting_html.py b/xarray/core/formatting_html.py\nindex 5521b33e..0a304d36 100644\n--- a/xarray/core/formatting_html.py\n+++ b/xarray/core/formatting_html.py\n@@ -103,6 +103,8 @@ def summarize_variable(name, var, is_index=False, dtype=None, preview=None):\n     cssclass_idx = \" class='xr-has-index'\" if is_index else \"\"\n     dims_str = f\"({', '.join(escape(dim) for dim in var.dims)})\"\n     name = escape(str(name))\n+    if var.attrs.get(\"units\"):\n+        name += f\", in {escape(str(var.attrs['units']))}\"\n     dtype = dtype or escape(str(var.dtype))\n \n     # \"unique\" ids required to expand/collapse subsections\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "mwaskom__seaborn-3407",
+      "repo": "mwaskom/seaborn",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:37:26.259441",
+      "kepler": {
+        "success": true,
+        "duration_s": 490.9,
+        "cost_usd": 0.736213,
+        "tools": 40,
+        "tool_breakdown": {
+          "analyze_code": 2,
+          "search_code": 5,
+          "get_project_overview": 1,
+          "read_file": 10,
+          "grep": 7,
+          "run_tests": 5,
+          "shell": 7,
+          "edit_file": 2,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 1302583,
+          "output_tokens": 14506,
+          "cache_read": 1255232,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 17,
+      "model_patch": "diff --git a/seaborn/axisgrid.py b/seaborn/axisgrid.py\nindex 75349099..49211d03 100644\n--- a/seaborn/axisgrid.py\n+++ b/seaborn/axisgrid.py\n@@ -1472,8 +1472,9 @@ class PairGrid(Grid):\n                 for ax in diag_axes[1:]:\n                     share_axis(diag_axes[0], ax, \"y\")\n \n-            self.diag_vars = np.array(diag_vars, np.object_)\n-            self.diag_axes = np.array(diag_axes, np.object_)\n+            self.diag_vars = np.empty(len(diag_vars), dtype=object)\n+            self.diag_vars[:] = diag_vars\n+            self.diag_axes = np.array(diag_axes, dtype=object)\n \n         if \"hue\" not in signature(func).parameters:\n             return self._map_diag_iter_hue(func, **kwargs)\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "pydata__xarray-4493",
+      "repo": "pydata/xarray",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:40:22.005903",
+      "kepler": {
+        "success": true,
+        "duration_s": 366.6,
+        "cost_usd": 0.60063,
+        "tools": 35,
+        "tool_breakdown": {
+          "get_project_overview": 2,
+          "search_code": 4,
+          "read_file": 9,
+          "analyze_code": 1,
+          "grep": 6,
+          "shell": 7,
+          "edit_file": 1,
+          "run_tests": 5
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 1076146,
+          "output_tokens": 10688,
+          "cache_read": 1032640,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 20,
+      "model_patch": "diff --git a/xarray/core/variable.py b/xarray/core/variable.py\nindex 64c1895d..5714ca3d 100644\n--- a/xarray/core/variable.py\n+++ b/xarray/core/variable.py\n@@ -218,7 +218,13 @@ def as_compatible_data(data, fastpath=False):\n         data = np.timedelta64(getattr(data, \"value\", data), \"ns\")\n \n     # we don't want nested self-described arrays\n-    data = getattr(data, \"values\", data)\n+    # use .data rather than .values to avoid triggering dask computation\n+    from .dataarray import DataArray\n+\n+    if isinstance(data, DataArray):\n+        data = data.data\n+    else:\n+        data = getattr(data, \"values\", data)\n \n     if isinstance(data, np.ma.MaskedArray):\n         mask = np.ma.getmaskarray(data)\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-5495",
+      "repo": "pytest-dev/pytest",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:42:58.268581",
+      "kepler": {
+        "success": true,
+        "duration_s": 245.4,
+        "cost_usd": 0.352685,
+        "tools": 22,
+        "tool_breakdown": {
+          "search_code": 6,
+          "get_project_overview": 1,
+          "read_file": 4,
+          "edit_file": 1,
+          "run_tests": 3,
+          "shell": 6,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 499727,
+          "output_tokens": 7686,
+          "cache_read": 467328,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 46,
+      "model_patch": "diff --git a/src/_pytest/assertion/util.py b/src/_pytest/assertion/util.py\nindex 762e5761d..a875834cb 100644\n--- a/src/_pytest/assertion/util.py\n+++ b/src/_pytest/assertion/util.py\n@@ -259,20 +259,35 @@ def _compare_eq_sequence(left, right, verbose=0):\n     len_right = len(right)\n     for i in range(min(len_left, len_right)):\n         if left[i] != right[i]:\n-            explanation += [\n-                \"At index {} diff: {!r} != {!r}\".format(i, left[i], right[i])\n-            ]\n+            if isinstance(left, bytes):\n+                explanation += [\n+                    \"At index {} diff: {} != {}\".format(\n+                        i,\n+                        saferepr(bytes([left[i]])),\n+                        saferepr(bytes([right[i]])),\n+                    )\n+                ]\n+            else:\n+                explanation += [\n+                    \"At index {} diff: {!r} != {!r}\".format(i, left[i], right[i])\n+                ]\n             break\n     len_diff = len_left - len_right\n \n     if len_diff:\n         if len_diff > 0:\n             dir_with_more = \"Left\"\n-            extra = saferepr(left[len_right])\n+            if isinstance(left, bytes):\n+                extra = saferepr(bytes([left[len_right]]))\n+            else:\n+                extra = saferepr(left[len_right])\n         else:\n             len_diff = 0 - len_diff\n             dir_with_more = \"Right\"\n-            extra = saferepr(right[len_left])\n+            if isinstance(right, bytes):\n+                extra = saferepr(bytes([right[len_left]]))\n+            else:\n+                extra = saferepr(right[len_left])\n \n         if len_diff == 1:\n             explanation += [\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-10297",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:45:38.973178",
+      "kepler": {
+        "success": true,
+        "duration_s": 104.0,
+        "cost_usd": 0.175002,
+        "tools": 12,
+        "tool_breakdown": {
+          "search_code": 5,
+          "get_project_overview": 1,
+          "read_file": 1,
+          "edit_file": 3,
+          "run_tests": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 267723,
+          "output_tokens": 2071,
+          "cache_read": 244160,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 32,
+      "model_patch": "diff --git a/sklearn/linear_model/ridge.py b/sklearn/linear_model/ridge.py\nindex 911c74ae3b..c0404922d4 100644\n--- a/sklearn/linear_model/ridge.py\n+++ b/sklearn/linear_model/ridge.py\n@@ -1301,6 +1301,12 @@ class RidgeClassifierCV(LinearClassifierMixin, _BaseRidgeCV):\n         weights inversely proportional to class frequencies in the input data\n         as ``n_samples / (n_classes * np.bincount(y))``\n \n+    store_cv_values : boolean, default=False\n+        Flag indicating if the cross-validation values corresponding to\n+        each alpha should be stored in the ``cv_values_`` attribute. This\n+        flag is only compatible with ``cv=None`` (i.e. using Generalized\n+        Cross-Validation).\n+\n     Attributes\n     ----------\n     cv_values_ : array, shape = [n_samples, n_alphas] or \\\n@@ -1333,10 +1339,11 @@ class RidgeClassifierCV(LinearClassifierMixin, _BaseRidgeCV):\n     advantage of the multi-variate response support in Ridge.\n     \"\"\"\n     def __init__(self, alphas=(0.1, 1.0, 10.0), fit_intercept=True,\n-                 normalize=False, scoring=None, cv=None, class_weight=None):\n+                 normalize=False, scoring=None, cv=None, class_weight=None,\n+                 store_cv_values=False):\n         super(RidgeClassifierCV, self).__init__(\n             alphas=alphas, fit_intercept=fit_intercept, normalize=normalize,\n-            scoring=scoring, cv=cv)\n+            scoring=scoring, cv=cv, store_cv_values=store_cv_values)\n         self.class_weight = class_weight\n \n     def fit(self, X, y, sample_weight=None):\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-7432",
+      "repo": "pytest-dev/pytest",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:44:32.454905",
+      "kepler": {
+        "success": true,
+        "duration_s": 240.5,
+        "cost_usd": 0.303114,
+        "tools": 24,
+        "tool_breakdown": {
+          "read_file": 3,
+          "search_code": 1,
+          "get_project_overview": 1,
+          "analyze_code": 1,
+          "edit_file": 1,
+          "write_file": 3,
+          "shell": 14
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 562176,
+          "output_tokens": 4598,
+          "cache_read": 537920,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/src/_pytest/skipping.py b/src/_pytest/skipping.py\nindex 7bd975e5a..c9bdfee89 100644\n--- a/src/_pytest/skipping.py\n+++ b/src/_pytest/skipping.py\n@@ -291,7 +291,7 @@ def pytest_runtest_makereport(item: Item, call: CallInfo[None]):\n             else:\n                 rep.outcome = \"passed\"\n                 rep.wasxfail = xfailed.reason\n-    elif (\n+    if (\n         item._store.get(skipped_by_mark_key, True)\n         and rep.skipped\n         and type(rep.longrepr) is tuple\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "pylint-dev__pylint-7114",
+      "repo": "pylint-dev/pylint",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:42:41.841298",
+      "kepler": {
+        "success": true,
+        "duration_s": 358.6,
+        "cost_usd": 0.478256,
+        "tools": 22,
+        "tool_breakdown": {
+          "get_project_overview": 2,
+          "search_code": 5,
+          "read_file": 3,
+          "edit_file": 3,
+          "run_tests": 3,
+          "shell": 6
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 559253,
+          "output_tokens": 13829,
+          "cache_read": 521088,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/pylint/lint/expand_modules.py b/pylint/lint/expand_modules.py\nindex 289e1afce..2210dedbd 100644\n--- a/pylint/lint/expand_modules.py\n+++ b/pylint/lint/expand_modules.py\n@@ -121,7 +121,7 @@ def expand_modules(\n         else:\n             is_namespace = modutils.is_namespace(spec)\n             is_directory = modutils.is_directory(spec)\n-        if not is_namespace:\n+        if not is_namespace and os.path.isfile(filepath):\n             result.append(\n                 {\n                     \"path\": filepath,\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-25747",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:48:43.717253",
+      "kepler": {
+        "success": true,
+        "duration_s": 8.4,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-13497",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:47:06.464149",
+      "kepler": {
+        "success": true,
+        "duration_s": 172.4,
+        "cost_usd": 0.258324,
+        "tools": 19,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "read_file": 3,
+          "edit_file": 1,
+          "run_tests": 1,
+          "shell": 10
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 451309,
+          "output_tokens": 3683,
+          "cache_read": 426240,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 19,
+      "model_patch": "diff --git a/sklearn/feature_selection/mutual_info_.py b/sklearn/feature_selection/mutual_info_.py\nindex d5d1b7fb59..6c6a70e42a 100644\n--- a/sklearn/feature_selection/mutual_info_.py\n+++ b/sklearn/feature_selection/mutual_info_.py\n@@ -247,7 +247,12 @@ def _estimate_mi(X, y, discrete_features='auto', discrete_target=False,\n     X, y = check_X_y(X, y, accept_sparse='csc', y_numeric=not discrete_target)\n     n_samples, n_features = X.shape\n \n-    if discrete_features == 'auto':\n+    if isinstance(discrete_features, str):\n+        if discrete_features != 'auto':\n+            raise ValueError(\"Unknown value for discrete_features: {}. \"\n+                             \"Allowed values are: 'auto', True, False, \"\n+                             \"an array_like.\"\n+                             .format(discrete_features))\n         discrete_features = issparse(X)\n \n     if isinstance(discrete_features, bool):\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-14092",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:47:32.222895",
+      "kepler": {
+        "success": true,
+        "duration_s": 243.4,
+        "cost_usd": 0.434889,
+        "tools": 27,
+        "tool_breakdown": {
+          "search_code": 7,
+          "get_project_overview": 1,
+          "read_file": 7,
+          "edit_file": 3,
+          "run_tests": 3,
+          "shell": 5,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 675502,
+          "output_tokens": 8977,
+          "cache_read": 639360,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 41,
+      "model_patch": "diff --git a/sklearn/utils/tests/test_validation.py b/sklearn/utils/tests/test_validation.py\nindex 7484eb1688..6dc11bb7b5 100644\n--- a/sklearn/utils/tests/test_validation.py\n+++ b/sklearn/utils/tests/test_validation.py\n@@ -838,9 +838,9 @@ def test_check_scalar_valid(x, target_type, min_val, max_val):\n \n @pytest.mark.parametrize('x, target_name, target_type, min_val, max_val, '\n                          'err_msg',\n-                         [(1, \"test_name1\", float, 2, 4,\n+                         [(\"foo\", \"test_name1\", float, 2, 4,\n                            TypeError(\"`test_name1` must be an instance of \"\n-                                     \"<class 'float'>, not <class 'int'>.\")),\n+                                     \"<class 'float'>, not <class 'str'>.\")),\n                           (1, \"test_name2\", int, 2, 4,\n                            ValueError('`test_name2`= 1, must be >= 2.')),\n                           (5, \"test_name3\", int, 2, 4,\ndiff --git a/sklearn/utils/validation.py b/sklearn/utils/validation.py\nindex 8747844e5c..2bec07a9c4 100644\n--- a/sklearn/utils/validation.py\n+++ b/sklearn/utils/validation.py\n@@ -973,8 +973,17 @@ def check_scalar(x, name, target_type, min_val=None, max_val=None):\n     \"\"\"\n \n     if not isinstance(x, target_type):\n-        raise TypeError('`{}` must be an instance of {}, not {}.'\n-                        .format(name, target_type, type(x)))\n+        # Accept numpy integer types when int is expected, and accept int\n+        # when float is expected (e.g. for GridSearchCV parameter grids).\n+        if (target_type is int\n+                and isinstance(x, np.integer)):\n+            pass\n+        elif (target_type is float\n+              and isinstance(x, (int, np.integer))):\n+            pass\n+        else:\n+            raise TypeError('`{}` must be an instance of {}, not {}.'\n+                            .format(name, target_type, type(x)))\n \n     if min_val is not None and x < min_val:\n         raise ValueError('`{}`= {}, must be >= {}.'.format(name, x, min_val))\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-7975",
+      "repo": "sphinx-doc/sphinx",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:49:01.080073",
+      "kepler": {
+        "success": true,
+        "duration_s": 204.7,
+        "cost_usd": 0.323918,
+        "tools": 16,
+        "tool_breakdown": {
+          "search_code": 5,
+          "get_project_overview": 1,
+          "read_file": 5,
+          "edit_file": 2,
+          "run_tests": 2,
+          "shell": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 346932,
+          "output_tokens": 9163,
+          "cache_read": 316416,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/sphinx/environment/adapters/indexentries.py b/sphinx/environment/adapters/indexentries.py\nindex 5af213932..1fb47f9ac 100644\n--- a/sphinx/environment/adapters/indexentries.py\n+++ b/sphinx/environment/adapters/indexentries.py\n@@ -110,6 +110,8 @@ class IndexEntries:\n                 lckey = lckey[1:]\n             if lckey[0:1].isalpha() or lckey.startswith('_'):\n                 lckey = chr(127) + lckey\n+            else:\n+                lckey = chr(126) + lckey\n             # ensure a determinstic order *within* letters by also sorting on\n             # the entry itself\n             return (lckey, entry[0])\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-10949",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:46:31.606141",
+      "kepler": {
+        "success": true,
+        "duration_s": 453.5,
+        "cost_usd": 0.550592,
+        "tools": 17,
+        "tool_breakdown": {
+          "search_code": 6,
+          "get_project_overview": 1,
+          "analyze_code": 1,
+          "read_file": 4,
+          "grep": 1,
+          "edit_file": 1,
+          "run_tests": 3
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 535185,
+          "output_tokens": 17440,
+          "cache_read": 487616,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 18,
+      "model_patch": "diff --git a/sklearn/utils/validation.py b/sklearn/utils/validation.py\nindex fe1f7236ec..932a2d9644 100644\n--- a/sklearn/utils/validation.py\n+++ b/sklearn/utils/validation.py\n@@ -464,7 +464,11 @@ def check_array(array, accept_sparse=False, accept_large_sparse=True,\n     dtype_orig = getattr(array, \"dtype\", None)\n     if not hasattr(dtype_orig, 'kind'):\n         # not a data type (e.g. a column named dtype in a pandas DataFrame)\n-        dtype_orig = None\n+        # Try to get dtype from DataFrame-like objects\n+        if hasattr(array, \"values\"):\n+            dtype_orig = getattr(array.values, \"dtype\", None)\n+        else:\n+            dtype_orig = None\n \n     if dtype_numeric:\n         if dtype_orig is not None and dtype_orig.kind == \"O\":\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-25500",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:48:35.617676",
+      "kepler": {
+        "success": true,
+        "duration_s": 351.9,
+        "cost_usd": 0,
+        "tools": 26,
+        "tool_breakdown": {
+          "get_project_overview": 2,
+          "search_code": 5,
+          "read_file": 2,
+          "edit_file": 1,
+          "shell": 14,
+          "grep": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/sklearn/calibration.py b/sklearn/calibration.py\nindex 2c4a33616d..34aadd2e9b 100644\n--- a/sklearn/calibration.py\n+++ b/sklearn/calibration.py\n@@ -760,7 +760,7 @@ class _CalibratedClassifier:\n                 # When binary, `predictions` consists only of predictions for\n                 # clf.classes_[1] but `pos_class_indices` = 0\n                 class_idx += 1\n-            proba[:, class_idx] = calibrator.predict(this_pred)\n+            proba[:, class_idx] = np.asarray(calibrator.predict(this_pred)).ravel()\n \n         # Normalize the probabilities\n         if n_classes == 2:\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sympy__sympy-13647",
+      "repo": "sympy/sympy",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:54:36.189200",
+      "kepler": {
+        "success": true,
+        "duration_s": 93.3,
+        "cost_usd": 0.148393,
+        "tools": 11,
+        "tool_breakdown": {
+          "search_code": 5,
+          "get_project_overview": 1,
+          "read_file": 1,
+          "edit_file": 1,
+          "shell": 1,
+          "run_tests": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 190744,
+          "output_tokens": 2226,
+          "cache_read": 169344,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/sympy/matrices/common.py b/sympy/matrices/common.py\nindex 056d9bc497..4aa75e4d77 100644\n--- a/sympy/matrices/common.py\n+++ b/sympy/matrices/common.py\n@@ -86,7 +86,7 @@ def entry(i, j):\n                 return self[i, j]\n             elif pos <= j < pos + other.cols:\n                 return other[i, j - pos]\n-            return self[i, j - pos - other.cols]\n+            return self[i, j - other.cols]\n \n         return self._new(self.rows, self.cols + other.cols,\n                          lambda i, j: entry(i, j))\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sympy__sympy-12454",
+      "repo": "sympy/sympy",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:52:32.815980",
+      "kepler": {
+        "success": true,
+        "duration_s": 262.7,
+        "cost_usd": 0.361051,
+        "tools": 27,
+        "tool_breakdown": {
+          "search_code": 5,
+          "get_project_overview": 1,
+          "grep": 4,
+          "shell": 7,
+          "read_file": 5,
+          "edit_file": 2,
+          "run_tests": 2,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 701017,
+          "output_tokens": 4723,
+          "cache_read": 671424,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 23,
+      "model_patch": "diff --git a/sympy/matrices/matrices.py b/sympy/matrices/matrices.py\nindex 90ea232faf..7e6d4395b8 100644\n--- a/sympy/matrices/matrices.py\n+++ b/sympy/matrices/matrices.py\n@@ -641,7 +641,7 @@ def _eval_is_zero(self):\n     def _eval_is_upper_hessenberg(self):\n         return all(self[i, j].is_zero\n                    for i in range(2, self.rows)\n-                   for j in range(i - 1))\n+                   for j in range(min(i - 1, self.cols)))\n \n     def _eval_values(self):\n         return [i for i in self if not i.is_zero]\n@@ -1112,7 +1112,7 @@ def is_upper(self):\n         \"\"\"\n         return all(self[i, j].is_zero\n                    for i in range(1, self.rows)\n-                   for j in range(i))\n+                   for j in range(min(i, self.cols)))\n \n     @property\n     def is_zero(self):\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8627",
+      "repo": "sphinx-doc/sphinx",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:51:44.232992",
+      "kepler": {
+        "success": true,
+        "duration_s": 503.3,
+        "cost_usd": 0.915176,
+        "tools": 36,
+        "tool_breakdown": {
+          "search_code": 14,
+          "get_project_overview": 1,
+          "read_file": 10,
+          "shell": 4,
+          "edit_file": 1,
+          "run_tests": 5,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 1,
+        "usage": {
+          "input_tokens": 1285193,
+          "output_tokens": 23625,
+          "cache_read": 1220288,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 22,
+      "model_patch": "diff --git a/sphinx/util/typing.py b/sphinx/util/typing.py\nindex 2d4f67bba..536e50544 100644\n--- a/sphinx/util/typing.py\n+++ b/sphinx/util/typing.py\n@@ -315,6 +315,16 @@ def stringify(annotation: Any) -> str:\n def _stringify_py37(annotation: Any) -> str:\n     \"\"\"stringify() for py37+.\"\"\"\n     module = getattr(annotation, '__module__', None)\n+    if module and hasattr(annotation, '__qualname__'):\n+        # For C extension types (e.g., struct.Struct where __module__ is '_struct'),\n+        # try to find the public module that re-exports the type\n+        if module.startswith('_'):\n+            parent_module = module[1:]\n+            if parent_module in sys.modules:\n+                parent = sys.modules[parent_module]\n+                obj = getattr(parent, annotation.__qualname__, None)\n+                if obj is annotation:\n+                    module = parent_module\n     if module == 'typing':\n         if getattr(annotation, '_name', None):\n             qualname = annotation._name\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8506",
+      "repo": "sphinx-doc/sphinx",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:50:07.946411",
+      "kepler": {
+        "success": true,
+        "duration_s": 744.5,
+        "cost_usd": 1.186355,
+        "tools": 64,
+        "tool_breakdown": {
+          "search_code": 6,
+          "get_project_overview": 1,
+          "read_file": 6,
+          "grep": 1,
+          "edit_file": 6,
+          "shell": 42,
+          "run_tests": 1,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 2446955,
+          "output_tokens": 21204,
+          "cache_read": 2397248,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/sphinx/domains/std.py b/sphinx/domains/std.py\nindex c87217c56..c7b28d2a8 100644\n--- a/sphinx/domains/std.py\n+++ b/sphinx/domains/std.py\n@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)\n \n \n # RE for option descriptions\n-option_desc_re = re.compile(r'((?:/|--|-|\\+)?[^\\s=[]+)(=?\\s*.*)')\n+option_desc_re = re.compile(r'((?:/|--|-|\\+)?\\[?[^\\s=[]+)(=?\\s*.*)')\n # RE for grammar tokens\n token_re = re.compile(r'`(\\w+)`', re.U)\n \n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sympy__sympy-15609",
+      "repo": "sympy/sympy",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T03:00:14.262759",
+      "kepler": {
+        "success": true,
+        "duration_s": 164.4,
+        "cost_usd": 0.264651,
+        "tools": 17,
+        "tool_breakdown": {
+          "search_code": 7,
+          "get_project_overview": 1,
+          "read_file": 1,
+          "shell": 5,
+          "edit_file": 1,
+          "run_tests": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 339193,
+          "output_tokens": 5792,
+          "cache_read": 311040,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/sympy/printing/latex.py b/sympy/printing/latex.py\nindex 901918674a..8923ff6791 100644\n--- a/sympy/printing/latex.py\n+++ b/sympy/printing/latex.py\n@@ -1438,7 +1438,7 @@ def _print_MatrixBase(self, expr):\n \n     def _print_MatrixElement(self, expr):\n         return self.parenthesize(expr.parent, PRECEDENCE[\"Atom\"], strict=True) \\\n-            + '_{%s, %s}' % (expr.i, expr.j)\n+            + '_{%s, %s}' % (self._print(expr.i), self._print(expr.j))\n \n     def _print_MatrixSlice(self, expr):\n         def latexslice(x):\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sympy__sympy-15011",
+      "repo": "sympy/sympy",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:57:06.636762",
+      "kepler": {
+        "success": true,
+        "duration_s": 396.6,
+        "cost_usd": 0.595557,
+        "tools": 29,
+        "tool_breakdown": {
+          "search_code": 8,
+          "get_project_overview": 1,
+          "read_file": 7,
+          "run_tests": 3,
+          "shell": 7,
+          "edit_file": 3
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 936743,
+          "output_tokens": 12080,
+          "cache_read": 887360,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 50,
+      "model_patch": "diff --git a/sympy/utilities/lambdify.py b/sympy/utilities/lambdify.py\nindex f71bea25f5..bf3722d507 100644\n--- a/sympy/utilities/lambdify.py\n+++ b/sympy/utilities/lambdify.py\n@@ -531,7 +531,7 @@ def lambdastr(args, expr, printer=None, dummify=False):\n     'lambda _0,_1: (lambda x,y,z: (x + y))(_0,_1[0],_1[1])'\n     \"\"\"\n     # Transforming everything to strings.\n-    from sympy.matrices import DeferredVector\n+    from sympy.matrices import DeferredVector, MatrixSymbol\n     from sympy import Dummy, sympify, Symbol, Function, flatten\n \n     if printer is not None:\n@@ -560,6 +560,10 @@ def sub_args(args, dummies_dict):\n                 dummies = Dummy()\n                 dummies_dict.update({args : dummies})\n                 return str(dummies)\n+            elif isinstance(args, MatrixSymbol):\n+                dummies = Dummy()\n+                dummies_dict.update({args : dummies})\n+                return str(dummies)\n             else:\n                 return str(args)\n \n@@ -708,7 +712,7 @@ def _preprocess(self, args, expr):\n         Returns string form of args, and updated expr.\n         \"\"\"\n         from sympy import Dummy, Symbol, Function, flatten\n-        from sympy.matrices import DeferredVector\n+        from sympy.matrices import DeferredVector, MatrixSymbol\n \n         dummify = self._dummify\n \n@@ -728,6 +732,15 @@ def _preprocess(self, args, expr):\n             elif isinstance(arg, Symbol):\n                 argrep = self._argrepr(arg)\n \n+                if dummify or not self._is_safe_ident(argrep):\n+                    dummy = Dummy()\n+                    argstrs.append(self._argrepr(dummy))\n+                    expr = self._subexpr(expr, {arg: dummy})\n+                else:\n+                    argstrs.append(argrep)\n+            elif isinstance(arg, MatrixSymbol):\n+                argrep = str(arg.name)\n+\n                 if dummify or not self._is_safe_ident(argrep):\n                     dummy = Dummy()\n                     argstrs.append(self._argrepr(dummy))\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sympy__sympy-18532",
+      "repo": "sympy/sympy",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T03:03:54.560272",
+      "kepler": {
+        "success": true,
+        "duration_s": 124.5,
+        "cost_usd": 0.17772,
+        "tools": 14,
+        "tool_breakdown": {
+          "get_project_overview": 2,
+          "search_code": 3,
+          "read_file": 3,
+          "edit_file": 1,
+          "run_tests": 3,
+          "shell": 1,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 1,
+        "usage": {
+          "input_tokens": 254255,
+          "output_tokens": 2469,
+          "cache_read": 230400,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 26,
+      "model_patch": "diff --git a/sympy/core/basic.py b/sympy/core/basic.py\nindex 6866648d4e..6571793972 100644\n--- a/sympy/core/basic.py\n+++ b/sympy/core/basic.py\n@@ -503,13 +503,14 @@ def atoms(self, *types):\n         if types:\n             types = tuple(\n                 [t if isinstance(t, type) else type(t) for t in types])\n+            result = set()\n+            for expr in preorder_traversal(self):\n+                if isinstance(expr, types):\n+                    result.add(expr)\n+            return result\n         else:\n-            types = (Atom,)\n-        result = set()\n-        for expr in preorder_traversal(self):\n-            if isinstance(expr, types):\n-                result.add(expr)\n-        return result\n+            return {expr for expr in preorder_traversal(self)\n+                    if not expr.args}\n \n     @property\n     def free_symbols(self):\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sympy__sympy-16988",
+      "repo": "sympy/sympy",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T03:02:38.487890",
+      "kepler": {
+        "success": true,
+        "duration_s": 234.2,
+        "cost_usd": 0.346543,
+        "tools": 16,
+        "tool_breakdown": {
+          "get_project_overview": 2,
+          "search_code": 5,
+          "analyze_code": 1,
+          "read_file": 2,
+          "shell": 3,
+          "edit_file": 1,
+          "run_tests": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 436808,
+          "output_tokens": 8179,
+          "cache_read": 402432,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/sympy/sets/sets.py b/sympy/sets/sets.py\nindex 03cf57a30b..efb23acb65 100644\n--- a/sympy/sets/sets.py\n+++ b/sympy/sets/sets.py\n@@ -1265,6 +1265,8 @@ def __new__(cls, *args, **kwargs):\n         # Reduce sets using known rules\n         if evaluate:\n             args = list(cls._new_args_filter(args))\n+            # Remove duplicate sets\n+            args = list(ordered(set(args), Set._infimum_key))\n             return simplify_intersection(args)\n \n         args = list(ordered(args, Set._infimum_key))\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sympy__sympy-13177",
+      "repo": "sympy/sympy",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:54:13.558682",
+      "kepler": {
+        "success": true,
+        "duration_s": 768.4,
+        "cost_usd": 0.994336,
+        "tools": 42,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "read_file": 9,
+          "edit_file": 1,
+          "shell": 25,
+          "run_tests": 1,
+          "grep": 1,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 1436371,
+          "output_tokens": 27075,
+          "cache_read": 1378112,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/sympy/core/mod.py b/sympy/core/mod.py\nindex 11c800704b..f7efc66964 100644\n--- a/sympy/core/mod.py\n+++ b/sympy/core/mod.py\n@@ -39,7 +39,7 @@ def doit(p, q):\n             if p.is_infinite or q.is_infinite or p is nan or q is nan:\n                 return nan\n             if (p == q or p == -q or\n-                    p.is_Pow and p.exp.is_Integer and p.base == q or\n+                    p.is_Pow and p.exp.is_Integer and p.base == q and q.is_integer or\n                     p.is_integer and q == 1):\n                 return S.Zero\n \n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sympy__sympy-19487",
+      "repo": "sympy/sympy",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T03:06:10.330584",
+      "kepler": {
+        "success": true,
+        "duration_s": 104.5,
+        "cost_usd": 0.172776,
+        "tools": 11,
+        "tool_breakdown": {
+          "search_code": 4,
+          "get_project_overview": 1,
+          "read_file": 3,
+          "edit_file": 1,
+          "run_tests": 1,
+          "shell": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 250588,
+          "output_tokens": 2124,
+          "cache_read": 226240,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 15,
+      "model_patch": "diff --git a/sympy/functions/elementary/complexes.py b/sympy/functions/elementary/complexes.py\nindex 7fda45982b..f2354bcf72 100644\n--- a/sympy/functions/elementary/complexes.py\n+++ b/sympy/functions/elementary/complexes.py\n@@ -394,6 +394,9 @@ def _eval_rewrite_as_Heaviside(self, arg, **kwargs):\n         if arg.is_extended_real:\n             return Heaviside(arg, H0=S(1)/2) * 2 - 1\n \n+    def _eval_rewrite_as_Abs(self, arg, **kwargs):\n+        return Piecewise((0, Eq(arg, 0)), (arg/Abs(arg), True))\n+\n     def _eval_simplify(self, **kwargs):\n         return self.func(self.args[0].factor())  # XXX include doit?\n \n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sympy__sympy-17655",
+      "repo": "sympy/sympy",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T03:03:10.269568",
+      "kepler": {
+        "success": true,
+        "duration_s": 353.3,
+        "cost_usd": 0.376561,
+        "tools": 21,
+        "tool_breakdown": {
+          "search_code": 7,
+          "analyze_code": 1,
+          "get_project_overview": 1,
+          "read_file": 5,
+          "shell": 3,
+          "edit_file": 2,
+          "run_tests": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 481968,
+          "output_tokens": 9673,
+          "cache_read": 449792,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 28,
+      "model_patch": "diff --git a/sympy/geometry/point.py b/sympy/geometry/point.py\nindex 7c978c47be..226dd50d6e 100644\n--- a/sympy/geometry/point.py\n+++ b/sympy/geometry/point.py\n@@ -21,7 +21,7 @@\n \n import warnings\n \n-from sympy.core import S, sympify, Expr\n+from sympy.core import S, sympify, Expr, Mul\n from sympy.core.compatibility import is_sequence\n from sympy.core.containers import Tuple\n from sympy.simplify import nsimplify, simplify\n@@ -213,6 +213,13 @@ def __add__(self, other):\n         sympy.geometry.point.Point.translate\n \n         \"\"\"\n+        if isinstance(other, Mul):\n+            # e.g. 2*Point(1,1) or sympify(2.0)*Point(1,1)\n+            # Try to extract the Point factor and resolve the multiplication\n+            pts = [a for a in other.args if isinstance(a, Point)]\n+            if len(pts) == 1:\n+                other = pts[0] * Mul(*[a for a in other.args\n+                                       if not isinstance(a, Point)])\n         try:\n             s, o = Point._normalize_dimension(self, Point(other, evaluate=False))\n         except TypeError:\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sympy__sympy-13915",
+      "repo": "sympy/sympy",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T02:56:21.215040",
+      "kepler": {
+        "success": true,
+        "duration_s": 959.6,
+        "cost_usd": 1.961123,
+        "tools": 69,
+        "tool_breakdown": {
+          "search_code": 7,
+          "get_project_overview": 2,
+          "shell": 39,
+          "analyze_code": 3,
+          "read_file": 13,
+          "grep": 1,
+          "edit_file": 2,
+          "run_tests": 1,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 3722397,
+          "output_tokens": 41082,
+          "cache_read": 3637888,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 18,
+      "model_patch": "diff --git a/sympy/core/mul.py b/sympy/core/mul.py\nindex 4f01eeedbd..dab2689cd0 100644\n--- a/sympy/core/mul.py\n+++ b/sympy/core/mul.py\n@@ -423,6 +423,12 @@ def _gather(c_powers):\n             changed = False\n             for b, e in c_powers:\n                 if e.is_zero:\n+                    # if the base is or contains an infinity then we have\n+                    # an expression like zoo*zoo**(-1) or (zoo + x)/(zoo + x)\n+                    # which should be nan, not 1\n+                    if b.is_finite is False or b.has(S.ComplexInfinity) \\\n+                            or b.has(S.Infinity) or b.has(S.NegativeInfinity):\n+                        return [S.NaN], [], order_symbols\n                     continue\n                 if e is S.One:\n                     if b.is_Number:\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sympy__sympy-22840",
+      "repo": "sympy/sympy",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T03:09:14.968883",
+      "kepler": {
+        "success": true,
+        "duration_s": 209.3,
+        "cost_usd": 0.291884,
+        "tools": 18,
+        "tool_breakdown": {
+          "get_project_overview": 2,
+          "search_code": 4,
+          "grep": 2,
+          "read_file": 7,
+          "edit_file": 1,
+          "run_tests": 1,
+          "shell": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 1,
+        "usage": {
+          "input_tokens": 332781,
+          "output_tokens": 6609,
+          "cache_read": 298368,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 15,
+      "model_patch": "diff --git a/sympy/simplify/cse_main.py b/sympy/simplify/cse_main.py\nindex d649dd02a9..26d8d23ee0 100644\n--- a/sympy/simplify/cse_main.py\n+++ b/sympy/simplify/cse_main.py\n@@ -586,6 +586,9 @@ def _find_repeated(expr):\n         if isinstance(expr, RootOf):\n             return\n \n+        if isinstance(expr, MatrixSymbol):\n+            return\n+\n         if isinstance(expr, Basic) and (expr.is_Atom or expr.is_Order):\n             if expr.is_Symbol:\n                 excluded_symbols.add(expr)\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sympy__sympy-24213",
+      "repo": "sympy/sympy",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T03:12:32.291658",
+      "kepler": {
+        "success": true,
+        "duration_s": 101.4,
+        "cost_usd": 0.149393,
+        "tools": 11,
+        "tool_breakdown": {
+          "search_code": 5,
+          "get_project_overview": 1,
+          "read_file": 1,
+          "edit_file": 1,
+          "shell": 1,
+          "run_tests": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 212165,
+          "output_tokens": 1764,
+          "cache_read": 190208,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/sympy/physics/units/unitsystem.py b/sympy/physics/units/unitsystem.py\nindex a436880c4b..5705c821c2 100644\n--- a/sympy/physics/units/unitsystem.py\n+++ b/sympy/physics/units/unitsystem.py\n@@ -175,7 +175,7 @@ def _collect_factor_and_dimension(self, expr):\n             for addend in expr.args[1:]:\n                 addend_factor, addend_dim = \\\n                     self._collect_factor_and_dimension(addend)\n-                if dim != addend_dim:\n+                if not self.get_dimension_system().equivalent_dims(dim, addend_dim):\n                     raise ValueError(\n                         'Dimension of \"{}\" is {}, '\n                         'but it should be {}'.format(\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sympy__sympy-20639",
+      "repo": "sympy/sympy",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T03:07:16.095616",
+      "kepler": {
+        "success": true,
+        "duration_s": 425.8,
+        "cost_usd": 0.67921,
+        "tools": 44,
+        "tool_breakdown": {
+          "get_project_overview": 2,
+          "search_code": 6,
+          "read_file": 2,
+          "shell": 25,
+          "edit_file": 3,
+          "run_tests": 2,
+          "grep": 3,
+          "bash": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 1,
+        "usage": {
+          "input_tokens": 1357814,
+          "output_tokens": 10235,
+          "cache_read": 1313984,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/sympy/printing/pretty/pretty.py b/sympy/printing/pretty/pretty.py\nindex df7452ee87..769090c7ca 100644\n--- a/sympy/printing/pretty/pretty.py\n+++ b/sympy/printing/pretty/pretty.py\n@@ -1954,7 +1954,7 @@ def _print_Pow(self, power):\n             if e is S.NegativeOne:\n                 return prettyForm(\"1\")/self._print(b)\n             n, d = fraction(e)\n-            if n is S.One and d.is_Atom and not e.is_Integer and self._settings['root_notation']:\n+            if n is S.One and (d.is_Integer or d.is_Symbol) and not e.is_Integer and self._settings['root_notation']:\n                 return self._print_nth_root(b, e)\n             if e.is_Rational and e < 0:\n                 return prettyForm(\"1\")/self._print(Pow(b, -e, evaluate=False))\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sympy__sympy-20049",
+      "repo": "sympy/sympy",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T03:06:44.399358",
+      "kepler": {
+        "success": true,
+        "duration_s": 987.1,
+        "cost_usd": 1.069063,
+        "tools": 37,
+        "tool_breakdown": {
+          "search_code": 6,
+          "get_project_overview": 1,
+          "read_file": 11,
+          "grep": 1,
+          "list_files": 1,
+          "analyze_code": 1,
+          "run_tests": 5,
+          "shell": 9,
+          "edit_file": 1,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 1,
+        "usage": {
+          "input_tokens": 1585491,
+          "output_tokens": 28245,
+          "cache_read": 1522624,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 45,
+      "model_patch": "diff --git a/sympy/physics/vector/point.py b/sympy/physics/vector/point.py\nindex d4e3cfcc90..dd3ce2a835 100644\n--- a/sympy/physics/vector/point.py\n+++ b/sympy/physics/vector/point.py\n@@ -518,10 +518,37 @@ def vel(self, frame):\n         \"\"\"\n \n         _check_frame(frame)\n-        if not (frame in self._vel_dict):\n+        if frame in self._vel_dict:\n+            return self._vel_dict[frame]\n+        # Attempt to automatically calculate the velocity from position\n+        # relationships. BFS through the position tree to find the shortest\n+        # path to a point that has its velocity defined in the frame.\n+        visited = {self}\n+        queue = [[self]]\n+        found_path = None\n+        while queue:\n+            path = queue.pop(0)\n+            current = path[-1]\n+            for point in current._pos_dict:\n+                if point in visited:\n+                    continue\n+                visited.add(point)\n+                new_path = path + [point]\n+                if frame in point._vel_dict:\n+                    found_path = new_path\n+                    break\n+                queue.append(new_path)\n+            if found_path is not None:\n+                break\n+        if found_path is None:\n             raise ValueError('Velocity of point ' + self.name + ' has not been'\n                              ' defined in ReferenceFrame ' + frame.name)\n-        return self._vel_dict[frame]\n+        # Walk the path backward: start from the terminal point with known\n+        # velocity and accumulate derivatives of position vectors.\n+        vel = found_path[-1].vel(frame)\n+        for i in range(len(found_path) - 2, -1, -1):\n+            vel += found_path[i]._pos_dict[found_path[i + 1]].dt(frame)\n+        return vel\n \n     def partial_velocity(self, frame, *gen_speeds):\n         \"\"\"Returns the partial velocities of the linear velocity vector of this\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sympy__sympy-21612",
+      "repo": "sympy/sympy",
+      "model": "xiaomi/mimo-v2.5",
+      "timestamp": "2026-08-23T03:08:06.309611",
+      "kepler": {
+        "success": false,
+        "duration_s": 1200,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "status": "bahulam_failed",
+      "error": "Timeout"
+    }
+  ]
+}
