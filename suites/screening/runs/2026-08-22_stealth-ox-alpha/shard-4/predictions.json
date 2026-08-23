@@ -1,0 +1,302 @@
+[
+  {
+    "instance_id": "astropy__astropy-14182",
+    "model_patch": "diff --git a/astropy/io/ascii/rst.py b/astropy/io/ascii/rst.py\nindex abdeba8efb..3e012fe525 100644\n--- a/astropy/io/ascii/rst.py\n+++ b/astropy/io/ascii/rst.py\n@@ -27,7 +27,6 @@ class SimpleRSTHeader(FixedWidthHeader):\n \n \n class SimpleRSTData(FixedWidthData):\n-    start_line = 3\n     end_line = -1\n     splitter_class = FixedWidthTwoLineDataSplitter\n \n@@ -46,6 +45,18 @@ class RST(FixedWidth):\n           2    4.5  Worlds\n         ==== ===== ======\n \n+    Like other fixed-width formats, when writing a table you can provide ``header_rows``\n+    to specify a list of table rows to output as the header. For example::\n+\n+    >>> tbl.write(sys.stdout, format=\"ascii.rst\", header_rows=['name', 'unit'])\n+    ===== ========\n+    wave response\n+      nm       ct\n+    ===== ========\n+    350.0 0.7\n+    950.0 1.2\n+    ===== ========\n+\n     Currently there is no support for reading tables which utilize continuation lines,\n     or for ones which define column spans through the use of an additional\n     line of dashes in the header.\n@@ -57,10 +68,28 @@ class RST(FixedWidth):\n     data_class = SimpleRSTData\n     header_class = SimpleRSTHeader\n \n-    def __init__(self):\n-        super().__init__(delimiter_pad=None, bookend=False)\n+    def __init__(self, header_rows=None):\n+        super().__init__(delimiter_pad=None, bookend=False, header_rows=header_rows)\n \n     def write(self, lines):\n+        \"\"\"\n+        Write the table data in RST format including header and footer separator lines.\n+\n+        Parameters\n+        ----------\n+        lines : list of str\n+            The formatted table lines to be written.\n+\n+        Returns\n+        -------\n+        list[str]\n+            The complete RST table with header separator, table content, and\n+            footer separator line.\n+        \"\"\"\n         lines = super().write(lines)\n-        lines = [lines[1]] + lines + [lines[1]]\n-        return lines\n+        idx = len(self.header.header_rows)\n+        return [lines[idx]] + lines + [lines[idx]]\n+\n+    def read(self, table):\n+        self.data.start_line = 2 + len(self.header.header_rows)\n+        return super().read(table)\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "django__django-11039",
+    "model_patch": "diff --git a/django/core/management/commands/sqlmigrate.py b/django/core/management/commands/sqlmigrate.py\nindex f0b663222a..b51d1739a4 100644\n--- a/django/core/management/commands/sqlmigrate.py\n+++ b/django/core/management/commands/sqlmigrate.py\n@@ -56,7 +56,7 @@ class Command(BaseCommand):\n         targets = [(app_label, migration.name)]\n \n         # Show begin/end around output only for atomic migrations\n-        self.output_transaction = migration.atomic\n+        self.output_transaction = migration.atomic and connection.features.can_rollback_ddl\n \n         # Make a plan that represents just the requested migrations and show SQL\n         # for it\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "django__django-11133",
+    "model_patch": "diff --git a/django/http/response.py b/django/http/response.py\nindex 6a84e193ba..5588f90f4d 100644\n--- a/django/http/response.py\n+++ b/django/http/response.py\n@@ -231,6 +231,8 @@ class HttpResponseBase:\n         # - when self._charset != 'utf-8' it re-encodes the content\n         if isinstance(value, bytes):\n             return bytes(value)\n+        if isinstance(value, memoryview):\n+            return bytes(value)\n         if isinstance(value, str):\n             return bytes(value.encode(self.charset))\n         # Handle non-string types.\n@@ -309,7 +311,7 @@ class HttpResponse(HttpResponseBase):\n     @content.setter\n     def content(self, value):\n         # Consume iterators upon assignment to allow repeated iteration.\n-        if hasattr(value, '__iter__') and not isinstance(value, (bytes, str)):\n+        if hasattr(value, '__iter__') and not isinstance(value, (bytes, str, memoryview)):\n             content = b''.join(self.make_bytes(chunk) for chunk in value)\n             if hasattr(value, 'close'):\n                 try:\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "django__django-11583",
+    "model_patch": "diff --git a/django/utils/autoreload.py b/django/utils/autoreload.py\nindex 25c3b44250..1b7e8838db 100644\n--- a/django/utils/autoreload.py\n+++ b/django/utils/autoreload.py\n@@ -143,6 +143,12 @@ def iter_modules_and_files(modules, extra_files):\n             # The module could have been removed, don't fail loudly if this\n             # is the case.\n             continue\n+        except ValueError as e:\n+            # A path may contain an embedded null byte, which pathlib's\n+            # resolve() raises ValueError for; skip such files.\n+            if str(e) != 'embedded null byte':\n+                raise\n+            continue\n         results.add(resolved_path)\n     return frozenset(results)\n \n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "django__django-11815",
+    "model_patch": "diff --git a/django/db/migrations/serializer.py b/django/db/migrations/serializer.py\nindex 27b5cbd379..4622b0fcd8 100644\n--- a/django/db/migrations/serializer.py\n+++ b/django/db/migrations/serializer.py\n@@ -120,9 +120,9 @@ class EnumSerializer(BaseSerializer):\n     def serialize(self):\n         enum_class = self.value.__class__\n         module = enum_class.__module__\n-        v_string, v_imports = serializer_factory(self.value.value).serialize()\n+        v_string, v_imports = serializer_factory(self.value.name).serialize()\n         imports = {'import %s' % module, *v_imports}\n-        return \"%s.%s(%s)\" % (module, enum_class.__name__, v_string), imports\n+        return \"%s.%s[%s]\" % (module, enum_class.__name__, v_string), imports\n \n \n class FloatSerializer(BaseSimpleSerializer):\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "django__django-11910",
+    "model_patch": "",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "django__django-12125",
+    "model_patch": "",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "django__django-12470",
+    "model_patch": "diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py\nindex 92213a4e67..735ca92182 100644\n--- a/django/db/models/sql/compiler.py\n+++ b/django/db/models/sql/compiler.py\n@@ -711,7 +711,14 @@ class SQLCompiler:\n         # If we get to this point and the field is a relation to another model,\n         # append the default ordering for that model unless the attribute name\n         # of the field is specified.\n-        if field.is_relation and opts.ordering and getattr(field, 'attname', None) != name:\n+        # If the field is the pk shortcut, avoid appending the default\n+        # ordering of the related model, as the pk refers to the concrete\n+        # column of the joined table (e.g. the parent link of a model using\n+        # multi-table inheritance).\n+        if (\n+            field.is_relation and opts.ordering and\n+            getattr(field, 'attname', None) != name and name != 'pk'\n+        ):\n             # Firstly, avoid infinite loops.\n             already_seen = already_seen or set()\n             join_tuple = tuple(getattr(self.query.alias_map[j], 'join_cols', None) for j in joins)\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "django__django-13658",
+    "model_patch": "",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "django__django-12747",
+    "model_patch": "diff --git a/django/db/models/deletion.py b/django/db/models/deletion.py\nindex 16dff6a1cd..86d4ff6d62 100644\n--- a/django/db/models/deletion.py\n+++ b/django/db/models/deletion.py\n@@ -442,4 +442,6 @@ class Collector:\n         for model, instances in self.data.items():\n             for instance in instances:\n                 setattr(instance, model._meta.pk.attname, None)\n-        return sum(deleted_counter.values()), dict(deleted_counter)\n+        return sum(deleted_counter.values()), {\n+            model: count for model, count in deleted_counter.items() if count\n+        }\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "django__django-13710",
+    "model_patch": "diff --git a/django/contrib/admin/options.py b/django/contrib/admin/options.py\nindex dadd4acfa1..1e5fab917e 100644\n--- a/django/contrib/admin/options.py\n+++ b/django/contrib/admin/options.py\n@@ -2037,10 +2037,13 @@ class InlineModelAdmin(BaseModelAdmin):\n         self.opts = self.model._meta\n         self.has_registered_model = admin_site.is_registered(self.model)\n         super().__init__()\n+        if self.verbose_name_plural is None:\n+            if self.verbose_name is None:\n+                self.verbose_name_plural = self.model._meta.verbose_name_plural\n+            else:\n+                self.verbose_name_plural = format_lazy('{}s', self.verbose_name)\n         if self.verbose_name is None:\n             self.verbose_name = self.model._meta.verbose_name\n-        if self.verbose_name_plural is None:\n-            self.verbose_name_plural = self.model._meta.verbose_name_plural\n \n     @property\n     def media(self):\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "django__django-14534",
+    "model_patch": "diff --git a/django/forms/boundfield.py b/django/forms/boundfield.py\nindex 2ff8b0ee26..a061f15f87 100644\n--- a/django/forms/boundfield.py\n+++ b/django/forms/boundfield.py\n@@ -277,7 +277,7 @@ class BoundWidget:\n \n     @property\n     def id_for_label(self):\n-        return 'id_%s_%s' % (self.data['name'], self.data['index'])\n+        return self.data['attrs'].get('id')\n \n     @property\n     def choice_label(self):\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "django__django-13315",
+    "model_patch": "diff --git a/django/db/models/fields/__init__.py b/django/db/models/fields/__init__.py\nindex 2bce85beef..9a23a0da08 100644\n--- a/django/db/models/fields/__init__.py\n+++ b/django/db/models/fields/__init__.py\n@@ -881,6 +881,8 @@ class Field(RegisterLookupMixin):\n             else 'pk'\n         )\n         qs = rel_model._default_manager.complex_filter(limit_choices_to)\n+        if qs.query.has_filters():\n+            qs = qs.distinct()\n         if ordering:\n             qs = qs.order_by(*ordering)\n         return (blank_choice if include_blank else []) + [\ndiff --git a/django/db/models/fields/reverse_related.py b/django/db/models/fields/reverse_related.py\nindex 12160add7f..eb22f29ab5 100644\n--- a/django/db/models/fields/reverse_related.py\n+++ b/django/db/models/fields/reverse_related.py\n@@ -151,6 +151,9 @@ class ForeignObjectRel(FieldCacheMixin):\n         \"\"\"\n         limit_choices_to = limit_choices_to or self.limit_choices_to\n         qs = self.related_model._default_manager.complex_filter(limit_choices_to)\n+        # Remove duplicates created by joins.\n+        if qs.query.has_filters():\n+            qs = qs.distinct()\n         if ordering:\n             qs = qs.order_by(*ordering)\n         return (blank_choice if include_blank else []) + [\ndiff --git a/django/forms/models.py b/django/forms/models.py\nindex 5d115458a1..cefd6ce10a 100644\n--- a/django/forms/models.py\n+++ b/django/forms/models.py\n@@ -101,6 +101,9 @@ def apply_limit_choices_to_to_formfield(formfield):\n         limit_choices_to = formfield.get_limit_choices_to()\n         if limit_choices_to is not None:\n             formfield.queryset = formfield.queryset.complex_filter(limit_choices_to)\n+            # Remove duplicates created by joins.\n+            if formfield.queryset.query.has_filters():\n+                formfield.queryset = formfield.queryset.distinct()\n \n \n def fields_for_model(model, fields=None, exclude=None, widgets=None,\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "django__django-14017",
+    "model_patch": "diff --git a/django/db/models/query_utils.py b/django/db/models/query_utils.py\nindex c957ffa564..f72acd8e37 100644\n--- a/django/db/models/query_utils.py\n+++ b/django/db/models/query_utils.py\n@@ -40,17 +40,20 @@ class Q(tree.Node):\n         super().__init__(children=[*args, *sorted(kwargs.items())], connector=_connector, negated=_negated)\n \n     def _combine(self, other, conn):\n-        if not isinstance(other, Q):\n+        if not(isinstance(other, Q) or getattr(other, 'conditional', False) is True):\n             raise TypeError(other)\n \n-        # If the other Q() is empty, ignore it and just use `self`.\n-        if not other:\n-            _, args, kwargs = self.deconstruct()\n-            return type(self)(*args, **kwargs)\n-        # Or if this Q is empty, ignore it and just use `other`.\n-        elif not self:\n-            _, args, kwargs = other.deconstruct()\n-            return type(other)(*args, **kwargs)\n+        if isinstance(other, Q):\n+            # If the other Q() is empty, ignore it and just use `self`.\n+            if not other:\n+                _, args, kwargs = self.deconstruct()\n+                return type(self)(*args, **kwargs)\n+            # Or if this Q is empty, ignore it and just use `other`.\n+            elif not self:\n+                _, args, kwargs = other.deconstruct()\n+                return type(other)(*args, **kwargs)\n+        else:\n+            other = Q(other)\n \n         obj = type(self)()\n         obj.connector = conn\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "django__django-13230",
+    "model_patch": "diff --git a/django/contrib/syndication/views.py b/django/contrib/syndication/views.py\nindex 68ffb0bfe0..ee1cdc8f18 100644\n--- a/django/contrib/syndication/views.py\n+++ b/django/contrib/syndication/views.py\n@@ -182,6 +182,7 @@ class Feed:\n                 request.is_secure(),\n             )\n             enclosures = self._get_dynamic_attr('item_enclosures', item)\n+            comments = self._get_dynamic_attr('item_comments', item)\n             author_name = self._get_dynamic_attr('item_author_name', item)\n             if author_name is not None:\n                 author_email = self._get_dynamic_attr('item_author_email', item)\n@@ -212,6 +213,7 @@ class Feed:\n                 author_name=author_name,\n                 author_email=author_email,\n                 author_link=author_link,\n+                comments=comments,\n                 categories=self._get_dynamic_attr('item_categories', item),\n                 item_copyright=self._get_dynamic_attr('item_copyright', item),\n                 **self.item_extra_kwargs(item)\ndiff --git a/docs/ref/contrib/syndication.txt b/docs/ref/contrib/syndication.txt\nindex 13aa944e8a..9c818d1cfd 100644\n--- a/docs/ref/contrib/syndication.txt\n+++ b/docs/ref/contrib/syndication.txt\n@@ -889,6 +889,22 @@ This example illustrates all possible attributes and methods for a\n \n         item_copyright = 'Copyright (c) 2007, Sally Smith' # Hard-coded copyright notice.\n \n+        # ITEM COMMENTS -- One of the following three is optional. The\n+        # framework looks for them in this order.\n+\n+        def item_comments(self, obj):\n+            \"\"\"\n+            Takes an item, as returned by items(), and returns the item's\n+            comments URL as a normal Python string.\n+            \"\"\"\n+\n+        def item_comments(self):\n+            \"\"\"\n+            Returns the comments URL for every item in the feed.\n+            \"\"\"\n+\n+        item_comments = 'https://www.example.com/comments' # Hard-coded comments URL.\n+\n \n The low-level framework\n =======================\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "django__django-14787",
+    "model_patch": "diff --git a/django/utils/decorators.py b/django/utils/decorators.py\nindex 5c9a5d01c7..69aca10a4d 100644\n--- a/django/utils/decorators.py\n+++ b/django/utils/decorators.py\n@@ -37,7 +37,7 @@ def _multi_decorate(decorators, method):\n         # 'self' argument, but it's a closure over self so it can call\n         # 'func'. Also, wrap method.__get__() in a function because new\n         # attributes can't be set on bound method objects, only on functions.\n-        bound_method = partial(method.__get__(self, type(self)))\n+        bound_method = wraps(method)(partial(method.__get__(self, type(self))))\n         for dec in decorators:\n             bound_method = dec(bound_method)\n         return bound_method(*args, **kwargs)\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "django__django-16379",
+    "model_patch": "diff --git a/django/core/cache/backends/filebased.py b/django/core/cache/backends/filebased.py\nindex 631da49444..671adb031b 100644\n--- a/django/core/cache/backends/filebased.py\n+++ b/django/core/cache/backends/filebased.py\n@@ -89,11 +89,14 @@ class FileBasedCache(BaseCache):\n         return True\n \n     def has_key(self, key, version=None):\n-        fname = self._key_to_file(key, version)\n-        if os.path.exists(fname):\n-            with open(fname, \"rb\") as f:\n+        \"\"\"\n+        Return True if the key is in the cache and has not expired.\n+        \"\"\"\n+        try:\n+            with open(self._key_to_file(key, version), \"rb\") as f:\n                 return not self._is_expired(f)\n-        return False\n+        except FileNotFoundError:\n+            return False\n \n     def _cull(self):\n         \"\"\"\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "django__django-14999",
+    "model_patch": "diff --git a/django/db/migrations/operations/models.py b/django/db/migrations/operations/models.py\nindex 982816be3a..c120f5d32d 100644\n--- a/django/db/migrations/operations/models.py\n+++ b/django/db/migrations/operations/models.py\n@@ -320,12 +320,13 @@ class RenameModel(ModelOperation):\n         new_model = to_state.apps.get_model(app_label, self.new_name)\n         if self.allow_migrate_model(schema_editor.connection.alias, new_model):\n             old_model = from_state.apps.get_model(app_label, self.old_name)\n+            old_db_table = old_model._meta.db_table\n+            new_db_table = new_model._meta.db_table\n+            # Don't alter when a table name is not changed.\n+            if old_db_table == new_db_table:\n+                return\n             # Move the main table\n-            schema_editor.alter_db_table(\n-                new_model,\n-                old_model._meta.db_table,\n-                new_model._meta.db_table,\n-            )\n+            schema_editor.alter_db_table(new_model, old_db_table, new_db_table)\n             # Alter the fields pointing to us\n             for related_object in old_model._meta.related_objects:\n                 if related_object.related_model == old_model:\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "django__django-15814",
+    "model_patch": "diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py\nindex 33cc636b22..5036335bec 100644\n--- a/django/db/models/sql/query.py\n+++ b/django/db/models/sql/query.py\n@@ -748,7 +748,7 @@ class Query(BaseExpression):\n                     cur_model = source.related_model\n                 else:\n                     cur_model = source.remote_field.model\n-                opts = cur_model._meta\n+                opts = cur_model._meta.concrete_model._meta\n                 # Even if we're \"just passing through\" this model, we must add\n                 # both the current model's pk and the related reference field\n                 # (if it's not a reverse relation) to the things we select.\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "django__django-17087",
+    "model_patch": "diff --git a/django/db/migrations/serializer.py b/django/db/migrations/serializer.py\nindex d88cda6e20..06657ebaab 100644\n--- a/django/db/migrations/serializer.py\n+++ b/django/db/migrations/serializer.py\n@@ -168,7 +168,7 @@ class FunctionTypeSerializer(BaseSerializer):\n         ):\n             klass = self.value.__self__\n             module = klass.__module__\n-            return \"%s.%s.%s\" % (module, klass.__name__, self.value.__name__), {\n+            return \"%s.%s.%s\" % (module, klass.__qualname__, self.value.__name__), {\n                 \"import %s\" % module\n             }\n         # Further error checking\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "django__django-15388",
+    "model_patch": "diff --git a/django/template/autoreload.py b/django/template/autoreload.py\nindex cf1b20ba95..7242d68f2d 100644\n--- a/django/template/autoreload.py\n+++ b/django/template/autoreload.py\n@@ -48,6 +48,8 @@ def watch_for_template_changes(sender, **kwargs):\n \n @receiver(file_changed, dispatch_uid='template_loaders_file_changed')\n def template_changed(sender, file_path, **kwargs):\n+    if file_path.suffix == '.py':\n+        return\n     for template_dir in get_template_directories():\n         if template_dir in file_path.parents:\n             reset_loaders()\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "django__django-14997",
+    "model_patch": "diff --git a/django/db/backends/ddl_references.py b/django/db/backends/ddl_references.py\nindex c06386a2fa..f798fd648b 100644\n--- a/django/db/backends/ddl_references.py\n+++ b/django/db/backends/ddl_references.py\n@@ -212,11 +212,7 @@ class Expressions(TableColumns):\n     def rename_table_references(self, old_table, new_table):\n         if self.table != old_table:\n             return\n-        expressions = deepcopy(self.expressions)\n-        self.columns = []\n-        for col in self.compiler.query._gen_cols([expressions]):\n-            col.alias = new_table\n-        self.expressions = expressions\n+        self.expressions = self.expressions.relabeled_clone({old_table: new_table})\n         super().rename_table_references(old_table, new_table)\n \n     def rename_column_references(self, table, old_column, new_column):\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "django__django-15819",
+    "model_patch": "diff --git a/django/core/management/commands/inspectdb.py b/django/core/management/commands/inspectdb.py\nindex f33bcbdccf..dee00ef93e 100644\n--- a/django/core/management/commands/inspectdb.py\n+++ b/django/core/management/commands/inspectdb.py\n@@ -133,6 +133,7 @@ class Command(BaseCommand):\n                 known_models.append(table2model(table_name))\n                 used_column_names = []  # Holds column names used in the table so far\n                 column_to_field_name = {}  # Maps column names to names of model fields\n+                used_relations = set()  # Holds foreign relations used in the table.\n                 for row in table_description:\n                     comment_notes = (\n                         []\n@@ -186,6 +187,12 @@ class Command(BaseCommand):\n                             field_type = \"%s(%s\" % (rel_type, rel_to)\n                         else:\n                             field_type = \"%s('%s'\" % (rel_type, rel_to)\n+                        if rel_to in used_relations:\n+                            extra_params[\"related_name\"] = \"%s_%s_set\" % (\n+                                table2model(table_name).lower(),\n+                                att_name,\n+                            )\n+                        used_relations.add(rel_to)\n                     else:\n                         # Calling `get_field_type` to get the field type string and any\n                         # additional parameters and notes.\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "django__django-16408",
+    "model_patch": "diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py\nindex 7c433b3f06..c07076d54a 100644\n--- a/django/db/models/sql/compiler.py\n+++ b/django/db/models/sql/compiler.py\n@@ -1274,6 +1274,9 @@ class SQLCompiler:\n                 if from_obj:\n                     final_field.remote_field.set_cached_value(from_obj, obj)\n \n+            def local_setter_noop(obj, from_obj):\n+                pass\n+\n             def remote_setter(name, obj, from_obj):\n                 setattr(from_obj, name, obj)\n \n@@ -1295,7 +1298,11 @@ class SQLCompiler:\n                         \"model\": model,\n                         \"field\": final_field,\n                         \"reverse\": True,\n-                        \"local_setter\": partial(local_setter, final_field),\n+                        \"local_setter\": (\n+                            partial(local_setter, final_field)\n+                            if len(joins) <= 2\n+                            else local_setter_noop\n+                        ),\n                         \"remote_setter\": partial(remote_setter, name),\n                         \"from_parent\": from_parent,\n                     }\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "psf__requests-1963",
+    "model_patch": "diff --git a/requests/sessions.py b/requests/sessions.py\nindex 425db22c..fc5b0ffa 100644\n--- a/requests/sessions.py\n+++ b/requests/sessions.py\n@@ -168,8 +168,11 @@ class SessionRedirectMixin(object):\n             if new_auth is not None:\n                 prepared_request.prepare_auth(new_auth)\n \n+            # Override the original request.\n+            req = prepared_request\n+\n             resp = self.send(\n-                prepared_request,\n+                req,\n                 stream=stream,\n                 timeout=timeout,\n                 verify=verify,\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "psf__requests-863",
+    "model_patch": "diff --git a/requests/models.py b/requests/models.py\nindex d8456375..e3168019 100644\n--- a/requests/models.py\n+++ b/requests/models.py\n@@ -463,7 +463,11 @@ class Request(object):\n     def register_hook(self, event, hook):\n         \"\"\"Properly register a hook.\"\"\"\n \n-        self.hooks[event].append(hook)\n+        # Accept both single callables and lists of callables.\n+        if isinstance(hook, list):\n+            self.hooks[event].extend(hook)\n+        else:\n+            self.hooks[event].append(hook)\n \n     def deregister_hook(self, event, hook):\n         \"\"\"Deregister a previously registered hook.\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-23314",
+    "model_patch": "diff --git a/lib/mpl_toolkits/mplot3d/axes3d.py b/lib/mpl_toolkits/mplot3d/axes3d.py\nindex 9db44b7994..5479bc1af0 100644\n--- a/lib/mpl_toolkits/mplot3d/axes3d.py\n+++ b/lib/mpl_toolkits/mplot3d/axes3d.py\n@@ -387,6 +387,8 @@ class Axes3D(Axes):\n \n     @martist.allow_rasterization\n     def draw(self, renderer):\n+        if not self.get_visible():\n+            return\n         self._unstale_viewLim()\n \n         # draw the background patch\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "pydata__xarray-5131",
+    "model_patch": "diff --git a/xarray/core/groupby.py b/xarray/core/groupby.py\nindex 8a097251..af5abd9a 100644\n--- a/xarray/core/groupby.py\n+++ b/xarray/core/groupby.py\n@@ -436,7 +436,7 @@ class GroupBy(SupportsArithmetic):\n         return zip(self._unique_coord.values, self._iter_grouped())\n \n     def __repr__(self):\n-        return \"{}, grouped over {!r} \\n{!r} groups with labels {}.\".format(\n+        return \"{}, grouped over {!r}\\n{!r} groups with labels {}.\".format(\n             self.__class__.__name__,\n             self._unique_coord.name,\n             self._unique_coord.size,\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-26011",
+    "model_patch": "diff --git a/lib/matplotlib/axis.py b/lib/matplotlib/axis.py\nindex e6e7e29f11..598436ba63 100644\n--- a/lib/matplotlib/axis.py\n+++ b/lib/matplotlib/axis.py\n@@ -1246,6 +1246,7 @@ class Axis(martist.Artist):\n                         v0, v1, emit=False, auto=auto)\n                     if other.figure != self.figure:\n                         other.figure.canvas.draw_idle()\n+                    other.callbacks.process(f\"{name}lim_changed\", other)\n \n         self.stale = True\n         return v0, v1\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-24970",
+    "model_patch": "diff --git a/lib/matplotlib/colors.py b/lib/matplotlib/colors.py\nindex 2d3072da04..ab0d73c4b5 100644\n--- a/lib/matplotlib/colors.py\n+++ b/lib/matplotlib/colors.py\n@@ -715,16 +715,17 @@ class Colormap:\n         if not xa.dtype.isnative:\n             xa = xa.byteswap().newbyteorder()  # Native byteorder is faster.\n         if xa.dtype.kind == \"f\":\n-            with np.errstate(invalid=\"ignore\"):\n-                xa *= self.N\n-                # Negative values are out of range, but astype(int) would\n-                # truncate them towards zero.\n-                xa[xa < 0] = -1\n-                # xa == 1 (== N after multiplication) is not out of range.\n-                xa[xa == self.N] = self.N - 1\n-                # Avoid converting large positive values to negative integers.\n-                np.clip(xa, -1, self.N, out=xa)\n-                xa = xa.astype(int)\n+            xa *= self.N\n+            # Negative values are out of range, but astype(int) would\n+            # truncate them towards zero.\n+            xa[xa < 0] = -1\n+            # xa == 1 (== N after multiplication) is not out of range.\n+            xa[xa == self.N] = self.N - 1\n+            # Avoid converting large positive values to negative integers.\n+            np.clip(xa, -1, self.N, out=xa)\n+        with np.errstate(invalid=\"ignore\"):\n+            # We need this cast for unsigned ints as well as floats\n+            xa = xa.astype(int)\n         # Set the over-range indices before the under-range;\n         # otherwise the under-range values get converted to over-range.\n         xa[xa > self.N - 1] = self._i_over\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "pytest-dev__pytest-11148",
+    "model_patch": "",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-23476",
+    "model_patch": "diff --git a/lib/matplotlib/figure.py b/lib/matplotlib/figure.py\nindex c55864243a..6516816ed6 100644\n--- a/lib/matplotlib/figure.py\n+++ b/lib/matplotlib/figure.py\n@@ -3023,6 +3023,9 @@ class Figure(FigureBase):\n         # Set cached renderer to None -- it can't be pickled.\n         state[\"_cachedRenderer\"] = None\n \n+        # discard any changes to the dpi due to pixel ratio changes\n+        state[\"_dpi\"] = state.get('_original_dpi', state['_dpi'])\n+\n         # add version information to the state\n         state['__mpl_version__'] = mpl.__version__\n \n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-25332",
+    "model_patch": "diff --git a/lib/matplotlib/cbook.py b/lib/matplotlib/cbook.py\nindex c9699b2e21..1ccefabb8f 100644\n--- a/lib/matplotlib/cbook.py\n+++ b/lib/matplotlib/cbook.py\n@@ -846,6 +846,31 @@ class Grouper:\n         siblings = self._mapping.get(weakref.ref(a), [weakref.ref(a)])\n         return [x() for x in siblings]\n \n+    def __getstate__(self):\n+        \"\"\"\n+        Return the disjoint sets as a list of lists of the joined objects,\n+        dropping the unpicklable weak references used internally.\n+        \"\"\"\n+        self.clean()\n+        state = []\n+        seen = set()\n+        for siblings in self._mapping.values():\n+            if id(siblings) not in seen:  # sibling lists are shared.\n+                seen.add(id(siblings))\n+                state.append([x() for x in siblings])\n+        return state\n+\n+    def __setstate__(self, state):\n+        \"\"\"\n+        Rebuild the internal weak-reference mapping from *state* (a list of\n+        lists of joined objects), restoring the shared sibling lists.\n+        \"\"\"\n+        self._mapping = {}\n+        for objs in state:\n+            refs = [weakref.ref(x) for x in objs]\n+            for ref in refs:\n+                self._mapping[ref] = refs\n+\n \n class GrouperView:\n     \"\"\"Immutable view over a `.Grouper`.\"\"\"\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "pylint-dev__pylint-7228",
+    "model_patch": "",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-12471",
+    "model_patch": "",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-13584",
+    "model_patch": "",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "sphinx-doc__sphinx-11445",
+    "model_patch": "",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-11281",
+    "model_patch": "",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "pytest-dev__pytest-5692",
+    "model_patch": "diff --git a/src/_pytest/junitxml.py b/src/_pytest/junitxml.py\nindex 15c630b1d..ba0f48ed3 100644\n--- a/src/_pytest/junitxml.py\n+++ b/src/_pytest/junitxml.py\n@@ -10,9 +10,11 @@ src/main/resources/org/jenkinsci/plugins/xunit/types/model/xsd/junit-10.xsd\n \"\"\"\n import functools\n import os\n+import platform\n import re\n import sys\n import time\n+from datetime import datetime\n \n import py\n \n@@ -666,6 +668,8 @@ class LogXML:\n             skipped=self.stats[\"skipped\"],\n             tests=numtests,\n             time=\"%.3f\" % suite_time_delta,\n+            timestamp=datetime.fromtimestamp(self.suite_start_time).isoformat(),\n+            hostname=platform.node(),\n         )\n         logfile.write(Junit.testsuites([suite_node]).unicode(indent=0))\n         logfile.close()\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "sphinx-doc__sphinx-8713",
+    "model_patch": "diff --git a/sphinx/ext/napoleon/docstring.py b/sphinx/ext/napoleon/docstring.py\nindex 755088ca5..a5a986e49 100644\n--- a/sphinx/ext/napoleon/docstring.py\n+++ b/sphinx/ext/napoleon/docstring.py\n@@ -682,7 +682,13 @@ class GoogleDocstring:\n         return self._parse_generic_section(_('Notes'), use_admonition)\n \n     def _parse_other_parameters_section(self, section: str) -> List[str]:\n-        return self._format_fields(_('Other Parameters'), self._consume_fields())\n+        if self._config.napoleon_use_param:\n+            # Allow to declare multiple parameters at once (ex: x, y: int)\n+            fields = self._consume_fields(multiple=True)\n+            return self._format_docutils_params(fields)\n+        else:\n+            fields = self._consume_fields()\n+            return self._format_fields(_('Other Parameters'), fields)\n \n     def _parse_parameters_section(self, section: str) -> List[str]:\n         if self._config.napoleon_use_param:\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "pytest-dev__pytest-6116",
+    "model_patch": "",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-10508",
+    "model_patch": "",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-15535",
+    "model_patch": "",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "sphinx-doc__sphinx-8282",
+    "model_patch": "diff --git a/sphinx/ext/autodoc/__init__.py b/sphinx/ext/autodoc/__init__.py\nindex 978fd5df8..90a8e8309 100644\n--- a/sphinx/ext/autodoc/__init__.py\n+++ b/sphinx/ext/autodoc/__init__.py\n@@ -1240,7 +1240,9 @@ class FunctionDocumenter(DocstringSignatureMixin, ModuleLevelDocumenter):  # typ\n \n     def format_signature(self, **kwargs: Any) -> str:\n         sigs = []\n-        if self.analyzer and '.'.join(self.objpath) in self.analyzer.overloads:\n+        if (self.analyzer and\n+                '.'.join(self.objpath) in self.analyzer.overloads and\n+                self.env.config.autodoc_typehints != 'none'):\n             # Use signatures for overloaded functions instead of the implementation function.\n             overloaded = True\n         else:\n@@ -1474,7 +1476,7 @@ class ClassDocumenter(DocstringSignatureMixin, ModuleLevelDocumenter):  # type:\n         sigs = []\n \n         overloads = self.get_overloaded_signatures()\n-        if overloads:\n+        if overloads and self.env.config.autodoc_typehints != 'none':\n             # Use signatures for overloaded methods instead of the implementation method.\n             method = safe_getattr(self._signature_class, self._signature_method_name, None)\n             __globals__ = safe_getattr(method, '__globals__', {})\n@@ -1882,7 +1884,9 @@ class MethodDocumenter(DocstringSignatureMixin, ClassLevelDocumenter):  # type:\n \n     def format_signature(self, **kwargs: Any) -> str:\n         sigs = []\n-        if self.analyzer and '.'.join(self.objpath) in self.analyzer.overloads:\n+        if (self.analyzer and\n+                '.'.join(self.objpath) in self.analyzer.overloads and\n+                self.env.config.autodoc_typehints != 'none'):\n             # Use signatures for overloaded methods instead of the implementation method.\n             overloaded = True\n         else:\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "sympy__sympy-13146",
+    "model_patch": "",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "sympy__sympy-14024",
+    "model_patch": "",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "sphinx-doc__sphinx-8801",
+    "model_patch": "",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "sympy__sympy-15345",
+    "model_patch": "diff --git a/sympy/printing/mathematica.py b/sympy/printing/mathematica.py\nindex ea7e3a2d94..5f248c3aad 100644\n--- a/sympy/printing/mathematica.py\n+++ b/sympy/printing/mathematica.py\n@@ -101,6 +101,12 @@ def _print_Function(self, expr):\n                     return \"%s[%s]\" % (mfunc, self.stringify(expr.args, \", \"))\n         return expr.func.__name__ + \"[%s]\" % self.stringify(expr.args, \", \")\n \n+    def _print_Max(self, expr):\n+        return \"Max[%s]\" % self.stringify(expr.args, \", \")\n+\n+    def _print_Min(self, expr):\n+        return \"Min[%s]\" % self.stringify(expr.args, \", \")\n+\n     def _print_Integral(self, expr):\n         if len(expr.variables) == 1 and not expr.limits[0][1:]:\n             args = [expr.args[0], expr.variables[0]]\ndiff --git a/sympy/printing/tests/test_mathematica.py b/sympy/printing/tests/test_mathematica.py\nindex 1a49cb1fcc..a67e1ce5fc 100644\n--- a/sympy/printing/tests/test_mathematica.py\n+++ b/sympy/printing/tests/test_mathematica.py\n@@ -86,6 +86,12 @@ def test_Derivative():\n \n def test_Sum():\n     assert mcode(Sum(sin(x), (x, 0, 10))) == \"Hold[Sum[Sin[x], {x, 0, 10}]]\"\n+\n+\n+def test_Max():\n+    assert mcode(Max(x, 2)) == \"Max[2, x]\"\n+    assert mcode(Max(x, y)) == \"Max[x, y]\"\n+    assert mcode(Min(x, y)) == \"Min[x, y]\"\n     assert mcode(Sum(exp(-x**2 - y**2),\n                      (x, -oo, oo),\n                      (y, -oo, oo))) == \\\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "sympy__sympy-12419",
+    "model_patch": "",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "sympy__sympy-13437",
+    "model_patch": "diff --git a/sympy/functions/combinatorial/numbers.py b/sympy/functions/combinatorial/numbers.py\nindex 896729ac87..df493c352b 100644\n--- a/sympy/functions/combinatorial/numbers.py\n+++ b/sympy/functions/combinatorial/numbers.py\n@@ -434,6 +434,12 @@ def _bell_incomplete_poly(n, k, symbols):\n \n     @classmethod\n     def eval(cls, n, k_sym=None, symbols=None):\n+        if n is S.Infinity:\n+            if k_sym is None and symbols is None:\n+                return S.Infinity\n+            else:\n+                raise ValueError(\"Bell polynomial is defined only for finite integers\")\n+\n         if n.is_Integer and n.is_nonnegative:\n             if k_sym is None:\n                 return Integer(cls._bell(int(n)))\n@@ -443,6 +449,10 @@ def eval(cls, n, k_sym=None, symbols=None):\n                 r = cls._bell_incomplete_poly(int(n), int(k_sym), symbols)\n                 return r\n \n+        if n.is_integer is False or n.is_nonnegative is False:\n+            raise ValueError(\"Bell numbers are defined only for \"\n+                             \"non-negative integers\")\n+\n     def _eval_rewrite_as_Sum(self, n, k_sym=None, symbols=None):\n         from sympy import Sum\n         if (k_sym is not None) or (symbols is not None):\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "sympy__sympy-15308",
+    "model_patch": "diff --git a/sympy/printing/latex.py b/sympy/printing/latex.py\nindex a0eb97792e..3de6929ba4 100644\n--- a/sympy/printing/latex.py\n+++ b/sympy/printing/latex.py\n@@ -289,6 +289,10 @@ def _do_exponent(self, expr, exp):\n         else:\n             return expr\n \n+    def _print_Basic(self, expr):\n+        l = [self._print(o) for o in expr.args]\n+        return self._deal_with_super_sub(expr.__class__.__name__) + r\"\\left(%s\\right)\" % \", \".join(l)\n+\n     def _print_bool(self, e):\n         return r\"\\mathrm{%s}\" % e\n \n@@ -1462,6 +1466,10 @@ def _print_Transpose(self, expr):\n         else:\n             return \"%s^T\" % self._print(mat)\n \n+    def _print_Trace(self, expr):\n+        mat = expr.arg\n+        return r\"\\mathrm{tr}\\left (%s \\right )\" % self._print(mat)\n+\n     def _print_Adjoint(self, expr):\n         mat = expr.arg\n         from sympy.matrices import MatrixSymbol\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "sympy__sympy-21171",
+    "model_patch": "diff --git a/sympy/printing/latex.py b/sympy/printing/latex.py\nindex 43f9e6ad8d..e74a08091f 100644\n--- a/sympy/printing/latex.py\n+++ b/sympy/printing/latex.py\n@@ -1968,10 +1968,13 @@ def _print_DiracDelta(self, expr, exp=None):\n             tex = r\"\\left(%s\\right)^{%s}\" % (tex, exp)\n         return tex\n \n-    def _print_SingularityFunction(self, expr):\n+    def _print_SingularityFunction(self, expr, exp=None):\n         shift = self._print(expr.args[0] - expr.args[1])\n         power = self._print(expr.args[2])\n-        tex = r\"{\\left\\langle %s \\right\\rangle}^{%s}\" % (shift, power)\n+        if exp is not None:\n+            tex = r\"{\\left({\\langle %s \\rangle}^{%s}\\right)}^{%s}\" % (shift, power, exp)\n+        else:\n+            tex = r\"{\\left\\langle %s \\right\\rangle}^{%s}\" % (shift, power)\n         return tex\n \n     def _print_Heaviside(self, expr, exp=None):\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "sympy__sympy-20442",
+    "model_patch": "diff --git a/sympy/physics/units/util.py b/sympy/physics/units/util.py\nindex b03ed4cd88..d96c82cd02 100644\n--- a/sympy/physics/units/util.py\n+++ b/sympy/physics/units/util.py\n@@ -13,13 +13,15 @@\n def _get_conversion_matrix_for_expr(expr, target_units, unit_system):\n     from sympy import Matrix\n \n+    from sympy.matrices.common import NonInvertibleMatrixError\n+\n     dimension_system = unit_system.get_dimension_system()\n \n     expr_dim = Dimension(unit_system.get_dimensional_expr(expr))\n     dim_dependencies = dimension_system.get_dimensional_dependencies(expr_dim, mark_dimensionless=True)\n     target_dims = [Dimension(unit_system.get_dimensional_expr(x)) for x in target_units]\n     canon_dim_units = [i for x in target_dims for i in dimension_system.get_dimensional_dependencies(x, mark_dimensionless=True)]\n-    canon_expr_units = {i for i in dim_dependencies}\n+    canon_expr_units = set(dim_dependencies)\n \n     if not canon_expr_units.issubset(set(canon_dim_units)):\n         return None\n@@ -30,7 +32,10 @@ def _get_conversion_matrix_for_expr(expr, target_units, unit_system):\n     camat = Matrix([[dimension_system.get_dimensional_dependencies(i, mark_dimensionless=True).get(j, 0) for i in target_dims] for j in canon_dim_units])\n     exprmat = Matrix([dim_dependencies.get(k, 0) for k in canon_dim_units])\n \n-    res_exponents = camat.solve_least_squares(exprmat, method=None)\n+    try:\n+        res_exponents = camat.solve(exprmat)\n+    except NonInvertibleMatrixError:\n+        return None\n     return res_exponents\n \n \n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "sympy__sympy-18621",
+    "model_patch": "diff --git a/sympy/matrices/expressions/blockmatrix.py b/sympy/matrices/expressions/blockmatrix.py\nindex 11aebbc59f..b821c42845 100644\n--- a/sympy/matrices/expressions/blockmatrix.py\n+++ b/sympy/matrices/expressions/blockmatrix.py\n@@ -301,7 +301,7 @@ def blocks(self):\n         data = [[mats[i] if i == j else ZeroMatrix(mats[i].rows, mats[j].cols)\n                         for j in range(len(mats))]\n                         for i in range(len(mats))]\n-        return ImmutableDenseMatrix(data)\n+        return ImmutableDenseMatrix(data, evaluate=False)\n \n     @property\n     def shape(self):\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "sympy__sympy-23262",
+    "model_patch": "diff --git a/sympy/utilities/lambdify.py b/sympy/utilities/lambdify.py\nindex da67263b19..ce1431205a 100644\n--- a/sympy/utilities/lambdify.py\n+++ b/sympy/utilities/lambdify.py\n@@ -959,6 +959,10 @@ def _recursive_to_string(doprint, arg):\n             left, right = \"[]\"\n         elif isinstance(arg, tuple):\n             left, right = \"()\"\n+            if len(arg) == 1:\n+                # avoid printing a single-element tuple as just the element\n+                # wrapped in parentheses, e.g. (1) instead of (1,)\n+                right = \",)\"\n         else:\n             raise NotImplementedError(\"unhandled type: %s, %s\" % (type(arg), arg))\n         return left +', '.join(_recursive_to_string(doprint, e) for e in arg) + right\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "sympy__sympy-16503",
+    "model_patch": "",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "sympy__sympy-17630",
+    "model_patch": "",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "sympy__sympy-24066",
+    "model_patch": "diff --git a/sympy/physics/units/unitsystem.py b/sympy/physics/units/unitsystem.py\nindex 3daf84c108..b84614c79b 100644\n--- a/sympy/physics/units/unitsystem.py\n+++ b/sympy/physics/units/unitsystem.py\n@@ -192,8 +192,9 @@ def _collect_factor_and_dimension(self, expr):\n         elif isinstance(expr, Function):\n             fds = [self._collect_factor_and_dimension(\n                 arg) for arg in expr.args]\n-            return (expr.func(*(f[0] for f in fds)),\n-                    *(d[1] for d in fds))\n+            dims = [Dimension(1) if self.get_dimension_system(\n+                ).is_dimensionless(d[1]) else d[1] for d in fds]\n+            return (expr.func(*(f[0] for f in fds)), *dims)\n         elif isinstance(expr, Dimension):\n             return S.One, expr\n         else:\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "sympy__sympy-18698",
+    "model_patch": "diff --git a/sympy/polys/polytools.py b/sympy/polys/polytools.py\nindex c9e77a901f..e44dcc1844 100644\n--- a/sympy/polys/polytools.py\n+++ b/sympy/polys/polytools.py\n@@ -2,7 +2,8 @@\n \n from __future__ import print_function, division\n \n-from functools import wraps\n+from collections import defaultdict\n+from functools import reduce, wraps\n \n from sympy.core import (\n     S, Basic, Expr, I, Integer, Add, Mul, Dummy, Tuple\n@@ -11,6 +12,8 @@\n from sympy.core.compatibility import iterable, ordered\n from sympy.core.decorators import _sympifyit\n from sympy.core.function import Derivative\n+from operator import mul\n+\n from sympy.core.mul import _keep_coeff\n from sympy.core.relational import Relational\n from sympy.core.symbol import Symbol\n@@ -5950,7 +5953,14 @@ def _symbolic_factor_list(expr, opt, method):\n \n                 factors.append((_factors_product(other), exp))\n \n-    return coeff, factors\n+    if method == 'sqf':\n+        factors = [(reduce(mul, (f for f, _ in factors if _ == k)), k)\n+                   for k in {i for _, i in factors}]\n+    # collect duplicate factors\n+    rv = defaultdict(int)\n+    for k, v in factors:\n+        rv[k] += v\n+    return coeff, list(rv.items())\n \n \n def _symbolic_factor(expr, opt, method):\n",
+    "model_name_or_path": "stealth/ox-alpha"
+  },
+  {
+    "instance_id": "sympy__sympy-21627",
+    "model_patch": "",
+    "model_name_or_path": "stealth/ox-alpha"
+  }
+]

@@ -1,0 +1,1702 @@
+{
+  "benchmark": "swe-bench-lite",
+  "model": "stealth/ox-alpha",
+  "timestamp": "2026-08-22T20:49:34.984456",
+  "total": 60,
+  "passed": 38,
+  "failed": 0,
+  "errors": 22,
+  "pass_rate": 63.3,
+  "total_cost_usd": 25.263,
+  "avg_cost_usd": 0.421,
+  "results": [
+    {
+      "instance_id": "astropy__astropy-6938",
+      "repo": "astropy/astropy",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T16:59:19.582475",
+      "kepler": {
+        "success": false,
+        "duration_s": 1200,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "status": "bahulam_failed",
+      "error": "Timeout"
+    },
+    {
+      "instance_id": "django__django-11001",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T17:19:26.710552",
+      "kepler": {
+        "success": true,
+        "duration_s": 497.3,
+        "cost_usd": 0.450898,
+        "tools": 24,
+        "tool_breakdown": {
+          "search_code": 6,
+          "get_project_overview": 1,
+          "read_file": 5,
+          "edit_file": 2,
+          "shell": 8,
+          "grep": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 514699,
+          "output_tokens": 12610,
+          "cache_read": 474944,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 23,
+      "model_patch": "diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py\nindex 7649c39262..8f1e44c9b3 100644\n--- a/django/db/models/sql/compiler.py\n+++ b/django/db/models/sql/compiler.py\n@@ -353,7 +353,7 @@ class SQLCompiler:\n             # not taken into account so we strip it. When this entire method\n             # is refactored into expressions, then we can check each part as we\n             # generate it.\n-            without_ordering = self.ordering_parts.search(sql).group(1)\n+            without_ordering = self.ordering_parts.search(' '.join(sql.split())).group(1)\n             params_hash = make_hashable(params)\n             if (without_ordering, params_hash) in seen:\n                 continue\n@@ -366,7 +366,7 @@ class SQLCompiler:\n         if self.query.distinct and not self.query.distinct_fields:\n             select_sql = [t[1] for t in select]\n             for expr, (sql, params, is_ref) in order_by:\n-                without_ordering = self.ordering_parts.search(sql).group(1)\n+                without_ordering = self.ordering_parts.search(' '.join(sql.split())).group(1)\n                 if not is_ref and (without_ordering, params) not in select_sql:\n                     extra_select.append((expr, (without_ordering, params), None))\n         return extra_select\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-11019",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T17:26:34.252107",
+      "kepler": {
+        "success": true,
+        "duration_s": 829.7,
+        "cost_usd": 0.875468,
+        "tools": 33,
+        "tool_breakdown": {
+          "search_code": 3,
+          "analyze_code": 1,
+          "get_project_overview": 1,
+          "read_file": 6,
+          "shell": 11,
+          "grep": 3,
+          "web_search": 1,
+          "web_fetch": 4,
+          "edit_file": 3
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 1176566,
+          "output_tokens": 16380,
+          "cache_read": 1074048,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 121,
+      "model_patch": "diff --git a/django/forms/widgets.py b/django/forms/widgets.py\nindex 02aa32b207..e944091f0d 100644\n--- a/django/forms/widgets.py\n+++ b/django/forms/widgets.py\n@@ -6,16 +6,21 @@ import copy\n import datetime\n import re\n import warnings\n+from collections import defaultdict\n from itertools import chain\n \n from django.conf import settings\n from django.forms.utils import to_current_timezone\n from django.templatetags.static import static\n from django.utils import datetime_safe, formats\n+from django.utils.datastructures import OrderedSet\n from django.utils.dates import MONTHS\n from django.utils.formats import get_format\n from django.utils.html import format_html, html_safe\n from django.utils.safestring import mark_safe\n+from django.utils.topological_sort import (\n+    CyclicDependencyError, stable_topological_sort,\n+)\n from django.utils.translation import gettext_lazy as _\n \n from .renderers import get_default_renderer\n@@ -59,22 +64,15 @@ class Media:\n \n     @property\n     def _css(self):\n-        css = self._css_lists[0]\n-        # filter(None, ...) avoids calling merge with empty dicts.\n-        for obj in filter(None, self._css_lists[1:]):\n-            css = {\n-                medium: self.merge(css.get(medium, []), obj.get(medium, []))\n-                for medium in css.keys() | obj.keys()\n-            }\n-        return css\n+        css = defaultdict(list)\n+        for css_list in self._css_lists:\n+            for medium, sublist in css_list.items():\n+                css[medium].append(sublist)\n+        return {medium: self.merge(*lists) for medium, lists in css.items()}\n \n     @property\n     def _js(self):\n-        js = self._js_lists[0]\n-        # filter(None, ...) avoids calling merge() with empty lists.\n-        for obj in filter(None, self._js_lists[1:]):\n-            js = self.merge(js, obj)\n-        return js\n+        return self.merge(*self._js_lists)\n \n     def render(self):\n         return mark_safe('\\n'.join(chain.from_iterable(getattr(self, 'render_' + name)() for name in MEDIA_TYPES)))\n@@ -115,39 +113,37 @@ class Media:\n         raise KeyError('Unknown media type \"%s\"' % name)\n \n     @staticmethod\n-    def merge(list_1, list_2):\n+    def merge(*lists):\n         \"\"\"\n-        Merge two lists while trying to keep the relative order of the elements.\n-        Warn if the lists have the same two elements in a different relative\n-        order.\n+        Merge lists while trying to keep the relative order of the elements.\n+        Warn if the lists have the same elements in a different relative order.\n \n         For static assets it can be important to have them included in the DOM\n         in a certain order. In JavaScript you may not be able to reference a\n         global or in CSS you might want to override a style.\n         \"\"\"\n-        # Start with a copy of list_1.\n-        combined_list = list(list_1)\n-        last_insert_index = len(list_1)\n-        # Walk list_2 in reverse, inserting each element into combined_list if\n-        # it doesn't already exist.\n-        for path in reversed(list_2):\n-            try:\n-                # Does path already exist in the list?\n-                index = combined_list.index(path)\n-            except ValueError:\n-                # Add path to combined_list since it doesn't exist.\n-                combined_list.insert(last_insert_index, path)\n-            else:\n-                if index > last_insert_index:\n-                    warnings.warn(\n-                        'Detected duplicate Media files in an opposite order:\\n'\n-                        '%s\\n%s' % (combined_list[last_insert_index], combined_list[index]),\n-                        MediaOrderConflictWarning,\n-                    )\n-                # path already exists in the list. Update last_insert_index so\n-                # that the following elements are inserted in front of this one.\n-                last_insert_index = index\n-        return combined_list\n+        dependency_graph = defaultdict(set)\n+        all_items = OrderedSet()\n+        for list_ in filter(None, lists):\n+            head = list_[0]\n+            # The first items depend on nothing but have to be part of the\n+            # dependency graph to be included in the result.\n+            dependency_graph.setdefault(head, set())\n+            for item in list_:\n+                all_items.add(item)\n+                # No self dependencies\n+                if head != item:\n+                    dependency_graph[item].add(head)\n+                head = item\n+        try:\n+            return stable_topological_sort(all_items, dependency_graph)\n+        except CyclicDependencyError:\n+            warnings.warn(\n+                'Detected duplicate Media files in an opposite order: {}'.format(\n+                    ', '.join(repr(l) for l in lists)\n+                ), MediaOrderConflictWarning,\n+            )\n+            return list(all_items)\n \n     def __add__(self, other):\n         combined = Media()\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-11797",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T17:57:14.359752",
+      "kepler": {
+        "success": true,
+        "duration_s": 251.9,
+        "cost_usd": 0.168669,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 15263,
+          "output_tokens": 8192,
+          "cache_read": 0,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-11630",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T17:55:38.601796",
+      "kepler": {
+        "success": true,
+        "duration_s": 644.5,
+        "cost_usd": 0.366272,
+        "tools": 24,
+        "tool_breakdown": {
+          "search_code": 2,
+          "grep": 6,
+          "read_file": 5,
+          "list_files": 1,
+          "edit_file": 3,
+          "run_tests": 1,
+          "shell": 6
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 464093,
+          "output_tokens": 6756,
+          "cache_read": 417536,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 52,
+      "model_patch": "diff --git a/django/core/checks/model_checks.py b/django/core/checks/model_checks.py\nindex 5c2266ca1d..a3d1a73fc1 100644\n--- a/django/core/checks/model_checks.py\n+++ b/django/core/checks/model_checks.py\n@@ -4,7 +4,8 @@ from collections import defaultdict\n from itertools import chain\n \n from django.apps import apps\n-from django.core.checks import Error, Tags, register\n+from django.conf import settings\n+from django.core.checks import Error, Tags, Warning, register\n \n \n @register(Tags.models)\n@@ -37,14 +38,29 @@ def check_all_models(app_configs=None, **kwargs):\n             constraints[model_constraint.name].append(model._meta.label)\n     for db_table, model_labels in db_table_models.items():\n         if len(model_labels) != 1:\n-            errors.append(\n-                Error(\n-                    \"db_table '%s' is used by multiple models: %s.\"\n-                    % (db_table, ', '.join(db_table_models[db_table])),\n-                    obj=db_table,\n-                    id='models.E028',\n+            if settings.DATABASE_ROUTERS:\n+                errors.append(\n+                    Warning(\n+                        \"db_table '%s' is used by multiple models: %s.\"\n+                        % (db_table, ', '.join(db_table_models[db_table])),\n+                        hint=(\n+                            'You have configured settings.DATABASE_ROUTERS. '\n+                            'Verify that %s are correctly routed to separate '\n+                            'databases.' % ', '.join(db_table_models[db_table])\n+                        ),\n+                        obj=db_table,\n+                        id='models.W035',\n+                    )\n+                )\n+            else:\n+                errors.append(\n+                    Error(\n+                        \"db_table '%s' is used by multiple models: %s.\"\n+                        % (db_table, ', '.join(db_table_models[db_table])),\n+                        obj=db_table,\n+                        id='models.E028',\n+                    )\n                 )\n-            )\n     for index_name, model_labels in indexes.items():\n         if len(model_labels) > 1:\n             model_labels = set(model_labels)\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-12184",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T18:28:12.139144",
+      "kepler": {
+        "success": true,
+        "duration_s": 899.9,
+        "cost_usd": 0.524344,
+        "tools": 17,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "read_file": 1,
+          "shell": 6,
+          "web_search": 1,
+          "web_fetch": 1,
+          "edit_file": 1,
+          "grep": 2,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 346850,
+          "output_tokens": 14696,
+          "cache_read": 272832,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 16,
+      "model_patch": "diff --git a/django/urls/resolvers.py b/django/urls/resolvers.py\nindex 2d4610aac4..120e0396af 100644\n--- a/django/urls/resolvers.py\n+++ b/django/urls/resolvers.py\n@@ -158,8 +158,9 @@ class RegexPattern(CheckURLMixin):\n             # If there are any named groups, use those as kwargs, ignoring\n             # non-named groups. Otherwise, pass all non-named arguments as\n             # positional arguments.\n-            kwargs = {k: v for k, v in match.groupdict().items() if v is not None}\n+            kwargs = match.groupdict()\n             args = () if kwargs else match.groups()\n+            kwargs = {k: v for k, v in kwargs.items() if v is not None}\n             return path[match.end():], args, kwargs\n         return None\n \n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-12453",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T18:44:03.462593",
+      "kepler": {
+        "success": true,
+        "duration_s": 224.1,
+        "cost_usd": 0.238559,
+        "tools": 16,
+        "tool_breakdown": {
+          "search_code": 3,
+          "grep": 1,
+          "get_project_overview": 1,
+          "read_file": 1,
+          "edit_file": 2,
+          "shell": 8
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 318867,
+          "output_tokens": 1655,
+          "cache_read": 275136,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 26,
+      "model_patch": "diff --git a/django/db/backends/base/creation.py b/django/db/backends/base/creation.py\nindex c50fc90171..5cf1f5b3c2 100644\n--- a/django/db/backends/base/creation.py\n+++ b/django/db/backends/base/creation.py\n@@ -5,7 +5,7 @@ from io import StringIO\n from django.apps import apps\n from django.conf import settings\n from django.core import serializers\n-from django.db import router\n+from django.db import router, transaction\n \n # The prefix to put on the default database name when creating\n # the test database.\n@@ -126,8 +126,9 @@ class BaseDatabaseCreation:\n         the serialize_db_to_string() method.\n         \"\"\"\n         data = StringIO(data)\n-        for obj in serializers.deserialize(\"json\", data, using=self.connection.alias):\n-            obj.save()\n+        with transaction.atomic(using=self.connection.alias):\n+            for obj in serializers.deserialize(\"json\", data, using=self.connection.alias):\n+                obj.save()\n \n     def _get_database_display_str(self, verbosity, database_name):\n         \"\"\"\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-13933",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:22:44.877315",
+      "kepler": {
+        "success": true,
+        "duration_s": 12.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-13660",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:22:44.877206",
+      "kepler": {
+        "success": true,
+        "duration_s": 12.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-13447",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:22:44.877111",
+      "kepler": {
+        "success": true,
+        "duration_s": 170.9,
+        "cost_usd": 0.178567,
+        "tools": 18,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "grep": 1,
+          "shell": 8,
+          "read_file": 1,
+          "edit_file": 4
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 359630,
+          "output_tokens": 2221,
+          "cache_read": 345792,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 40,
+      "model_patch": "diff --git a/django/contrib/admin/sites.py b/django/contrib/admin/sites.py\nindex 837dabfea8..7fd5515a42 100644\n--- a/django/contrib/admin/sites.py\n+++ b/django/contrib/admin/sites.py\n@@ -430,7 +430,7 @@ class AdminSite:\n                     return HttpResponsePermanentRedirect(path)\n         raise Http404\n \n-    def _build_app_dict(self, request, label=None):\n+    def build_app_dict(self, request, label=None):\n         \"\"\"\n         Build the app dictionary. The optional `label` parameter filters models\n         of a specific app.\n@@ -466,6 +466,7 @@ class AdminSite:\n                 'perms': perms,\n                 'admin_url': None,\n                 'add_url': None,\n+                'model': model,\n             }\n             if perms.get('change') or perms.get('view'):\n                 model_dict['view_only'] = not perms.get('change')\n@@ -503,7 +504,7 @@ class AdminSite:\n         Return a sorted list of all the installed apps that have been\n         registered in this site.\n         \"\"\"\n-        app_dict = self._build_app_dict(request)\n+        app_dict = self.build_app_dict(request)\n \n         # Sort the apps alphabetically.\n         app_list = sorted(app_dict.values(), key=lambda x: x['name'].lower())\n@@ -534,7 +535,7 @@ class AdminSite:\n         return TemplateResponse(request, self.index_template or 'admin/index.html', context)\n \n     def app_index(self, request, app_label, extra_context=None):\n-        app_dict = self._build_app_dict(request, app_label)\n+        app_dict = self.build_app_dict(request, app_label)\n         if not app_dict:\n             raise Http404('The requested admin page does not exist.')\n         # Sort the models alphabetically within each app.\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-14238",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:23:19.872271",
+      "kepler": {
+        "success": true,
+        "duration_s": 181.1,
+        "cost_usd": 0.208324,
+        "tools": 12,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "read_file": 1,
+          "edit_file": 1,
+          "shell": 6
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 233421,
+          "output_tokens": 5773,
+          "cache_read": 214272,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 16,
+      "model_patch": "diff --git a/django/db/models/fields/__init__.py b/django/db/models/fields/__init__.py\nindex 0f53d9c30b..2ba7755750 100644\n--- a/django/db/models/fields/__init__.py\n+++ b/django/db/models/fields/__init__.py\n@@ -2524,7 +2524,9 @@ class AutoFieldMeta(type):\n         return isinstance(instance, self._subclasses) or super().__instancecheck__(instance)\n \n     def __subclasscheck__(self, subclass):\n-        return subclass in self._subclasses or super().__subclasscheck__(subclass)\n+        return issubclass(subclass, self._subclasses) or super().__subclasscheck__(\n+            subclass\n+        )\n \n \n class AutoField(AutoFieldMixin, IntegerField, metaclass=AutoFieldMeta):\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-12983",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:22:44.876587",
+      "kepler": {
+        "success": true,
+        "duration_s": 226.1,
+        "cost_usd": 0.238796,
+        "tools": 23,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "read_file": 1,
+          "edit_file": 1,
+          "shell": 17
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 467325,
+          "output_tokens": 3809,
+          "cache_read": 451968,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 23,
+      "model_patch": "diff --git a/django/utils/text.py b/django/utils/text.py\nindex fb5f6298c4..3106f5f2f3 100644\n--- a/django/utils/text.py\n+++ b/django/utils/text.py\n@@ -396,14 +396,15 @@ def slugify(value, allow_unicode=False):\n     Convert to ASCII if 'allow_unicode' is False. Convert spaces to hyphens.\n     Remove characters that aren't alphanumerics, underscores, or hyphens.\n     Convert to lowercase. Also strip leading and trailing whitespace.\n+    Strip leading and trailing dashes and underscores.\n     \"\"\"\n     value = str(value)\n     if allow_unicode:\n         value = unicodedata.normalize('NFKC', value)\n     else:\n         value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')\n-    value = re.sub(r'[^\\w\\s-]', '', value.lower()).strip()\n-    return re.sub(r'[-\\s]+', '-', value)\n+    value = re.sub(r'[^\\w\\s-]', '', value.lower())\n+    return re.sub(r'[-\\s]+', '-', value).strip('-_')\n \n \n def camel_case_to_spaces(value):\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-14608",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:23:19.939252",
+      "kepler": {
+        "success": true,
+        "duration_s": 267.6,
+        "cost_usd": 0.277196,
+        "tools": 29,
+        "tool_breakdown": {
+          "search_code": 5,
+          "get_project_overview": 1,
+          "read_file": 4,
+          "grep": 3,
+          "analyze_code": 1,
+          "edit_file": 2,
+          "run_tests": 1,
+          "shell": 12
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 607349,
+          "output_tokens": 4169,
+          "cache_read": 595328,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 25,
+      "model_patch": "diff --git a/django/forms/formsets.py b/django/forms/formsets.py\nindex a89c35599f..69d5ed887d 100644\n--- a/django/forms/formsets.py\n+++ b/django/forms/formsets.py\n@@ -333,7 +333,7 @@ class BaseFormSet:\n         self._non_form_errors.\n         \"\"\"\n         self._errors = []\n-        self._non_form_errors = self.error_class()\n+        self._non_form_errors = self.error_class(error_class='nonform')\n         empty_forms_count = 0\n \n         if not self.is_bound:  # Stop further processing.\n@@ -380,7 +380,9 @@ class BaseFormSet:\n             # Give self.clean() a chance to do cross-form validation.\n             self.clean()\n         except ValidationError as e:\n-            self._non_form_errors = self.error_class(e.error_list)\n+            self._non_form_errors = self.error_class(\n+                e.error_list, error_class='nonform'\n+            )\n \n     def clean(self):\n         \"\"\"\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-15347",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:26:53.428173",
+      "kepler": {
+        "success": true,
+        "duration_s": 114.5,
+        "cost_usd": 0.116081,
+        "tools": 13,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "read_file": 2,
+          "edit_file": 1,
+          "shell": 6
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 248788,
+          "output_tokens": 1400,
+          "cache_read": 241216,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/django/contrib/messages/storage/cookie.py b/django/contrib/messages/storage/cookie.py\nindex 1d390c71dd..e48d4edb08 100644\n--- a/django/contrib/messages/storage/cookie.py\n+++ b/django/contrib/messages/storage/cookie.py\n@@ -19,7 +19,7 @@ class MessageEncoder(json.JSONEncoder):\n             # Using 0/1 here instead of False/True to produce more compact json\n             is_safedata = 1 if isinstance(obj.message, SafeData) else 0\n             message = [self.message_key, is_safedata, obj.level, obj.message]\n-            if obj.extra_tags:\n+            if obj.extra_tags is not None:\n                 message.append(obj.extra_tags)\n             return message\n         return super().default(obj)\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-13033",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:22:44.876812",
+      "kepler": {
+        "success": true,
+        "duration_s": 416.6,
+        "cost_usd": 0.244363,
+        "tools": 11,
+        "tool_breakdown": {
+          "search_code": 4,
+          "analyze_code": 1,
+          "get_project_overview": 1,
+          "read_file": 1,
+          "edit_file": 1,
+          "run_tests": 2,
+          "shell": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 189682,
+          "output_tokens": 11486,
+          "cache_read": 184064,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py\nindex abbb1e37cb..a8f5b61fbe 100644\n--- a/django/db/models/sql/compiler.py\n+++ b/django/db/models/sql/compiler.py\n@@ -727,7 +727,7 @@ class SQLCompiler:\n         # If we get to this point and the field is a relation to another model,\n         # append the default ordering for that model unless it is the pk\n         # shortcut or the attribute name of the field that is specified.\n-        if field.is_relation and opts.ordering and getattr(field, 'attname', None) != name and name != 'pk':\n+        if field.is_relation and opts.ordering and getattr(field, 'attname', None) != pieces[-1] and name != 'pk':\n             # Firstly, avoid infinite loops.\n             already_seen = already_seen or set()\n             join_tuple = tuple(getattr(self.query.alias_map[j], 'join_cols', None) for j in joins)\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-15851",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:28:59.371521",
+      "kepler": {
+        "success": true,
+        "duration_s": 101.1,
+        "cost_usd": 0.153252,
+        "tools": 11,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "read_file": 2,
+          "edit_file": 1,
+          "run_tests": 1,
+          "shell": 3
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 210463,
+          "output_tokens": 1705,
+          "cache_read": 186560,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 16,
+      "model_patch": "diff --git a/django/db/backends/postgresql/client.py b/django/db/backends/postgresql/client.py\nindex 4c9bd63546..3b5ddafaca 100644\n--- a/django/db/backends/postgresql/client.py\n+++ b/django/db/backends/postgresql/client.py\n@@ -32,9 +32,9 @@ class DatabaseClient(BaseDatabaseClient):\n             args += [\"-h\", host]\n         if port:\n             args += [\"-p\", str(port)]\n+        args.extend(parameters)\n         if dbname:\n             args += [dbname]\n-        args.extend(parameters)\n \n         env = {}\n         if passwd:\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-12708",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:22:44.876286",
+      "kepler": {
+        "success": true,
+        "duration_s": 494.5,
+        "cost_usd": 0.548438,
+        "tools": 34,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "analyze_code": 1,
+          "read_file": 9,
+          "grep": 2,
+          "shell": 13,
+          "edit_file": 5
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 775373,
+          "output_tokens": 16007,
+          "cache_read": 747328,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 111,
+      "model_patch": "diff --git a/django/db/backends/base/schema.py b/django/db/backends/base/schema.py\nindex 61f88401ab..7cdb9d32f7 100644\n--- a/django/db/backends/base/schema.py\n+++ b/django/db/backends/base/schema.py\n@@ -393,7 +393,10 @@ class BaseDatabaseSchemaEditor:\n         news = {tuple(fields) for fields in new_index_together}\n         # Deleted indexes\n         for fields in olds.difference(news):\n-            self._delete_composed_index(model, fields, {'index': True}, self.sql_delete_index)\n+            self._delete_composed_index(\n+                model, fields, {'index': True, 'unique': False},\n+                self.sql_delete_index,\n+            )\n         # Created indexes\n         for field_names in news.difference(olds):\n             fields = [model._meta.get_field(field) for field in field_names]\ndiff --git a/tests/schema/models.py b/tests/schema/models.py\nindex 6d4465807a..d899a550c0 100644\n--- a/tests/schema/models.py\n+++ b/tests/schema/models.py\n@@ -80,6 +80,16 @@ class AuthorWithUniqueNameAndBirthday(models.Model):\n         unique_together = [['name', 'birthday']]\n \n \n+class AuthorWithUniqueNameAndBirthdayIndexed(models.Model):\n+    name = models.CharField(max_length=255)\n+    birthday = models.DateField()\n+\n+    class Meta:\n+        apps = new_apps\n+        unique_together = [['name', 'birthday']]\n+        index_together = [['name', 'birthday']]\n+\n+\n class Book(models.Model):\n     author = models.ForeignKey(Author, models.CASCADE)\n     title = models.CharField(max_length=100, db_index=True)\ndiff --git a/tests/schema/tests.py b/tests/schema/tests.py\nindex 9aa1e239ac..cc336473f7 100644\n--- a/tests/schema/tests.py\n+++ b/tests/schema/tests.py\n@@ -29,10 +29,10 @@ from .models import (\n     Author, AuthorCharFieldWithIndex, AuthorTextFieldWithIndex,\n     AuthorWithDefaultHeight, AuthorWithEvenLongerName, AuthorWithIndexedName,\n     AuthorWithIndexedNameAndBirthday, AuthorWithUniqueName,\n-    AuthorWithUniqueNameAndBirthday, Book, BookForeignObj, BookWeak,\n-    BookWithLongName, BookWithO2O, BookWithoutAuthor, BookWithSlug, IntegerPK,\n-    Node, Note, NoteRename, Tag, TagIndexed, TagM2MTest, TagUniqueRename,\n-    Thing, UniqueTest, new_apps,\n+    AuthorWithUniqueNameAndBirthday, AuthorWithUniqueNameAndBirthdayIndexed,\n+    Book, BookForeignObj, BookWeak, BookWithLongName, BookWithO2O,\n+    BookWithoutAuthor, BookWithSlug, IntegerPK, Node, Note, NoteRename, Tag,\n+    TagIndexed, TagM2MTest, TagUniqueRename, Thing, UniqueTest, new_apps,\n )\n \n \n@@ -52,6 +52,7 @@ class SchemaTests(TransactionTestCase):\n         AuthorWithDefaultHeight, AuthorWithEvenLongerName, Book, BookWeak,\n         BookWithLongName, BookWithO2O, BookWithSlug, IntegerPK, Node, Note,\n         Tag, TagIndexed, TagM2MTest, TagUniqueRename, Thing, UniqueTest,\n+        AuthorWithUniqueNameAndBirthdayIndexed,\n     ]\n \n     # Utility functions\n@@ -2166,6 +2167,45 @@ class SchemaTests(TransactionTestCase):\n             False,\n         )\n \n+    @skipUnlessDBFeature('allows_multiple_constraints_on_same_fields')\n+    def test_remove_index_together_does_not_remove_unique_together(self):\n+        with connection.schema_editor() as editor:\n+            editor.create_model(AuthorWithUniqueNameAndBirthdayIndexed)\n+        # Ensure the unique constraint and the index exist.\n+        constraints = self.get_constraints(\n+            AuthorWithUniqueNameAndBirthdayIndexed._meta.db_table\n+        )\n+        unique_constraints = [\n+            name for name, details in constraints.items()\n+            if details['columns'] == ['name', 'birthday'] and details['unique']\n+        ]\n+        self.assertEqual(len(unique_constraints), 1)\n+        index_constraints = [\n+            name for name, details in constraints.items()\n+            if details['columns'] == ['name', 'birthday'] and details['index']\n+        ]\n+        self.assertEqual(len(index_constraints), 2)\n+        # Remove index together.\n+        index_together = AuthorWithUniqueNameAndBirthdayIndexed._meta.index_together\n+        with connection.schema_editor() as editor:\n+            editor.alter_index_together(\n+                AuthorWithUniqueNameAndBirthdayIndexed, index_together, []\n+            )\n+        # The unique constraint must remain.\n+        constraints = self.get_constraints(\n+            AuthorWithUniqueNameAndBirthdayIndexed._meta.db_table\n+        )\n+        unique_constraints = [\n+            name for name, details in constraints.items()\n+            if details['columns'] == ['name', 'birthday'] and details['unique']\n+        ]\n+        self.assertEqual(len(unique_constraints), 1)\n+        # Re-add index together.\n+        with connection.schema_editor() as editor:\n+            editor.alter_index_together(\n+                AuthorWithUniqueNameAndBirthdayIndexed, [], index_together\n+            )\n+\n     def test_index_together_with_fk(self):\n         \"\"\"\n         Tests removing and adding index_together constraints that include\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-16041",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:30:03.925910",
+      "kepler": {
+        "success": true,
+        "duration_s": 145.4,
+        "cost_usd": 0.20138,
+        "tools": 14,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "read_file": 1,
+          "edit_file": 1,
+          "run_tests": 1,
+          "shell": 7
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 269348,
+          "output_tokens": 3493,
+          "cache_read": 244096,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 21,
+      "model_patch": "diff --git a/django/forms/formsets.py b/django/forms/formsets.py\nindex 57676428ff..782c4d17a2 100644\n--- a/django/forms/formsets.py\n+++ b/django/forms/formsets.py\n@@ -257,12 +257,14 @@ class BaseFormSet(RenderableFormMixin):\n \n     @property\n     def empty_form(self):\n+        form_kwargs = self.get_form_kwargs(None)\n+        form_kwargs.pop(\"empty_permitted\", None)\n         form = self.form(\n             auto_id=self.auto_id,\n             prefix=self.add_prefix(\"__prefix__\"),\n             empty_permitted=True,\n             use_required_attribute=False,\n-            **self.get_form_kwargs(None),\n+            **form_kwargs,\n             renderer=self.renderer,\n         )\n         self.add_fields(form, None)\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-15781",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:27:59.418844",
+      "kepler": {
+        "success": true,
+        "duration_s": 322.5,
+        "cost_usd": 0.225222,
+        "tools": 10,
+        "tool_breakdown": {
+          "get_project_overview": 2,
+          "search_code": 3,
+          "read_file": 1,
+          "edit_file": 1,
+          "shell": 3
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 177063,
+          "output_tokens": 9727,
+          "cache_read": 167360,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 17,
+      "model_patch": "diff --git a/django/core/management/base.py b/django/core/management/base.py\nindex d37d43d5c5..abc6f79a15 100644\n--- a/django/core/management/base.py\n+++ b/django/core/management/base.py\n@@ -286,10 +286,10 @@ class BaseCommand:\n         Create and return the ``ArgumentParser`` which will be used to\n         parse the arguments to this command.\n         \"\"\"\n+        kwargs.setdefault(\"formatter_class\", DjangoHelpFormatter)\n         parser = CommandParser(\n             prog=\"%s %s\" % (os.path.basename(prog_name), subcommand),\n             description=self.help or None,\n-            formatter_class=DjangoHelpFormatter,\n             missing_args_message=getattr(self, \"missing_args_message\", None),\n             called_from_command_line=getattr(self, \"_called_from_command_line\", None),\n             **kwargs,\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-16873",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:31:21.365038",
+      "kepler": {
+        "success": true,
+        "duration_s": 171.9,
+        "cost_usd": 0.199049,
+        "tools": 21,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "read_file": 2,
+          "edit_file": 1,
+          "shell": 13,
+          "write_file": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 416312,
+          "output_tokens": 3148,
+          "cache_read": 406336,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 15,
+      "model_patch": "diff --git a/django/template/defaultfilters.py b/django/template/defaultfilters.py\nindex 03676533b7..671971a846 100644\n--- a/django/template/defaultfilters.py\n+++ b/django/template/defaultfilters.py\n@@ -587,7 +587,8 @@ def join(value, arg, autoescape=True):\n     try:\n         if autoescape:\n             value = [conditional_escape(v) for v in value]\n-        data = conditional_escape(arg).join(value)\n+            arg = conditional_escape(arg)\n+        data = arg.join(value)\n     except TypeError:  # Fail silently if arg isn't iterable.\n         return value\n     return mark_safe(data)\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-14667",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:25:58.124158",
+      "kepler": {
+        "success": true,
+        "duration_s": 500.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-25311",
+      "repo": "matplotlib/matplotlib",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:34:29.241605",
+      "kepler": {
+        "success": true,
+        "duration_s": 6.9,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-15061",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:26:33.317057",
+      "kepler": {
+        "success": true,
+        "duration_s": 745.4,
+        "cost_usd": 1.305244,
+        "tools": 79,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "read_file": 18,
+          "grep": 2,
+          "shell": 46,
+          "web_search": 2,
+          "edit_file": 3,
+          "web_fetch": 3,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 2866697,
+          "output_tokens": 16041,
+          "cache_read": 2790912,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 31,
+      "model_patch": "diff --git a/django/forms/widgets.py b/django/forms/widgets.py\nindex 00c19e2c55..386b0e7c3f 100644\n--- a/django/forms/widgets.py\n+++ b/django/forms/widgets.py\n@@ -849,9 +849,7 @@ class MultiWidget(Widget):\n         return context\n \n     def id_for_label(self, id_):\n-        if id_:\n-            id_ += '_0'\n-        return id_\n+        return ''\n \n     def value_from_datadict(self, data, files, name):\n         return [\ndiff --git a/docs/releases/4.1.txt b/docs/releases/4.1.txt\nindex 2d1e0a93fe..9015902a67 100644\n--- a/docs/releases/4.1.txt\n+++ b/docs/releases/4.1.txt\n@@ -154,6 +154,10 @@ File Uploads\n Forms\n ~~~~~\n \n+* Removed the ``for = ...`` in ``<label>`` generated by\n+  :class:`~django.forms.MultiWidget` (the label no longer points to the first\n+  subwidget's ID, e.g. ``id_xxx_0``).\n+\n * ...\n \n Generic Views\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-16229",
+      "repo": "django/django",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:30:51.531482",
+      "kepler": {
+        "success": true,
+        "duration_s": 500.9,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-25433",
+      "repo": "matplotlib/matplotlib",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:34:48.074863",
+      "kepler": {
+        "success": true,
+        "duration_s": 496.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-23299",
+      "repo": "matplotlib/matplotlib",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:33:33.147577",
+      "kepler": {
+        "success": true,
+        "duration_s": 871.5,
+        "cost_usd": 1.169136,
+        "tools": 74,
+        "tool_breakdown": {
+          "search_code": 3,
+          "grep": 5,
+          "get_project_overview": 1,
+          "read_file": 7,
+          "shell": 49,
+          "web_search": 2,
+          "web_fetch": 3,
+          "edit_file": 2,
+          "write_file": 1,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 2178443,
+          "output_tokens": 20801,
+          "cache_read": 2103040,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 24,
+      "model_patch": "diff --git a/lib/matplotlib/__init__.py b/lib/matplotlib/__init__.py\nindex c268a56724..528be266ff 100644\n--- a/lib/matplotlib/__init__.py\n+++ b/lib/matplotlib/__init__.py\n@@ -1059,6 +1059,8 @@ def rc_context(rc=None, fname=None):\n     \"\"\"\n     Return a context manager for temporarily changing rcParams.\n \n+    The :rc:`backend` will not be reset by the context manager.\n+\n     Parameters\n     ----------\n     rc : dict\n@@ -1087,7 +1089,8 @@ def rc_context(rc=None, fname=None):\n              plt.plot(x, y)  # uses 'print.rc'\n \n     \"\"\"\n-    orig = rcParams.copy()\n+    orig = dict(rcParams.copy())\n+    del orig['backend']\n     try:\n         if fname:\n             rc_file(fname)\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "psf__requests-2148",
+      "repo": "psf/requests",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:39:24.266631",
+      "kepler": {
+        "success": true,
+        "duration_s": 763.9,
+        "cost_usd": 0.922438,
+        "tools": 59,
+        "tool_breakdown": {
+          "analyze_code": 1,
+          "search_code": 4,
+          "get_project_overview": 1,
+          "read_file": 11,
+          "grep": 6,
+          "edit_file": 13,
+          "shell": 19,
+          "web_search": 1,
+          "git_status": 1,
+          "git_diff": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 1,
+        "usage": {
+          "input_tokens": 1263459,
+          "output_tokens": 29942,
+          "cache_read": 1228544,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 55,
+      "model_patch": "diff --git a/requests/compat.py b/requests/compat.py\nindex 84d703b6..c32a2c04 100644\n--- a/requests/compat.py\n+++ b/requests/compat.py\n@@ -93,6 +93,8 @@ if is_py2:\n     from StringIO import StringIO\n     from .packages.urllib3.packages.ordered_dict import OrderedDict\n     from httplib import IncompleteRead\n+    from socket import error as SocketError\n+    from socket import timeout as SocketTimeout\n \n     builtin_str = str\n     bytes = str\n@@ -109,6 +111,8 @@ elif is_py3:\n     from io import StringIO\n     from collections import OrderedDict\n     from http.client import IncompleteRead\n+    from socket import error as SocketError\n+    from socket import timeout as SocketTimeout\n \n     builtin_str = str\n     str = str\ndiff --git a/requests/models.py b/requests/models.py\nindex 0dc55568..8ab66a08 100644\n--- a/requests/models.py\n+++ b/requests/models.py\n@@ -22,12 +22,13 @@ from .packages.urllib3.util import parse_url\n from .packages.urllib3.exceptions import DecodeError\n from .exceptions import (\n     HTTPError, RequestException, MissingSchema, InvalidURL,\n-    ChunkedEncodingError, ContentDecodingError)\n+    ChunkedEncodingError, ContentDecodingError, ConnectionError, Timeout)\n from .utils import (\n     guess_filename, get_auth_from_url, requote_uri,\n     stream_decode_response_unicode, to_key_val_list, parse_header_links,\n     iter_slices, guess_json_utf, super_len, to_native_string)\n from .compat import (\n+    SocketError, SocketTimeout,\n     cookielib, urlunparse, urlsplit, urlencode, str, bytes, StringIO,\n     is_py2, chardet, json, builtin_str, basestring, IncompleteRead)\n from .status_codes import codes\n@@ -640,6 +641,12 @@ class Response(object):\n                     raise ChunkedEncodingError(e)\n                 except DecodeError as e:\n                     raise ContentDecodingError(e)\n+                except SocketTimeout as e:\n+                    # Catch read-timeouts that were put in the socket\n+                    raise Timeout(e)\n+\n+                except SocketError as e:\n+                    raise ConnectionError(e)\n             except AttributeError:\n                 # Standard file-like object.\n                 while True:\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-22711",
+      "repo": "matplotlib/matplotlib",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:32:40.642249",
+      "kepler": {
+        "success": false,
+        "duration_s": 1200,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "status": "bahulam_failed",
+      "error": "Timeout"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-23563",
+      "repo": "matplotlib/matplotlib",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:34:24.224764",
+      "kepler": {
+        "success": false,
+        "duration_s": 1200,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "status": "bahulam_failed",
+      "error": "Timeout"
+    },
+    {
+      "instance_id": "mwaskom__seaborn-3190",
+      "repo": "mwaskom/seaborn",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:39:09.205008",
+      "kepler": {
+        "success": true,
+        "duration_s": 1123.9,
+        "cost_usd": 2.526318,
+        "tools": 101,
+        "tool_breakdown": {
+          "get_project_overview": 1,
+          "analyze_code": 2,
+          "read_file": 17,
+          "grep": 3,
+          "search_code": 1,
+          "shell": 68,
+          "edit_file": 2,
+          "web_search": 3,
+          "web_fetch": 4
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 5397266,
+          "output_tokens": 33896,
+          "cache_read": 5249600,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/seaborn/_core/scales.py b/seaborn/_core/scales.py\nindex 6c9ecbc9..3c215a60 100644\n--- a/seaborn/_core/scales.py\n+++ b/seaborn/_core/scales.py\n@@ -346,7 +346,7 @@ class ContinuousBase(Scale):\n                 vmin, vmax = data.min(), data.max()\n             else:\n                 vmin, vmax = new.norm\n-            vmin, vmax = axis.convert_units((vmin, vmax))\n+            vmin, vmax = map(float, axis.convert_units((vmin, vmax)))\n             a = forward(vmin)\n             b = forward(vmax) - forward(vmin)\n \n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "repo": "psf/requests",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:43:14.999559",
+      "kepler": {
+        "success": true,
+        "duration_s": 908.4,
+        "cost_usd": 1.112305,
+        "tools": 89,
+        "tool_breakdown": {
+          "search_code": 2,
+          "grep": 4,
+          "shell": 55,
+          "analyze_code": 2,
+          "read_file": 15,
+          "edit_file": 11
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 1,
+        "usage": {
+          "input_tokens": 2342793,
+          "output_tokens": 20269,
+          "cache_read": 2303744,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 133,
+      "model_patch": "diff --git a/requests/cookies.py b/requests/cookies.py\nindex eee5168f..87ac65d5 100644\n--- a/requests/cookies.py\n+++ b/requests/cookies.py\n@@ -10,6 +10,10 @@ import copy\n import time\n import calendar\n import collections\n+try:\n+    from collections.abc import MutableMapping\n+except ImportError:\n+    MutableMapping = collections.MutableMapping\n from .compat import cookielib, urlparse, urlunparse, Morsel\n \n try:\n@@ -161,7 +165,7 @@ class CookieConflictError(RuntimeError):\n     Use .get and .set and include domain and path args in order to be more specific.\"\"\"\n \n \n-class RequestsCookieJar(cookielib.CookieJar, collections.MutableMapping):\n+class RequestsCookieJar(cookielib.CookieJar, MutableMapping):\n     \"\"\"Compatibility class; is a cookielib.CookieJar, but exposes a dict\n     interface.\n \ndiff --git a/requests/packages/urllib3/_collections.py b/requests/packages/urllib3/_collections.py\nindex 77cee017..4fcd2ab7 100644\n--- a/requests/packages/urllib3/_collections.py\n+++ b/requests/packages/urllib3/_collections.py\n@@ -1,5 +1,8 @@\n from __future__ import absolute_import\n-from collections import Mapping, MutableMapping\n+try:\n+    from collections.abc import Mapping, MutableMapping\n+except ImportError:\n+    from collections import Mapping, MutableMapping\n try:\n     from threading import RLock\n except ImportError:  # Platform-specific: No threads available\ndiff --git a/requests/sessions.py b/requests/sessions.py\nindex 3f405ba9..59f716b7 100644\n--- a/requests/sessions.py\n+++ b/requests/sessions.py\n@@ -9,7 +9,10 @@ requests (cookies, auth, proxies).\n \n \"\"\"\n import os\n-from collections import Mapping\n+try:\n+    from collections.abc import Mapping\n+except ImportError:\n+    from collections import Mapping\n from datetime import datetime\n \n from .auth import _basic_auth_str\ndiff --git a/requests/structures.py b/requests/structures.py\nindex 991056e4..5ff8f63a 100644\n--- a/requests/structures.py\n+++ b/requests/structures.py\n@@ -9,11 +9,16 @@ Data structures that power Requests.\n \"\"\"\n \n import collections\n+try:\n+    from collections.abc import Mapping, MutableMapping\n+except ImportError:\n+    Mapping = collections.Mapping\n+    MutableMapping = collections.MutableMapping\n \n from .compat import OrderedDict\n \n \n-class CaseInsensitiveDict(collections.MutableMapping):\n+class CaseInsensitiveDict(MutableMapping):\n     \"\"\"\n     A case-insensitive ``dict``-like object.\n \n@@ -73,7 +78,7 @@ class CaseInsensitiveDict(collections.MutableMapping):\n         )\n \n     def __eq__(self, other):\n-        if isinstance(other, collections.Mapping):\n+        if isinstance(other, Mapping):\n             other = CaseInsensitiveDict(other)\n         else:\n             return NotImplemented\ndiff --git a/requests/utils.py b/requests/utils.py\nindex 8d17b6b2..f7205266 100644\n--- a/requests/utils.py\n+++ b/requests/utils.py\n@@ -194,7 +194,12 @@ def to_key_val_list(value):\n     if isinstance(value, (str, bytes, bool, int)):\n         raise ValueError('cannot encode objects that are not 2-tuples')\n \n-    if isinstance(value, collections.Mapping):\n+    try:\n+        from collections.abc import Mapping as _Mapping\n+    except ImportError:\n+        from collections import Mapping as _Mapping\n+\n+    if isinstance(value, _Mapping):\n         value = value.items()\n \n     return list(value)\n@@ -360,11 +365,11 @@ def stream_decode_response_unicode(iterator, r):\n     \"\"\"Stream decodes a iterator.\"\"\"\n \n     if r.encoding is None:\n-        for item in iterator:\n-            yield item\n-        return\n+        encoding = r.apparent_encoding\n+    else:\n+        encoding = r.encoding\n \n-    decoder = codecs.getincrementaldecoder(r.encoding)(errors='replace')\n+    decoder = codecs.getincrementaldecoder(encoding)(errors='replace')\n     for chunk in iterator:\n         rv = decoder.decode(chunk)\n         if rv:\ndiff --git a/tests/test_utils.py b/tests/test_utils.py\nindex 17149d26..0c078f38 100644\n--- a/tests/test_utils.py\n+++ b/tests/test_utils.py\n@@ -25,7 +25,7 @@ class TestSuperLen:\n         'stream, value', (\n             (StringIO.StringIO, 'Test'),\n             (BytesIO, b'Test'),\n-            pytest.mark.skipif('cStringIO is None')((cStringIO, 'Test')),\n+            pytest.param(cStringIO, 'Test', marks=pytest.mark.skipif(cStringIO is None, reason='cStringIO not available')),\n         ))\n     def test_io_streams(self, stream, value):\n         \"\"\"Ensures that we properly deal with different kinds of IO streams.\"\"\"\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-5227",
+      "repo": "pytest-dev/pytest",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:52:52.256157",
+      "kepler": {
+        "success": true,
+        "duration_s": 366.1,
+        "cost_usd": 0.507763,
+        "tools": 46,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "grep": 2,
+          "shell": 34,
+          "read_file": 3,
+          "edit_file": 3
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 1008672,
+          "output_tokens": 7831,
+          "cache_read": 976192,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 40,
+      "model_patch": "diff --git a/src/_pytest/logging.py b/src/_pytest/logging.py\nindex 757cb2797..08670d2b2 100644\n--- a/src/_pytest/logging.py\n+++ b/src/_pytest/logging.py\n@@ -15,7 +15,7 @@ from _pytest.compat import dummy_context_manager\n from _pytest.config import create_terminal_writer\n from _pytest.pathlib import Path\n \n-DEFAULT_LOG_FORMAT = \"%(filename)-25s %(lineno)4d %(levelname)-8s %(message)s\"\n+DEFAULT_LOG_FORMAT = \"%(levelname)-8s %(name)s:%(filename)s:%(lineno)d %(message)s\"\n DEFAULT_LOG_DATE_FORMAT = \"%H:%M:%S\"\n \n \ndiff --git a/testing/logging/test_formatter.py b/testing/logging/test_formatter.py\nindex abceaf857..f93c1ce76 100644\n--- a/testing/logging/test_formatter.py\n+++ b/testing/logging/test_formatter.py\n@@ -6,7 +6,7 @@ from _pytest.logging import ColoredLevelFormatter\n \n \n def test_coloredlogformatter():\n-    logfmt = \"%(filename)-25s %(lineno)4d %(levelname)-8s %(message)s\"\n+    logfmt = \"%(levelname)-8s %(name)s:%(filename)s:%(lineno)d %(message)s\"\n \n     record = logging.LogRecord(\n         name=\"dummy\",\n@@ -27,10 +27,10 @@ def test_coloredlogformatter():\n     formatter = ColoredLevelFormatter(tw, logfmt)\n     output = formatter.format(record)\n     assert output == (\n-        \"dummypath                   10 \\x1b[32mINFO    \\x1b[0m Test Message\"\n+        \"\\x1b[32mINFO    \\x1b[0m dummy:dummypath:10 Test Message\"\n     )\n \n     tw.hasmarkup = False\n     formatter = ColoredLevelFormatter(tw, logfmt)\n     output = formatter.format(record)\n-    assert output == (\"dummypath                   10 INFO     Test Message\")\n+    assert output == (\"INFO     dummy:dummypath:10 Test Message\")\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "pylint-dev__pylint-7080",
+      "repo": "pylint-dev/pylint",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:52:08.683654",
+      "kepler": {
+        "success": true,
+        "duration_s": 550.2,
+        "cost_usd": 0.623958,
+        "tools": 37,
+        "tool_breakdown": {
+          "search_code": 4,
+          "get_project_overview": 1,
+          "grep": 2,
+          "read_file": 7,
+          "shell": 22,
+          "edit_file": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 1046678,
+          "output_tokens": 13068,
+          "cache_read": 1004480,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 13,
+      "model_patch": "diff --git a/pylint/lint/expand_modules.py b/pylint/lint/expand_modules.py\nindex 5cacc0371..289e1afce 100644\n--- a/pylint/lint/expand_modules.py\n+++ b/pylint/lint/expand_modules.py\n@@ -52,6 +52,7 @@ def _is_ignored_file(\n     ignore_list_re: list[Pattern[str]],\n     ignore_list_paths_re: list[Pattern[str]],\n ) -> bool:\n+    element = os.path.normpath(element)\n     basename = os.path.basename(element)\n     return (\n         basename in ignore_list\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-8906",
+      "repo": "pytest-dev/pytest",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:58:24.076500",
+      "kepler": {
+        "success": true,
+        "duration_s": 406.6,
+        "cost_usd": 0.579063,
+        "tools": 39,
+        "tool_breakdown": {
+          "search_code": 5,
+          "get_project_overview": 1,
+          "analyze_code": 1,
+          "grep": 6,
+          "read_file": 4,
+          "shell": 16,
+          "web_fetch": 3,
+          "web_search": 2,
+          "edit_file": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 1009979,
+          "output_tokens": 8602,
+          "cache_read": 955520,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 20,
+      "model_patch": "diff --git a/src/_pytest/python.py b/src/_pytest/python.py\nindex 79dfb7320..8e8d2f38d 100644\n--- a/src/_pytest/python.py\n+++ b/src/_pytest/python.py\n@@ -608,10 +608,10 @@ class Module(nodes.File, PyCollector):\n             if e.allow_module_level:\n                 raise\n             raise self.CollectError(\n-                \"Using pytest.skip outside of a test is not allowed. \"\n-                \"To decorate a test function, use the @pytest.mark.skip \"\n-                \"or @pytest.mark.skipif decorators instead, and to skip a \"\n-                \"module use `pytestmark = pytest.mark.{skip,skipif}.\"\n+                \"Using pytest.skip outside of a test will skip the entire module. \"\n+                \"If that's your intention, pass `allow_module_level=True`. \"\n+                \"If you want to skip a specific test or an entire class, \"\n+                \"use the @pytest.mark.skip or @pytest.mark.skipif decorators.\"\n             ) from e\n         self.config.pluginmanager.consider_module(mod)\n         return mod\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-7168",
+      "repo": "pytest-dev/pytest",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:54:35.927120",
+      "kepler": {
+        "success": true,
+        "duration_s": 674.0,
+        "cost_usd": 0.623413,
+        "tools": 25,
+        "tool_breakdown": {
+          "read_file": 6,
+          "web_search": 2,
+          "web_fetch": 1,
+          "edit_file": 1,
+          "grep": 2,
+          "search_files": 1,
+          "list_files": 1,
+          "run_tests": 1,
+          "shell": 9,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 2,
+        "usage": {
+          "input_tokens": 601433,
+          "output_tokens": 20761,
+          "cache_read": 552704,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/src/_pytest/_io/saferepr.py b/src/_pytest/_io/saferepr.py\nindex 23af4d0bb..47a00de60 100644\n--- a/src/_pytest/_io/saferepr.py\n+++ b/src/_pytest/_io/saferepr.py\n@@ -20,7 +20,7 @@ def _format_repr_exception(exc: BaseException, obj: Any) -> str:\n     except BaseException as exc:\n         exc_info = \"unpresentable exception ({})\".format(_try_repr_or_str(exc))\n     return \"<[{} raised in repr()] {} object at 0x{:x}>\".format(\n-        exc_info, obj.__class__.__name__, id(obj)\n+        exc_info, type(obj).__name__, id(obj)\n     )\n \n \n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "pydata__xarray-3364",
+      "repo": "pydata/xarray",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:48:16.412932",
+      "kepler": {
+        "success": false,
+        "duration_s": 1200,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "status": "bahulam_failed",
+      "error": "Timeout"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-10451",
+      "repo": "sphinx-doc/sphinx",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T20:08:18.365889",
+      "kepler": {
+        "success": true,
+        "duration_s": 12.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 0,
+          "output_tokens": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-7490",
+      "repo": "pytest-dev/pytest",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:57:54.453609",
+      "kepler": {
+        "success": true,
+        "duration_s": 774.8,
+        "cost_usd": 1.105309,
+        "tools": 48,
+        "tool_breakdown": {
+          "get_project_overview": 1,
+          "search_code": 2,
+          "analyze_code": 2,
+          "read_file": 8,
+          "web_search": 2,
+          "web_fetch": 2,
+          "edit_file": 4,
+          "shell": 23,
+          "write_file": 1,
+          "grep": 2,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 1625728,
+          "output_tokens": 27245,
+          "cache_read": 1548352,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 76,
+      "model_patch": "diff --git a/src/_pytest/assertion/rewrite.py b/src/_pytest/assertion/rewrite.py\nindex e77b1b0b8..5e3604aa9 100644\n--- a/src/_pytest/assertion/rewrite.py\n+++ b/src/_pytest/assertion/rewrite.py\n@@ -673,10 +673,6 @@ class AssertionRewriter(ast.NodeVisitor):\n             return\n         # Insert some special imports at the top of the module but after any\n         # docstrings and __future__ imports.\n-        aliases = [\n-            ast.alias(\"builtins\", \"@py_builtins\"),\n-            ast.alias(\"_pytest.assertion.rewrite\", \"@pytest_ar\"),\n-        ]\n         doc = getattr(mod, \"docstring\", None)\n         expect_docstring = doc is None\n         if doc is not None and self.is_rewrite_disabled(doc):\n@@ -703,6 +699,15 @@ class AssertionRewriter(ast.NodeVisitor):\n             pos += 1\n         else:\n             lineno = item.lineno\n+        aliases = [\n+            ast.alias(\"builtins\", \"@py_builtins\", lineno=lineno, col_offset=0),\n+            ast.alias(\n+                \"_pytest.assertion.rewrite\",\n+                \"@pytest_ar\",\n+                lineno=lineno,\n+                col_offset=0,\n+            ),\n+        ]\n         imports = [\n             ast.Import([alias], lineno=lineno, col_offset=0) for alias in aliases\n         ]\ndiff --git a/src/_pytest/skipping.py b/src/_pytest/skipping.py\nindex 335e10996..e6a3f7bde 100644\n--- a/src/_pytest/skipping.py\n+++ b/src/_pytest/skipping.py\n@@ -231,17 +231,14 @@ unexpectedsuccess_key = StoreKey[str]()\n \n @hookimpl(tryfirst=True)\n def pytest_runtest_setup(item: Item) -> None:\n-    item._store[skipped_by_mark_key] = False\n-\n     skipped = evaluate_skip_marks(item)\n+    item._store[skipped_by_mark_key] = skipped is not None\n     if skipped:\n-        item._store[skipped_by_mark_key] = True\n         skip(skipped.reason)\n \n-    if not item.config.option.runxfail:\n-        item._store[xfailed_key] = xfailed = evaluate_xfail_marks(item)\n-        if xfailed and not xfailed.run:\n-            xfail(\"[NOTRUN] \" + xfailed.reason)\n+    item._store[xfailed_key] = xfailed = evaluate_xfail_marks(item)\n+    if xfailed and not item.config.option.runxfail and not xfailed.run:\n+        xfail(\"[NOTRUN] \" + xfailed.reason)\n \n \n @hookimpl(hookwrapper=True)\n@@ -250,11 +247,14 @@ def pytest_runtest_call(item: Item) -> Generator[None, None, None]:\n     if xfailed is None:\n         item._store[xfailed_key] = xfailed = evaluate_xfail_marks(item)\n \n-    if not item.config.option.runxfail:\n-        if xfailed and not xfailed.run:\n-            xfail(\"[NOTRUN] \" + xfailed.reason)\n+    if xfailed and not item.config.option.runxfail and not xfailed.run:\n+        xfail(\"[NOTRUN] \" + xfailed.reason)\n \n     yield\n+    # The test run may have added an xfail mark dynamically.\n+    xfailed = item._store.get(xfailed_key, None)\n+    if xfailed is None:\n+        item._store[xfailed_key] = xfailed = evaluate_xfail_marks(item)\n \n \n @hookimpl(hookwrapper=True)\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-14894",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T20:05:12.713266",
+      "kepler": {
+        "success": true,
+        "duration_s": 414.0,
+        "cost_usd": 0.381883,
+        "tools": 30,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "read_file": 3,
+          "edit_file": 4,
+          "shell": 16,
+          "grep": 2,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 692661,
+          "output_tokens": 7207,
+          "cache_read": 668224,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 38,
+      "model_patch": "diff --git a/sklearn/svm/base.py b/sklearn/svm/base.py\nindex 64cebe8375..3cb6c0c3c2 100644\n--- a/sklearn/svm/base.py\n+++ b/sklearn/svm/base.py\n@@ -287,6 +287,10 @@ class BaseLibSVM(BaseEstimator, metaclass=ABCMeta):\n         n_SV = self.support_vectors_.shape[0]\n \n         dual_coef_indices = np.tile(np.arange(n_SV), n_class)\n+        if not n_SV:\n+            # if n_SV is 0, we need to return an empty array\n+            self.dual_coef_ = sp.csr_matrix([])\n+            return\n         dual_coef_indptr = np.arange(0, dual_coef_indices.size + 1,\n                                      dual_coef_indices.size / n_class)\n         self.dual_coef_ = sp.csr_matrix(\ndiff --git a/sklearn/svm/tests/test_svm.py b/sklearn/svm/tests/test_svm.py\nindex c82092dd93..1542a0e803 100644\n--- a/sklearn/svm/tests/test_svm.py\n+++ b/sklearn/svm/tests/test_svm.py\n@@ -1220,3 +1220,17 @@ def test_n_support_oneclass_svr():\n     assert reg.n_support_ == reg.support_vectors_.shape[0]\n     assert reg.n_support_.size == 1\n     assert reg.n_support_ == 4\n+\n+\n+def test_svr_regression_zero_support_vectors():\n+    # Make sure SVR works with sparse input and no support vectors\n+    # (used to raise ZeroDivisionError in _sparse_fit)\n+    # this is a non regression test for issue #14800\n+    x_train = np.array([[0, 1, 0, 0], [0, 0, 0, 1],\n+                        [0, 0, 1, 0], [0, 0, 0, 1]])\n+    y_train = np.array([0.04, 0.04, 0.10, 0.16])\n+    model = svm.SVR(C=316.227766017, cache_size=200, coef0=0.0, degree=3,\n+                    epsilon=0.1, gamma=1.0, kernel='linear', max_iter=15000,\n+                    shrinking=True, tol=0.001, verbose=False)\n+    model.fit(sparse.csr_matrix(x_train), y_train)\n+    assert model.dual_coef_.shape == (1, 0)\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "repo": "sphinx-doc/sphinx",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T20:08:38.050022",
+      "kepler": {
+        "success": true,
+        "duration_s": 253.7,
+        "cost_usd": 0.26834,
+        "tools": 19,
+        "tool_breakdown": {
+          "read_file": 6,
+          "grep": 4,
+          "edit_file": 5,
+          "list_files": 1,
+          "lint_check": 1,
+          "run_tests": 1,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 2,
+        "usage": {
+          "input_tokens": 363944,
+          "output_tokens": 8161,
+          "cache_read": 350336,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 43,
+      "model_patch": "diff --git a/sphinx/builders/manpage.py b/sphinx/builders/manpage.py\nindex 4166dece9..1ad512d65 100644\n--- a/sphinx/builders/manpage.py\n+++ b/sphinx/builders/manpage.py\n@@ -8,7 +8,7 @@\n     :license: BSD, see LICENSE for details.\n \"\"\"\n \n-from os import path\n+from os import makedirs, path\n from typing import Any, Dict, List, Set, Tuple, Union\n \n from docutils.frontend import OptionParser\n@@ -82,9 +82,17 @@ class ManualPageBuilder(Builder):\n \n             targetname = '%s.%s' % (name, section)\n             logger.info(darkgreen(targetname) + ' { ', nonl=True)\n-            destination = FileOutput(\n-                destination_path=path.join(self.outdir, targetname),\n-                encoding='utf-8')\n+\n+            sectiondir = path.join(self.outdir, str(section))\n+            if self.config.man_make_section_directory:\n+                makedirs(sectiondir, exist_ok=True)\n+                destination = FileOutput(\n+                    destination_path=path.join(sectiondir, targetname),\n+                    encoding='utf-8')\n+            else:\n+                destination = FileOutput(\n+                    destination_path=path.join(self.outdir, targetname),\n+                    encoding='utf-8')\n \n             tree = self.env.get_doctree(docname)\n             docnames = set()  # type: Set[str]\n@@ -115,6 +123,7 @@ def setup(app: Sphinx) -> Dict[str, Any]:\n \n     app.add_config_value('man_pages', default_man_pages, None)\n     app.add_config_value('man_show_urls', False, None)\n+    app.add_config_value('man_make_section_directory', False, None)\n \n     return {\n         'version': 'builtin',\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-13241",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T19:59:00.269560",
+      "kepler": {
+        "success": false,
+        "duration_s": 1200,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "status": "bahulam_failed",
+      "error": "Timeout"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-13439",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T20:01:21.057315",
+      "kepler": {
+        "success": false,
+        "duration_s": 1200,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "status": "bahulam_failed",
+      "error": "Timeout"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-25570",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T20:05:51.833483",
+      "kepler": {
+        "success": false,
+        "duration_s": 1200,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "status": "bahulam_failed",
+      "error": "Timeout"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8721",
+      "repo": "sphinx-doc/sphinx",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T20:10:51.095673",
+      "kepler": {
+        "success": true,
+        "duration_s": 1195.9,
+        "cost_usd": 1.202118,
+        "tools": 76,
+        "tool_breakdown": {
+          "search_code": 4,
+          "grep": 4,
+          "read_file": 8,
+          "edit_file": 7,
+          "shell": 50,
+          "write_file": 3
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 1,
+        "usage": {
+          "input_tokens": 1827823,
+          "output_tokens": 33335,
+          "cache_read": 1770880,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 23,
+      "model_patch": "diff --git a/sphinx/ext/viewcode.py b/sphinx/ext/viewcode.py\nindex a7d52a91c..b6ffae3b2 100644\n--- a/sphinx/ext/viewcode.py\n+++ b/sphinx/ext/viewcode.py\n@@ -56,8 +56,6 @@ def doctree_read(app: Sphinx, doctree: Node) -> None:\n         env._viewcode_modules = {}  # type: ignore\n     if app.builder.name == \"singlehtml\":\n         return\n-    if app.builder.name.startswith(\"epub\") and not env.config.viewcode_enable_epub:\n-        return\n \n     def has_tag(modname: str, fullname: str, docname: str, refname: str) -> bool:\n         entry = env._viewcode_modules.get(modname, None)  # type: ignore\n@@ -182,6 +180,8 @@ def collect_pages(app: Sphinx) -> Generator[Tuple[str, Dict[str, Any], str], Non\n     env = app.builder.env\n     if not hasattr(env, '_viewcode_modules'):\n         return\n+    if app.builder.name == 'epub' and not env.config.viewcode_enable_epub:\n+        return\n     highlighter = app.builder.highlighter  # type: ignore\n     urito = app.builder.get_relative_uri\n \n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sympy__sympy-13471",
+      "repo": "sympy/sympy",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T20:19:07.103666",
+      "kepler": {
+        "success": true,
+        "duration_s": 755.3,
+        "cost_usd": 0.760286,
+        "tools": 45,
+        "tool_breakdown": {
+          "search_code": 2,
+          "grep": 5,
+          "shell": 25,
+          "read_file": 2,
+          "web_search": 3,
+          "web_fetch": 4,
+          "edit_file": 2,
+          "run_tests": 1,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 1086726,
+          "output_tokens": 20817,
+          "cache_read": 1041536,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 17,
+      "model_patch": "diff --git a/sympy/core/numbers.py b/sympy/core/numbers.py\nindex 7bc96e68eb..cacba9eb29 100644\n--- a/sympy/core/numbers.py\n+++ b/sympy/core/numbers.py\n@@ -1042,6 +1042,11 @@ def __new__(cls, num, dps=None, prec=None, precision=None):\n                 # it's a hexadecimal (coming from a pickled object)\n                 # assume that it is in standard form\n                 num = list(num)\n+                # If we're loading an object pickled in Python 2 into\n+                # Python 3, we may need to strip a tailing 'L' because\n+                # of a shim for int on Python 3, see issue #13470.\n+                if num[1].endswith('L'):\n+                    num[1] = num[1][:-1]\n                 num[1] = long(num[1], 16)\n                 _mpf_ = tuple(num)\n             else:\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sympy__sympy-11870",
+      "repo": "sympy/sympy",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T20:12:13.570887",
+      "kepler": {
+        "success": false,
+        "duration_s": 1200,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "status": "bahulam_failed",
+      "error": "Timeout"
+    },
+    {
+      "instance_id": "sympy__sympy-12236",
+      "repo": "sympy/sympy",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T20:12:56.330180",
+      "kepler": {
+        "success": false,
+        "duration_s": 1200,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "status": "bahulam_failed",
+      "error": "Timeout"
+    },
+    {
+      "instance_id": "sympy__sympy-14308",
+      "repo": "sympy/sympy",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T20:25:58.701630",
+      "kepler": {
+        "success": true,
+        "duration_s": 456.6,
+        "cost_usd": 0.601287,
+        "tools": 42,
+        "tool_breakdown": {
+          "search_code": 2,
+          "grep": 5,
+          "list_files": 1,
+          "read_file": 14,
+          "shell": 20
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 942395,
+          "output_tokens": 10122,
+          "cache_read": 880640,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-15678",
+      "repo": "sympy/sympy",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T20:31:55.977468",
+      "kepler": {
+        "success": true,
+        "duration_s": 100.5,
+        "cost_usd": 0.132673,
+        "tools": 6,
+        "tool_breakdown": {
+          "search_code": 3,
+          "grep": 1,
+          "get_project_overview": 1,
+          "read_file": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 99804,
+          "output_tokens": 2685,
+          "cache_read": 76672,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-13773",
+      "repo": "sympy/sympy",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T20:21:27.131900",
+      "kepler": {
+        "success": true,
+        "duration_s": 729.4,
+        "cost_usd": 0.960487,
+        "tools": 53,
+        "tool_breakdown": {
+          "search_code": 2,
+          "grep": 6,
+          "list_files": 1,
+          "shell": 25,
+          "read_file": 7,
+          "web_search": 3,
+          "web_fetch": 5,
+          "edit_file": 2,
+          "write_file": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 1463710,
+          "output_tokens": 23014,
+          "cache_read": 1398464,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 27,
+      "model_patch": "diff --git a/sympy/matrices/common.py b/sympy/matrices/common.py\nindex 379a2917aa..ea6b83c425 100644\n--- a/sympy/matrices/common.py\n+++ b/sympy/matrices/common.py\n@@ -1973,6 +1973,10 @@ def __div__(self, other):\n \n     @call_highest_priority('__rmatmul__')\n     def __matmul__(self, other):\n+        other = _matrixify(other)\n+        if not getattr(other, 'is_Matrix', False) and not getattr(other, 'is_MatrixLike', False):\n+            return NotImplemented\n+\n         return self.__mul__(other)\n \n     @call_highest_priority('__rmul__')\n@@ -2068,6 +2072,10 @@ def __radd__(self, other):\n \n     @call_highest_priority('__matmul__')\n     def __rmatmul__(self, other):\n+        other = _matrixify(other)\n+        if not getattr(other, 'is_Matrix', False) and not getattr(other, 'is_MatrixLike', False):\n+            return NotImplemented\n+\n         return self.__rmul__(other)\n \n     @call_highest_priority('__mul__')\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sympy__sympy-18189",
+      "repo": "sympy/sympy",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T20:33:04.920160",
+      "kepler": {
+        "success": true,
+        "duration_s": 39.6,
+        "cost_usd": 0.097854,
+        "tools": 5,
+        "tool_breakdown": {
+          "search_code": 3,
+          "grep": 1,
+          "get_project_overview": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 84077,
+          "output_tokens": 537,
+          "cache_read": 60160,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-14774",
+      "repo": "sympy/sympy",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T20:30:51.880245",
+      "kepler": {
+        "success": true,
+        "duration_s": 172.3,
+        "cost_usd": 0.270451,
+        "tools": 20,
+        "tool_breakdown": {
+          "grep": 2,
+          "search_code": 2,
+          "get_project_overview": 1,
+          "read_file": 1,
+          "edit_file": 1,
+          "shell": 13
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 398921,
+          "output_tokens": 3426,
+          "cache_read": 362112,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/sympy/printing/latex.py b/sympy/printing/latex.py\nindex a3ead157c1..f3b7669e96 100644\n--- a/sympy/printing/latex.py\n+++ b/sympy/printing/latex.py\n@@ -740,7 +740,7 @@ def _print_Function(self, expr, exp=None):\n                 len(args) == 1 and \\\n                 not self._needs_function_brackets(expr.args[0])\n \n-            inv_trig_table = [\"asin\", \"acos\", \"atan\", \"acot\"]\n+            inv_trig_table = [\"asin\", \"acos\", \"atan\", \"acsc\", \"asec\", \"acot\"]\n \n             # If the function is an inverse trig function, handle the style\n             if func in inv_trig_table:\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sympy__sympy-21379",
+      "repo": "sympy/sympy",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T20:33:52.575005",
+      "kepler": {
+        "success": true,
+        "duration_s": 11.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-22714",
+      "repo": "sympy/sympy",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T20:33:52.878771",
+      "kepler": {
+        "success": true,
+        "duration_s": 11.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-20590",
+      "repo": "sympy/sympy",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T20:33:44.551411",
+      "kepler": {
+        "success": true,
+        "duration_s": 163.0,
+        "cost_usd": 0.17707,
+        "tools": 10,
+        "tool_breakdown": {
+          "search_code": 3,
+          "shell": 3,
+          "read_file": 3,
+          "edit_file": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 146434,
+          "output_tokens": 4475,
+          "cache_read": 121984,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/sympy/core/_print_helpers.py b/sympy/core/_print_helpers.py\nindex 96d7e72676..f7875b9eec 100644\n--- a/sympy/core/_print_helpers.py\n+++ b/sympy/core/_print_helpers.py\n@@ -17,6 +17,8 @@ class Printable:\n     This also adds support for LaTeX printing in jupyter notebooks.\n     \"\"\"\n \n+    __slots__ = ()\n+\n     # Note, we always use the default ordering (lex) in __str__ and __repr__,\n     # regardless of the global setting. See issue 5487.\n     def __str__(self):\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sympy__sympy-24909",
+      "repo": "sympy/sympy",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T20:34:15.788888",
+      "kepler": {
+        "success": true,
+        "duration_s": 720.5,
+        "cost_usd": 0.764278,
+        "tools": 41,
+        "tool_breakdown": {
+          "search_code": 3,
+          "grep": 2,
+          "get_project_overview": 1,
+          "read_file": 8,
+          "shell": 24,
+          "edit_file": 3
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 928756,
+          "output_tokens": 16896,
+          "cache_read": 842752,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 35,
+      "model_patch": "diff --git a/sympy/physics/units/prefixes.py b/sympy/physics/units/prefixes.py\nindex ca6a642156..69a0d4118e 100644\n--- a/sympy/physics/units/prefixes.py\n+++ b/sympy/physics/units/prefixes.py\n@@ -5,6 +5,7 @@\n BIN_PREFIXES.\n \"\"\"\n from sympy.core.expr import Expr\n+from sympy.core.singleton import S\n from sympy.core.sympify import sympify\n \n \n@@ -85,9 +86,9 @@ def __mul__(self, other):\n \n         fact = self.scale_factor * other.scale_factor\n \n-        if fact == 1:\n-            return 1\n-        elif isinstance(other, Prefix):\n+        if isinstance(other, Prefix):\n+            if fact == 1:\n+                return S.One\n             # simplify prefix\n             for p in PREFIXES:\n                 if PREFIXES[p].scale_factor == fact:\n@@ -103,7 +104,7 @@ def __truediv__(self, other):\n         fact = self.scale_factor / other.scale_factor\n \n         if fact == 1:\n-            return 1\n+            return S.One\n         elif isinstance(other, Prefix):\n             for p in PREFIXES:\n                 if PREFIXES[p].scale_factor == fact:\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sympy__sympy-17022",
+      "repo": "sympy/sympy",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T20:32:22.411233",
+      "kepler": {
+        "success": true,
+        "duration_s": 921.4,
+        "cost_usd": 0.569888,
+        "tools": 39,
+        "tool_breakdown": {
+          "search_code": 5,
+          "grep": 3,
+          "get_project_overview": 1,
+          "read_file": 10,
+          "shell": 18,
+          "web_search": 1,
+          "edit_file": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 826340,
+          "output_tokens": 15250,
+          "cache_read": 791808,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 19,
+      "model_patch": "diff --git a/sympy/printing/pycode.py b/sympy/printing/pycode.py\nindex 6ec7bd891c..e7968099de 100644\n--- a/sympy/printing/pycode.py\n+++ b/sympy/printing/pycode.py\n@@ -513,6 +513,13 @@ def _print_Inverse(self, expr):\n         return '{0}({1})'.format(self._module_format('numpy.linalg.inv'),\n             self._print(expr.args[0]))\n \n+    def _print_Identity(self, expr):\n+        shape = expr.shape\n+        if all([dim.is_Integer for dim in shape]):\n+            return '%s(%s)' % (self._module_format('numpy.eye'), self._print(expr.shape[0]))\n+        else:\n+            raise NotImplementedError(\"Symbolic matrix dimensions are not yet supported for identity matrices\")\n+\n     def _print_DotProduct(self, expr):\n         # DotProduct allows any shape order, but numpy.dot does matrix\n         # multiplication, so we have to make sure it gets 1 x n by n x 1.\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sympy__sympy-18199",
+      "repo": "sympy/sympy",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T20:33:44.078702",
+      "kepler": {
+        "success": true,
+        "duration_s": 842.1,
+        "cost_usd": 1.048374,
+        "tools": 47,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "analyze_code": 1,
+          "read_file": 6,
+          "shell": 23,
+          "edit_file": 6,
+          "web_search": 2,
+          "web_fetch": 3,
+          "grep": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 1499530,
+          "output_tokens": 28264,
+          "cache_read": 1434880,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 92,
+      "model_patch": "diff --git a/sympy/ntheory/residue_ntheory.py b/sympy/ntheory/residue_ntheory.py\nindex 9a3052d4c3..ff703cadbf 100644\n--- a/sympy/ntheory/residue_ntheory.py\n+++ b/sympy/ntheory/residue_ntheory.py\n@@ -2,6 +2,7 @@\n \n from sympy.core.compatibility import as_int, range\n from sympy.core.function import Function\n+from sympy.utilities.iterables import cartes\n from sympy.core.numbers import igcd, igcdex, mod_inverse\n from sympy.core.power import isqrt\n from sympy.core.singleton import S\n@@ -743,6 +744,50 @@ def _nthroot_mod1(s, q, p, all_roots):\n     return min(res)\n \n \n+def _nthroot_mod_composite(a, n, m):\n+    \"\"\"\n+    Find the solutions to ``x**n = a mod m`` when m is not prime.\n+    \"\"\"\n+    from sympy.ntheory.modular import crt\n+    f = factorint(m)\n+    dd = {}\n+    for p, e in f.items():\n+        tot_roots = set()\n+        if e == 1:\n+            tot_roots.update(nthroot_mod(a, n, p, True) or [])\n+        else:\n+            for root in nthroot_mod(a, n, p, True) or []:\n+                rootn = pow(root, n)\n+                diff = (rootn // (root or 1) * n) % p\n+                if diff != 0:\n+                    ppow = p\n+                    for j in range(1, e):\n+                        ppow *= p\n+                        root = (root - (rootn - a) * mod_inverse(diff, p)) % ppow\n+                    tot_roots.add(root)\n+                else:\n+                    new_base = p\n+                    roots_in_base = {root}\n+                    while new_base < pow(p, e):\n+                        new_base *= p\n+                        new_roots = set()\n+                        for k in roots_in_base:\n+                            if (pow(k, n) - a) % (new_base) != 0:\n+                                continue\n+                            while k not in new_roots:\n+                                new_roots.add(k)\n+                                k = (k + (new_base // p)) % new_base\n+                        roots_in_base = new_roots\n+                    tot_roots = tot_roots | roots_in_base\n+        dd[pow(p, e)] = tot_roots\n+    a = []\n+    m = []\n+    for x, y in dd.items():\n+        m.append(x)\n+        a.append(list(y))\n+    return sorted(set(crt(m, list(i))[0] for i in cartes(*a)))\n+\n+\n def nthroot_mod(a, n, p, all_roots=False):\n     \"\"\"\n     Find the solutions to ``x**n = a mod p``\n@@ -771,10 +816,12 @@ def nthroot_mod(a, n, p, all_roots=False):\n     if n == 2:\n         return sqrt_mod(a, p, all_roots)\n     # see Hackman \"Elementary Number Theory\" (2009), page 76\n+    if not isprime(p):\n+        return _nthroot_mod_composite(a, n, p)\n+    if a % p == 0:\n+        return [0]\n     if not is_nthpow_residue(a, n, p):\n         return None\n-    if not isprime(p):\n-        raise NotImplementedError(\"Not implemented for composite p\")\n \n     if (p - 1) % n == 0:\n         return _nthroot_mod1(a, n, p, all_roots)\ndiff --git a/sympy/ntheory/tests/test_residue.py b/sympy/ntheory/tests/test_residue.py\nindex fdc09e3e71..bb8cf1f5b4 100644\n--- a/sympy/ntheory/tests/test_residue.py\n+++ b/sympy/ntheory/tests/test_residue.py\n@@ -177,6 +177,8 @@ def test_residue():\n     assert nthroot_mod(36010, 8, 87382, True) == [40208, 47174]\n     assert nthroot_mod(0, 12, 37, True) == [0]\n     assert nthroot_mod(0, 7, 100, True) == [0, 10, 20, 30, 40, 50, 60, 70, 80, 90]\n+    assert nthroot_mod(17*17, 5, 17) == [0]\n+    assert nthroot_mod(17*17, 4, 17) == [0]\n \n     for p in primerange(5, 100):\n         qv = range(3, p, 4)\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sympy__sympy-19254",
+      "repo": "sympy/sympy",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T20:33:44.378364",
+      "kepler": {
+        "success": true,
+        "duration_s": 911.2,
+        "cost_usd": 0.738719,
+        "tools": 32,
+        "tool_breakdown": {
+          "search_code": 4,
+          "grep": 3,
+          "get_project_overview": 1,
+          "read_file": 5,
+          "web_search": 2,
+          "web_fetch": 2,
+          "shell": 13,
+          "edit_file": 1,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 877115,
+          "output_tokens": 23343,
+          "cache_read": 830656,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 75,
+      "model_patch": "diff --git a/sympy/polys/factortools.py b/sympy/polys/factortools.py\nindex 93298f47e6..b61e2bd3e2 100644\n--- a/sympy/polys/factortools.py\n+++ b/sympy/polys/factortools.py\n@@ -124,12 +124,64 @@ def dmp_trial_division(f, factors, u, K):\n \n \n def dup_zz_mignotte_bound(f, K):\n-    \"\"\"Mignotte bound for univariate polynomials in `K[x]`. \"\"\"\n-    a = dup_max_norm(f, K)\n-    b = abs(dup_LC(f, K))\n-    n = dup_degree(f)\n+    r\"\"\"\n+    The Knuth-Cohen variant of Mignotte bound for\n+    univariate polynomials in `K[x]`.\n \n-    return K.sqrt(K(n + 1))*2**n*a*b\n+    Examples\n+    ========\n+\n+    >>> from sympy.polys import ring, ZZ\n+    >>> R, x = ring(\"x\", ZZ)\n+    >>> f = x**3 + 14*x**2 + 56*x + 64\n+    >>> R.dup_zz_mignotte_bound(f)\n+    152\n+\n+    By checking ``factor(f)`` we can see that max coeff is 8\n+    Also consider a case that ``f`` is irreducible for example\n+    ``f = 2*x**2 + 3*x + 4``. To avoid a bug for these cases, we return the\n+    bound plus the max coefficient of ``f``\n+\n+    >>> f = 2*x**2 + 3*x + 4\n+    >>> R.dup_zz_mignotte_bound(f)\n+    6\n+\n+    Lastly, to see the difference between the new and the old Mignotte bound\n+    consider the irreducible polynomial::\n+\n+      f = 87*x**7 + 4*x**6 + 80*x**5 + 17*x**4 + 9*x**3 + 12*x**2 + 49*x + 26\n+\n+    >>> R.dup_zz_mignotte_bound(f)\n+    744\n+\n+    The new Mignotte bound is 744 whereas the old one (SymPy 1.5.1) is 1937664.\n+\n+    References\n+    ==========\n+\n+    .. [1] [Abbott13]_\n+\n+    \"\"\"\n+    from sympy.functions.combinatorial.factorials import binomial\n+    d = dup_degree(f)\n+    delta = _ceil(d / 2)\n+    delta2 = _ceil(delta / 2)\n+\n+    # euclidean-norm\n+    eucl_norm = K.sqrt( sum( cf**2 for cf in f ) )\n+\n+    # biggest values of binomial coefficients (p. 538 of reference)\n+    t1 = binomial(delta - 1, delta2)\n+    t2 = binomial(delta - 1, delta2 - 1)\n+\n+    lc = K.abs(dup_LC(f, K)) # leading coefficient\n+    bound = t1 * eucl_norm + t2 * lc # (p. 538 of reference)\n+\n+    bound += dup_max_norm(f, K) # add max coeff for irreducible polys\n+\n+    bound = _ceil(bound / 2) * 2 # round up to even integer\n+\n+    return bound\n \n \n def dmp_zz_mignotte_bound(f, u, K):\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sympy__sympy-23191",
+      "repo": "sympy/sympy",
+      "model": "stealth/ox-alpha",
+      "timestamp": "2026-08-22T20:34:15.583382",
+      "kepler": {
+        "success": true,
+        "duration_s": 909.8,
+        "cost_usd": 1.599644,
+        "tools": 86,
+        "tool_breakdown": {
+          "search_code": 6,
+          "grep": 3,
+          "get_project_overview": 1,
+          "shell": 63,
+          "read_file": 5,
+          "web_search": 3,
+          "web_fetch": 3,
+          "edit_file": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 3082595,
+          "output_tokens": 30746,
+          "cache_read": 3003456,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 42,
+      "model_patch": "diff --git a/sympy/printing/pretty/pretty.py b/sympy/printing/pretty/pretty.py\nindex 66461181d0..0160114e7c 100644\n--- a/sympy/printing/pretty/pretty.py\n+++ b/sympy/printing/pretty/pretty.py\n@@ -1144,22 +1144,24 @@ def _print_BasisDependent(self, expr):\n             if '\\n' in partstr:\n                 tempstr = partstr\n                 tempstr = tempstr.replace(vectstrs[i], '')\n-                if '\\N{right parenthesis extension}' in tempstr:   # If scalar is a fraction\n+                if '\\N{RIGHT PARENTHESIS EXTENSION}' in tempstr:   # If scalar is a fraction\n                     for paren in range(len(tempstr)):\n                         flag[i] = 1\n-                        if tempstr[paren] == '\\N{right parenthesis extension}':\n-                            tempstr = tempstr[:paren] + '\\N{right parenthesis extension}'\\\n-                                         + ' '  + vectstrs[i] + tempstr[paren + 1:]\n+                        if tempstr[paren] == '\\N{RIGHT PARENTHESIS EXTENSION}' and tempstr[paren + 1] == '\\n':\n+                            # We want to place the vector string after all the right parentheses, because\n+                            # otherwise, the vector will be in the middle of the string\n+                            tempstr = tempstr[:paren] + '\\N{RIGHT PARENTHESIS EXTENSION}'\\\n+                                         + ' ' + vectstrs[i] + tempstr[paren + 1:]\n                             break\n                 elif '\\N{RIGHT PARENTHESIS LOWER HOOK}' in tempstr:\n-                    flag[i] = 1\n-                    tempstr = tempstr.replace('\\N{RIGHT PARENTHESIS LOWER HOOK}',\n-                                        '\\N{RIGHT PARENTHESIS LOWER HOOK}'\n-                                        + ' ' + vectstrs[i])\n-                else:\n-                    tempstr = tempstr.replace('\\N{RIGHT PARENTHESIS UPPER HOOK}',\n-                                        '\\N{RIGHT PARENTHESIS UPPER HOOK}'\n-                                        + ' ' + vectstrs[i])\n+                    # We want to place the vector string after all the right parentheses, because\n+                    # otherwise, the vector will be in the middle of the string. For this reason,\n+                    # we insert the vector string at the rightmost index.\n+                    index = tempstr.rfind('\\N{RIGHT PARENTHESIS LOWER HOOK}')\n+                    if index != -1: # then this character was found in this string\n+                        flag[i] = 1\n+                        tempstr = tempstr[:index] + '\\N{RIGHT PARENTHESIS LOWER HOOK}'\\\n+                                     + ' ' + vectstrs[i] + tempstr[index + 1:]\n                 o1[i] = tempstr\n \n         o1 = [x.split('\\n') for x in o1]\n",
+      "status": "patched"
+    }
+  ]
+}

@@ -1,0 +1,225 @@
+{
+  "schema_version": 2,
+  "run_id": "2026-08-22_stealth-ox-alpha",
+  "run_started_at": "2026-08-22T19:18:54.694029Z",
+  "run_finished_at": "2026-08-22T21:36:04.444206Z",
+  "wall_clock_seconds": 5875.9,
+  "stage": "verified",
+  "gates_verdict": "REJECT",
+  "gates_pending_vm": [
+    "resolve_rate",
+    "resolve_per_patch",
+    "dashboard_cost_usd",
+    "cost_delta_pct"
+  ],
+  "model": {
+    "slug": "stealth/ox-alpha"
+  },
+  "harness": {
+    "cli_version": "0.1.1",
+    "cli_package": "@bahulam/code@0.1.1",
+    "harness_git_sha": "vendored-unpinned",
+    "gateway_url": "https://gateway.bahulam.ai/v1",
+    "dataset": "swe-bench-lite",
+    "instance_file": "screening-300-shard1.txt",
+    "instance_count": 60,
+    "parallel": 6,
+    "timeout_s": 1200
+  },
+  "environment": {
+    "hostname": "07586e17ec62",
+    "railway_deployment_id": "d09ce369-d525-42c3-bb66-cfc909dfb373",
+    "railway_service_id": "3a27666f-a29f-4f4d-ab0c-224a2c1c3421",
+    "railway_project_id": "5752685d-0c17-4c9f-9a3c-887b58f1be68",
+    "railway_region": null,
+    "python": "3.11.16"
+  },
+  "preflight": {
+    "http": 200,
+    "passed": true,
+    "reason": null,
+    "sample_response": {
+      "finish_reason": "tool_calls",
+      "has_tool_calls": true,
+      "provider": "Stealth"
+    }
+  },
+  "pricing_snapshot_path": "pricing.json",
+  "totals": {
+    "input_tokens": 202037930,
+    "output_tokens": 2733568,
+    "cache_read_tokens": 192847168,
+    "cache_write_tokens": 0,
+    "reasoning_tokens": 0,
+    "tools_invoked": 7558,
+    "sub_agent_invocations": 0,
+    "harness_cost_usd": 126.4299,
+    "stagnation_triggers": 34
+  },
+  "distributions": {
+    "cost_usd": {
+      "n": 300,
+      "mean": 0.4214,
+      "median": 0.2759,
+      "p95": 1.2112,
+      "min": 0,
+      "max": 2.5263,
+      "sum": 126.43
+    },
+    "duration_s": {
+      "n": 300,
+      "mean": 583.2937,
+      "median": 510.0,
+      "p95": 1200,
+      "min": 6.5,
+      "max": 1200,
+      "sum": 174988.1
+    },
+    "input_tokens": {
+      "n": 300,
+      "mean": 673459.7667,
+      "median": 374423.0,
+      "p95": 2236648,
+      "min": 0,
+      "max": 5565693,
+      "sum": 202037930
+    },
+    "output_tokens": {
+      "n": 300,
+      "mean": 9111.8933,
+      "median": 6520.0,
+      "p95": 27676,
+      "min": 0,
+      "max": 36004,
+      "sum": 2733568
+    },
+    "tools_per_instance": {
+      "n": 300,
+      "mean": 25.1933,
+      "median": 20.0,
+      "p95": 80.0,
+      "min": 0.0,
+      "max": 105.0,
+      "sum": 7558.0
+    }
+  },
+  "cache": {
+    "cache_read_tokens": 192847168,
+    "cache_write_tokens": 0,
+    "cache_hit_ratio_input": 0.9545
+  },
+  "tool_breakdown": {
+    "search_code": 626,
+    "grep": 474,
+    "shell": 4287,
+    "read_file": 954,
+    "edit_file": 459,
+    "run_tests": 34,
+    "get_project_overview": 161,
+    "web_search": 160,
+    "web_fetch": 231,
+    "git_diff": 45,
+    "search_files": 17,
+    "analyze_code": 58,
+    "write_file": 28,
+    "read_attachment": 2,
+    "git_status": 2,
+    "list_files": 13,
+    "read_files": 1,
+    "lint_check": 6
+  },
+  "outcome_counts": {
+    "bahulam_failed": 35,
+    "patched": 194,
+    "no_changes": 71
+  },
+  "metrics": {
+    "instances_submitted": 300,
+    "patched": 194,
+    "patch_rate": 0.6467,
+    "tool_call_emission_rate": 0.8333,
+    "zero_tool_timeout_count": 50,
+    "avg_duration_s": 583.3,
+    "avg_input_tokens": 673459,
+    "avg_output_tokens": 9111,
+    "cache_hit_pct": 0.9545,
+    "harness_cost_usd": 126.4299,
+    "harness_cost_per_patched_usd": 0.6517,
+    "total_tools_invoked": 7558,
+    "resolved": 181,
+    "resolve_rate": 0.6033,
+    "resolve_per_patch": 0.933,
+    "dashboard_cost_usd": 0.0,
+    "cost_per_resolved_usd": 0.0,
+    "cost_delta_pct": null,
+    "cost_note": "free model \u2014 dashboard cost not applicable; harness_cost_usd is a placeholder from catalog pricing"
+  },
+  "shards_merged": 5,
+  "docker_eval": {
+    "resolved_instances": 181,
+    "unresolved_instances": 13,
+    "empty_patch_instances": 106,
+    "error_instances": 0,
+    "report_path": "docker-eval.json"
+  },
+  "is_reasoning_model": false,
+  "gate_results": [
+    {
+      "metric": "resolve_rate",
+      "actual": 0.6033,
+      "threshold": 0.3,
+      "op": ">=",
+      "passed": true
+    },
+    {
+      "metric": "cache_hit_pct",
+      "actual": 0.9545,
+      "threshold": 0.7,
+      "op": ">=",
+      "passed": true
+    },
+    {
+      "metric": "tool_call_emission_rate",
+      "actual": 0.8333,
+      "threshold": 0.9,
+      "op": ">=",
+      "passed": false
+    },
+    {
+      "metric": "cost_per_resolved_usd",
+      "actual": 0.0,
+      "threshold": 2.0,
+      "op": "<=",
+      "passed": true
+    },
+    {
+      "metric": "dashboard_cost_usd",
+      "skipped": true,
+      "reason": "n/a for free-tier model"
+    },
+    {
+      "metric": "cost_delta_pct",
+      "skipped": true,
+      "reason": "n/a for free-tier model"
+    },
+    {
+      "metric": "resolve_per_patch",
+      "actual": 0.933,
+      "threshold": 0.6,
+      "op": ">=",
+      "passed": true
+    },
+    {
+      "metric": "reasoning_token_ratio",
+      "skipped": true,
+      "reason": "n/a for non-reasoning model"
+    }
+  ],
+  "full_300_projection": {
+    "full_300_cost_usd": 0.0,
+    "full_300_resolved": 180,
+    "full_300_cost_per_resolved_usd": 0.0,
+    "full_300_cache_hit_pct": 0.955,
+    "notes": "cost * 15.0x (accounts for sympy/sphinx tail); cache penalty 0.1 for reasoning models"
+  }
+}
