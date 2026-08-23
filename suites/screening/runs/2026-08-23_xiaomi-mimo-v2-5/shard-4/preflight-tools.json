@@ -1,0 +1,10 @@
+{
+  "http": 200,
+  "passed": true,
+  "reason": null,
+  "sample_response": {
+    "finish_reason": "tool_calls",
+    "has_tool_calls": true,
+    "provider": "Xiaomi"
+  }
+}
