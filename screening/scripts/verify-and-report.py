@@ -73,10 +73,16 @@ def evaluate_gates(metrics: dict, gates: list, is_reasoning: bool) -> tuple[list
     """Return (per-gate results, overall verdict)."""
     results = []
     all_pass = True
+    is_free = (metrics.get("dashboard_cost_usd") or 0) == 0
     for g in gates:
         applies = g.get("applies_to")
         if applies == "reasoning_models" and not is_reasoning:
             results.append({"metric": g["metric"], "skipped": True, "reason": "n/a for non-reasoning model"})
+            continue
+        # Cost-verification gates are not applicable to free-tier models
+        # (no dashboard cost to reconcile against harness estimate).
+        if is_free and g["metric"] in ("cost_delta_pct", "dashboard_cost_usd"):
+            results.append({"metric": g["metric"], "skipped": True, "reason": "n/a for free-tier model"})
             continue
 
         threshold = g.get("reasoning_model_value") if is_reasoning and g.get("reasoning_model_value") is not None else g["value"]
@@ -132,10 +138,13 @@ def compute_full_300_projection(metrics: dict, gates_yaml: dict, is_reasoning: b
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--screen-dir", required=True, type=Path, help="Dir containing predictions.json + screening-report.json from Railway")
-    ap.add_argument("--dashboard-cost-usd", required=True, type=float, help="Real cost from OpenRouter dashboard for the run window")
+    ap.add_argument("--screen-dir", "--run-dir", dest="screen_dir", required=True, type=Path,
+                    help="Dir containing predictions.json + screening-report.json (v2 sharded or v1 flat)")
+    ap.add_argument("--dashboard-cost-usd", type=float, default=None,
+                    help="Real cost from OpenRouter dashboard. Omit for free models (defaults to 0).")
     ap.add_argument("--force-reasoning-model", action="store_true", help="Apply reasoning-model-specific gates + cache penalty")
     ap.add_argument("--run-id", default=None, help="Override docker eval run_id (default: derives from screen-dir)")
+    ap.add_argument("--skip-docker", action="store_true", help="Reuse an existing docker-eval.json in --screen-dir instead of re-running eval")
     args = ap.parse_args()
 
     screen_dir = args.screen_dir
@@ -145,35 +154,54 @@ def main() -> None:
     partial = json.loads(partial_report_path.read_text())
 
     if partial.get("gates_verdict") == "REJECT":
-        print(f"[verify] pre-flight already rejected — nothing to verify. Reason: {partial['gates_reason']}", flush=True)
+        print(f"[verify] pre-flight already rejected — nothing to verify. Reason: {partial.get('gates_reason')}", flush=True)
         return
 
     predictions = screen_dir / "predictions.json"
     if not predictions.exists():
-        raise SystemExit(f"missing {predictions}")
+        raise SystemExit(f"missing {predictions} — run scripts/merge-shards.sh first if this is a sharded run")
 
-    # 1. docker eval
-    run_id = args.run_id or f"screen-{screen_dir.name}"
-    docker_report_path = run_docker_eval(predictions, screen_dir, run_id)
+    # 1. docker eval (or reuse existing docker-eval.json if --skip-docker)
+    existing_docker = screen_dir / "docker-eval.json"
+    if args.skip_docker and existing_docker.exists():
+        print(f"[verify] --skip-docker: reusing {existing_docker}", flush=True)
+        docker_report_path = existing_docker
+    else:
+        run_id = args.run_id or f"screen-{screen_dir.name}"
+        docker_report_path = run_docker_eval(predictions, screen_dir, run_id)
+        # copy to a stable name so verify can be re-run without re-eval
+        if docker_report_path.resolve() != existing_docker.resolve():
+            shutil.copy(docker_report_path, existing_docker)
     docker = json.loads(docker_report_path.read_text())
     print(f"[verify] docker eval: {docker.get('resolved_instances')} resolved / {docker.get('submitted_instances')} submitted", flush=True)
 
-    # 2. merge metrics
+    # 2. merge metrics — support both v1 (flat) and v2 (nested totals/model.slug) schemas
     metrics = dict(partial.get("metrics", {}))
-    n = metrics.get("instances_submitted", 30)
+    n = (metrics.get("instances_submitted")
+         or partial.get("harness", {}).get("instance_count")
+         or docker.get("submitted_instances")
+         or 300)
     resolved = docker.get("resolved_instances", 0)
-    patched = metrics.get("patched", 1)
+    patched = metrics.get("patched") or 1
     metrics["resolved"] = resolved
-    metrics["resolve_rate"] = round(resolved / n, 3) if n else 0
-    metrics["resolve_per_patch"] = round(resolved / patched, 3) if patched else 0
-    metrics["dashboard_cost_usd"] = args.dashboard_cost_usd
-    metrics["cost_per_resolved_usd"] = round(args.dashboard_cost_usd / resolved, 3) if resolved else None
+    metrics["resolve_rate"] = round(resolved / n, 4) if n else 0
+    metrics["resolve_per_patch"] = round(resolved / patched, 4) if patched else 0
+    dashboard_cost = args.dashboard_cost_usd if args.dashboard_cost_usd is not None else 0.0
+    metrics["dashboard_cost_usd"] = dashboard_cost
+    metrics["cost_per_resolved_usd"] = round(dashboard_cost / resolved, 4) if resolved else None
     harness_cost = metrics.get("harness_cost_usd") or 0
-    metrics["cost_delta_pct"] = round(abs(args.dashboard_cost_usd - harness_cost) / max(harness_cost, 0.01) * 100, 1)
+    if dashboard_cost > 0:
+        metrics["cost_delta_pct"] = round(abs(dashboard_cost - harness_cost) / max(harness_cost, 0.01) * 100, 1)
+    else:
+        metrics["cost_delta_pct"] = None  # free model — cost delta is meaningless
+        metrics["cost_note"] = "free model — dashboard cost not applicable; harness_cost_usd is a placeholder from catalog pricing"
 
-    # 3. gates
+    # 3. gates — schema v2 has model as dict {"slug": ...}; v1 has model as string
+    model_slug = partial.get("model", {}).get("slug") if isinstance(partial.get("model"), dict) else str(partial.get("model", ""))
     gates_yaml = load_yaml(GATES_FILE)
-    is_reasoning = args.force_reasoning_model or any(k in partial.get("model", "").lower() for k in ("sol", "o1", "o3", "o4", "reason", "-r1", "-mimo", "m3"))
+    is_reasoning = args.force_reasoning_model or any(
+        k in model_slug.lower() for k in ("sol", "o1", "o3", "o4", "reason", "-r1", "-mimo", "m3")
+    )
     gate_results, verdict = evaluate_gates(metrics, gates_yaml["gates"], is_reasoning)
     projection = compute_full_300_projection(metrics, gates_yaml, is_reasoning)
 
