@@ -1,0 +1,302 @@
+[
+  {
+    "instance_id": "django__django-11179",
+    "model_patch": "diff --git a/django/db/models/deletion.py b/django/db/models/deletion.py\nindex 92fe4affb9..3a462f1c4c 100644\n--- a/django/db/models/deletion.py\n+++ b/django/db/models/deletion.py\n@@ -277,6 +277,7 @@ class Collector:\n             if self.can_fast_delete(instance):\n                 with transaction.mark_for_rollback_on_error():\n                     count = sql.DeleteQuery(model).delete_batch([instance.pk], self.using)\n+                setattr(instance, model._meta.pk.attname, None)\n                 return count, {model._meta.label: count}\n \n         with transaction.atomic(using=self.using, savepoint=False):\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "astropy__astropy-14365",
+    "model_patch": "diff --git a/astropy/io/ascii/qdp.py b/astropy/io/ascii/qdp.py\nindex 83a4f004aa..768beb0de9 100644\n--- a/astropy/io/ascii/qdp.py\n+++ b/astropy/io/ascii/qdp.py\n@@ -68,7 +68,7 @@ def _line_type(line, delimiter=None):\n     _new_re = rf\"NO({sep}NO)+\"\n     _data_re = rf\"({_decimal_re}|NO|[-+]?nan)({sep}({_decimal_re}|NO|[-+]?nan))*)\"\n     _type_re = rf\"^\\s*((?P<command>{_command_re})|(?P<new>{_new_re})|(?P<data>{_data_re})?\\s*(\\!(?P<comment>.*))?\\s*$\"\n-    _line_type_re = re.compile(_type_re)\n+    _line_type_re = re.compile(_type_re, re.IGNORECASE)\n     line = line.strip()\n     if not line:\n         return \"comment\"\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "astropy__astropy-7746",
+    "model_patch": "diff --git a/astropy/wcs/wcs.py b/astropy/wcs/wcs.py\nindex d3a06f2b31..d2dfce1ea5 100644\n--- a/astropy/wcs/wcs.py\n+++ b/astropy/wcs/wcs.py\n@@ -1218,6 +1218,9 @@ reduce these to 2 dimensions using the naxis kwarg.\n                 raise ValueError(\n                     \"Coordinate arrays are not broadcastable to each other\")\n \n+            if axes[0].size == 0:\n+                return [np.empty(axes[0].shape) for x in axes]\n+\n             xy = np.hstack([x.reshape((x.size, 1)) for x in axes])\n \n             if ra_dec_order and sky == 'input':\n@@ -1235,6 +1238,8 @@ reduce these to 2 dimensions using the naxis kwarg.\n                 raise ValueError(\n                     \"When providing two arguments, the array must be \"\n                     \"of shape (N, {0})\".format(self.naxis))\n+            if xy.size == 0:\n+                return xy.reshape(xy.shape[:-1] + (self.naxis,))\n             if ra_dec_order and sky == 'input':\n                 xy = self._denormalize_sky(xy)\n             result = func(xy, origin)\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "django__django-11848",
+    "model_patch": "diff --git a/django/utils/http.py b/django/utils/http.py\nindex 572cfb4347..59705c440c 100644\n--- a/django/utils/http.py\n+++ b/django/utils/http.py\n@@ -176,10 +176,10 @@ def parse_http_date(date):\n     try:\n         year = int(m.group('year'))\n         if year < 100:\n-            if year < 70:\n-                year += 2000\n-            else:\n-                year += 1900\n+            year += (\n+                1900 if year + 2000 > datetime.datetime.utcnow().year + 50\n+                else 2000\n+            )\n         month = MONTHS.index(m.group('mon').lower()) + 1\n         day = int(m.group('day'))\n         hour = int(m.group('hour'))\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "django__django-11283",
+    "model_patch": "diff --git a/django/contrib/auth/migrations/0011_update_proxy_permissions.py b/django/contrib/auth/migrations/0011_update_proxy_permissions.py\nindex 0e66649695..c26a7b0fb5 100644\n--- a/django/contrib/auth/migrations/0011_update_proxy_permissions.py\n+++ b/django/contrib/auth/migrations/0011_update_proxy_permissions.py\n@@ -24,10 +24,24 @@ def update_proxy_model_permissions(apps, schema_editor, reverse=False):\n         proxy_content_type = ContentType.objects.get_for_model(Model, for_concrete_model=False)\n         old_content_type = proxy_content_type if reverse else concrete_content_type\n         new_content_type = concrete_content_type if reverse else proxy_content_type\n-        Permission.objects.filter(\n+        old_content_type_permissions = Permission.objects.filter(\n             permissions_query,\n             content_type=old_content_type,\n-        ).update(content_type=new_content_type)\n+        )\n+        new_content_type_permissions = Permission.objects.filter(\n+            permissions_query,\n+            content_type=new_content_type,\n+        )\n+        # If there are already permissions with the target content_type,\n+        # deleting them would cause an IntegrityError. Delete them first\n+        # and print a reminder to audit relevant permissions.\n+        if new_content_type_permissions.exists():\n+            print(\n+                'A problem arose migrating proxy model permissions for model %s:%s'\n+                % (opts.app_label, opts.model_name)\n+            )\n+            new_content_type_permissions.delete()\n+        old_content_type_permissions.update(content_type=new_content_type)\n \n \n def revert_proxy_model_permissions(apps, schema_editor):\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "django__django-12856",
+    "model_patch": "",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "django__django-12286",
+    "model_patch": "diff --git a/django/core/checks/translation.py b/django/core/checks/translation.py\nindex 138ed07ff8..67c858f17b 100644\n--- a/django/core/checks/translation.py\n+++ b/django/core/checks/translation.py\n@@ -57,5 +57,6 @@ def check_language_settings_consistent(app_configs, **kwargs):\n     \"\"\"Error if language settings are not consistent with each other.\"\"\"\n     available_tags = {i for i, _ in settings.LANGUAGES} | {'en-us'}\n     if settings.LANGUAGE_CODE not in available_tags:\n-        return [E004]\n+        if settings.LANGUAGE_CODE.split('-')[0] not in available_tags:\n+            return [E004]\n     return []\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "django__django-13321",
+    "model_patch": "diff --git a/django/contrib/sessions/backends/base.py b/django/contrib/sessions/backends/base.py\nindex 187e14b1b7..cbdacd2c16 100644\n--- a/django/contrib/sessions/backends/base.py\n+++ b/django/contrib/sessions/backends/base.py\n@@ -132,8 +132,8 @@ class SessionBase:\n \n     def _legacy_decode(self, session_data):\n         # RemovedInDjango40Warning: pre-Django 3.1 format will be invalid.\n-        encoded_data = base64.b64decode(session_data.encode('ascii'))\n         try:\n+            encoded_data = base64.b64decode(session_data.encode('ascii'))\n             # could produce ValueError if there is no ':'\n             hash, serialized = encoded_data.split(b':', 1)\n             expected_hash = self._hash(serialized)\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "django__django-12700",
+    "model_patch": "diff --git a/django/views/debug.py b/django/views/debug.py\nindex e6b7d4d821..22cdbfb103 100644\n--- a/django/views/debug.py\n+++ b/django/views/debug.py\n@@ -90,6 +90,10 @@ class SafeExceptionReporterFilter:\n                 cleansed = self.cleansed_substitute\n             elif isinstance(value, dict):\n                 cleansed = {k: self.cleanse_setting(k, v) for k, v in value.items()}\n+            elif isinstance(value, (list, tuple)):\n+                cleansed = [self.cleanse_setting(key, v) for v in value]\n+                if isinstance(value, tuple):\n+                    cleansed = tuple(cleansed)\n             else:\n                 cleansed = value\n         except TypeError:\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "django__django-11964",
+    "model_patch": "diff --git a/django/db/models/enums.py b/django/db/models/enums.py\nindex bbe362a6ab..ec0cc6c2bf 100644\n--- a/django/db/models/enums.py\n+++ b/django/db/models/enums.py\n@@ -60,7 +60,8 @@ class ChoicesMeta(enum.EnumMeta):\n \n class Choices(enum.Enum, metaclass=ChoicesMeta):\n     \"\"\"Class for creating enumerated choices.\"\"\"\n-    pass\n+    def __str__(self):\n+        return str(self.value)\n \n \n class IntegerChoices(int, Choices):\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "django__django-13768",
+    "model_patch": "diff --git a/django/dispatch/dispatcher.py b/django/dispatch/dispatcher.py\nindex b7d9d26389..bff9017fb9 100644\n--- a/django/dispatch/dispatcher.py\n+++ b/django/dispatch/dispatcher.py\n@@ -1,7 +1,10 @@\n+import logging\n import threading\n import warnings\n import weakref\n \n+logger = logging.getLogger('django.dispatch')\n+\n from django.utils.deprecation import RemovedInDjango40Warning\n from django.utils.inspect import func_accepts_kwargs\n \n@@ -208,6 +211,11 @@ class Signal:\n             try:\n                 response = receiver(signal=self, sender=sender, **named)\n             except Exception as err:\n+                logger.exception(\n+                    'Error calling %s in Signal.send_robust() (%s)',\n+                    receiver.__qualname__,\n+                    err,\n+                )\n                 responses.append((receiver, err))\n             else:\n                 responses.append((receiver, response))\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "django__django-13401",
+    "model_patch": "diff --git a/django/db/models/fields/__init__.py b/django/db/models/fields/__init__.py\nindex 28374272f4..fa5bf8e023 100644\n--- a/django/db/models/fields/__init__.py\n+++ b/django/db/models/fields/__init__.py\n@@ -516,17 +516,28 @@ class Field(RegisterLookupMixin):\n     def __eq__(self, other):\n         # Needed for @total_ordering\n         if isinstance(other, Field):\n-            return self.creation_counter == other.creation_counter\n+            return (\n+                self.creation_counter == other.creation_counter\n+                and self.model == other.model\n+            )\n         return NotImplemented\n \n     def __lt__(self, other):\n         # This is needed because bisect does not take a comparison function.\n         if isinstance(other, Field):\n-            return self.creation_counter < other.creation_counter\n+            # Prevent comparing fields of different models.\n+            if self.creation_counter != other.creation_counter:\n+                return self.creation_counter < other.creation_counter\n+            if self.model is not None and other.model is not None:\n+                return self.model._meta.label < other.model._meta.label\n+            return self.model is not None\n         return NotImplemented\n \n     def __hash__(self):\n-        return hash(self.creation_counter)\n+        # Combine creation_counter and model to ensure fields from\n+        # different models (even with the same creation_counter) have\n+        # different hashes, consistent with __eq__.\n+        return hash((self.creation_counter, self.model))\n \n     def __deepcopy__(self, memodict):\n         # We don't have to deepcopy very much here, since most things are not\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "django__django-14752",
+    "model_patch": "diff --git a/django/contrib/admin/views/autocomplete.py b/django/contrib/admin/views/autocomplete.py\nindex 3903e4c98c..1744271cbc 100644\n--- a/django/contrib/admin/views/autocomplete.py\n+++ b/django/contrib/admin/views/autocomplete.py\n@@ -26,12 +26,22 @@ class AutocompleteJsonView(BaseListView):\n         context = self.get_context_data()\n         return JsonResponse({\n             'results': [\n-                {'id': str(getattr(obj, to_field_name)), 'text': str(obj)}\n+                self.serialize_result(obj, to_field_name)\n                 for obj in context['object_list']\n             ],\n             'pagination': {'more': context['page_obj'].has_next()},\n         })\n \n+    def serialize_result(self, obj, to_field_name):\n+        \"\"\"\n+        Convert the object to a dictionary suitable for the autocomplete\n+        JSON response. Subclasses can override this to add extra fields.\n+        \"\"\"\n+        return {\n+            'id': str(getattr(obj, to_field_name)),\n+            'text': str(obj),\n+        }\n+\n     def get_paginator(self, *args, **kwargs):\n         \"\"\"Use the ModelAdmin's paginator.\"\"\"\n         return self.model_admin.get_paginator(self.request, *args, **kwargs)\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "django__django-14730",
+    "model_patch": "diff --git a/django/db/models/fields/related.py b/django/db/models/fields/related.py\nindex febaadbb5b..f124c2db56 100644\n--- a/django/db/models/fields/related.py\n+++ b/django/db/models/fields/related.py\n@@ -1258,6 +1258,16 @@ class ManyToManyField(RelatedField):\n                 )\n             )\n \n+        if self.remote_field.symmetrical and self.remote_field.related_name:\n+            warnings.append(\n+                checks.Warning(\n+                    'related_name has no effect on ManyToManyField with '\n+                    'a symmetrical relationship, e.g. to \"self\".',\n+                    obj=self,\n+                    id='fields.W345',\n+                )\n+            )\n+\n         return warnings\n \n     def _check_relationship_model(self, from_model=None, **kwargs):\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "django__django-15252",
+    "model_patch": "diff --git a/django/db/migrations/recorder.py b/django/db/migrations/recorder.py\nindex 1a37c6b7d0..4bd3d1bc7c 100644\n--- a/django/db/migrations/recorder.py\n+++ b/django/db/migrations/recorder.py\n@@ -1,5 +1,5 @@\n from django.apps.registry import Apps\n-from django.db import DatabaseError, models\n+from django.db import DatabaseError, models, router\n from django.utils.functional import classproperty\n from django.utils.timezone import now\n \n@@ -63,6 +63,8 @@ class MigrationRecorder:\n         if self.has_table():\n             return\n         # Make the table\n+        if not router.allow_migrate(self.connection.alias, self.Migration._meta.app_label):\n+            return\n         try:\n             with self.connection.schema_editor() as editor:\n                 editor.create_model(self.Migration)\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "django__django-15320",
+    "model_patch": "diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py\nindex 6f26dff0e0..201e4832f2 100644\n--- a/django/db/models/expressions.py\n+++ b/django/db/models/expressions.py\n@@ -1150,6 +1150,7 @@ class Subquery(BaseExpression, Combinable):\n     def __init__(self, queryset, output_field=None, **extra):\n         # Allow the usage of both QuerySet and sql.Query objects.\n         self.query = getattr(queryset, 'query', queryset)\n+        self.query.subquery = True\n         self.extra = extra\n         super().__init__(output_field)\n \n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "django__django-14155",
+    "model_patch": "diff --git a/django/urls/resolvers.py b/django/urls/resolvers.py\nindex 9b00e24509..9c5c7868e1 100644\n--- a/django/urls/resolvers.py\n+++ b/django/urls/resolvers.py\n@@ -60,8 +60,11 @@ class ResolverMatch:\n \n     def __repr__(self):\n         return \"ResolverMatch(func=%s, args=%s, kwargs=%s, url_name=%s, app_names=%s, namespaces=%s, route=%s)\" % (\n-            self._func_path, self.args, self.kwargs, self.url_name,\n-            self.app_names, self.namespaces, self.route,\n+            repr(self.func) if isinstance(self.func, functools.partial) else self._func_path,\n+            self.args, self.kwargs,\n+            \"'%s'\" % self.url_name if self.url_name is not None else self.url_name,\n+            self.app_names, self.namespaces,\n+            \"'%s'\" % self.route if self.route is not None else self.route,\n         )\n \n \n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "django__django-15902",
+    "model_patch": "diff --git a/django/forms/formsets.py b/django/forms/formsets.py\nindex 3adbc6979a..43bcfa393f 100644\n--- a/django/forms/formsets.py\n+++ b/django/forms/formsets.py\n@@ -40,6 +40,10 @@ class ManagementForm(Form):\n     MIN_NUM_FORMS = IntegerField(required=False, widget=HiddenInput)\n     MAX_NUM_FORMS = IntegerField(required=False, widget=HiddenInput)\n \n+    @property\n+    def template_name(self):\n+        return \"django/forms/div.html\"\n+\n     def clean(self):\n         cleaned_data = super().clean()\n         # When the management form is invalid, we don't know how many forms\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "django__django-16139",
+    "model_patch": "diff --git a/django/contrib/auth/forms.py b/django/contrib/auth/forms.py\nindex b3cfc6723c..a0abdcdde8 100644\n--- a/django/contrib/auth/forms.py\n+++ b/django/contrib/auth/forms.py\n@@ -163,7 +163,9 @@ class UserChangeForm(forms.ModelForm):\n         super().__init__(*args, **kwargs)\n         password = self.fields.get(\"password\")\n         if password:\n-            password.help_text = password.help_text.format(\"../password/\")\n+            password.help_text = password.help_text.format(\n+                \"../../%s/password/\" % self.instance.pk\n+            )\n         user_permissions = self.fields.get(\"user_permissions\")\n         if user_permissions:\n             user_permissions.queryset = user_permissions.queryset.select_related(\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "django__django-13220",
+    "model_patch": "diff --git a/django/core/exceptions.py b/django/core/exceptions.py\nindex dc084b8692..21bdc872cd 100644\n--- a/django/core/exceptions.py\n+++ b/django/core/exceptions.py\n@@ -174,6 +174,59 @@ class ValidationError(Exception):\n                     message %= error.params\n                 yield str(message)\n \n+    @staticmethod\n+    def _key(error):\n+        \"\"\"\n+        Return a hashable representation of a single-message ValidationError\n+        suitable for comparison and hashing. Dict params are converted to\n+        frozensets so key order doesn't matter.\n+        \"\"\"\n+        params_key = frozenset(error.params.items()) if error.params else None\n+        return (error.message, error.code, params_key)\n+\n+    def __eq__(self, other):\n+        if not isinstance(other, ValidationError):\n+            return NotImplemented\n+        if hasattr(self, 'error_dict'):\n+            if not hasattr(other, 'error_dict'):\n+                return False\n+            if set(self.error_dict) != set(other.error_dict):\n+                return False\n+            for field in self.error_dict:\n+                key_self = sorted(self._key(e) for e in self.error_dict[field])\n+                key_other = sorted(self._key(e) for e in other.error_dict[field])\n+                if key_self != key_other:\n+                    return False\n+            return True\n+        elif hasattr(self, 'message'):\n+            if not hasattr(other, 'message'):\n+                return False\n+            return (\n+                self.message == other.message\n+                and self.code == other.code\n+                and self.params == other.params\n+            )\n+        elif hasattr(self, 'error_list'):\n+            if not hasattr(other, 'error_list') or hasattr(other, 'message'):\n+                return False\n+            key_self = sorted(self._key(e) for e in self.error_list)\n+            key_other = sorted(self._key(e) for e in other.error_list)\n+            return key_self == key_other\n+        return NotImplemented\n+\n+    def __hash__(self):\n+        if hasattr(self, 'error_dict'):\n+            return hash(frozenset(\n+                (field, tuple(self._key(e) for e in errors))\n+                for field, errors in self.error_dict.items()\n+            ))\n+        elif hasattr(self, 'message'):\n+            params_key = frozenset(self.params.items()) if self.params else None\n+            return hash((self.message, self.code, params_key))\n+        elif hasattr(self, 'error_list'):\n+            return hash(tuple(sorted(self._key(e) for e in self.error_list)))\n+        return hash(())\n+\n     def __str__(self):\n         if hasattr(self, 'error_dict'):\n             return repr(dict(self))\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-22835",
+    "model_patch": "diff --git a/lib/matplotlib/artist.py b/lib/matplotlib/artist.py\nindex 1f33b9d3ec..2caf6572e3 100644\n--- a/lib/matplotlib/artist.py\n+++ b/lib/matplotlib/artist.py\n@@ -1304,10 +1304,13 @@ class Artist:\n             normed = self.norm(data)\n             if np.isfinite(normed):\n                 # Midpoints of neighboring color intervals.\n-                neighbors = self.norm.inverse(\n-                    (int(self.norm(data) * n) + np.array([0, 1])) / n)\n-                delta = abs(neighbors - data).max()\n-                g_sig_digits = cbook._g_sig_digits(data, delta)\n+                try:\n+                    neighbors = self.norm.inverse(\n+                        (int(self.norm(data) * n) + np.array([0, 1])) / n)\n+                    delta = abs(neighbors - data).max()\n+                    g_sig_digits = cbook._g_sig_digits(data, delta)\n+                except ValueError:\n+                    g_sig_digits = 3  # Consistent with default below.\n             else:\n                 g_sig_digits = 3  # Consistent with default below.\n             return \"[{:-#.{}g}]\".format(data, g_sig_digits)\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "django__django-13964",
+    "model_patch": "",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-23964",
+    "model_patch": "diff --git a/lib/matplotlib/backends/backend_ps.py b/lib/matplotlib/backends/backend_ps.py\nindex f209e811f1..8937e677fd 100644\n--- a/lib/matplotlib/backends/backend_ps.py\n+++ b/lib/matplotlib/backends/backend_ps.py\n@@ -666,7 +666,8 @@ grestore\n                     (item.x, item.ft_object.get_glyph_name(item.glyph_idx))\n                 )\n             # append the last entry\n-            stream.append(curr_stream)\n+            if curr_stream is not None:\n+                stream.append(curr_stream)\n \n         self.set_color(*gc.get_rgb())\n \n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-25442",
+    "model_patch": "diff --git a/lib/matplotlib/offsetbox.py b/lib/matplotlib/offsetbox.py\nindex 77768e7383..5f588c6cc7 100644\n--- a/lib/matplotlib/offsetbox.py\n+++ b/lib/matplotlib/offsetbox.py\n@@ -1558,14 +1558,15 @@ class DraggableBase:\n \n     def disconnect(self):\n         \"\"\"Disconnect the callbacks.\"\"\"\n-        for cid in self.cids:\n-            self.canvas.mpl_disconnect(cid)\n-        try:\n-            c1 = self._c1\n-        except AttributeError:\n-            pass\n-        else:\n-            self.canvas.mpl_disconnect(c1)\n+        if self.ref_artist.figure is not None:\n+            for cid in self.cids:\n+                self.canvas.mpl_disconnect(cid)\n+            try:\n+                c1 = self._c1\n+            except AttributeError:\n+                pass\n+            else:\n+                self.canvas.mpl_disconnect(c1)\n \n     def save_offset(self):\n         pass\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "django__django-16910",
+    "model_patch": "diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py\nindex 781dfd5499..17cf265b22 100644\n--- a/django/db/models/sql/query.py\n+++ b/django/db/models/sql/query.py\n@@ -779,6 +779,12 @@ class Query(BaseExpression):\n         # Only include fields mentioned in the mask.\n         for field_name, field_mask in mask.items():\n             field = opts.get_field(field_name)\n+            # For reverse relations, opts.get_field() returns a\n+            # ForeignObjectRel, but the select mask must be keyed by the\n+            # actual field on the related model (e.g. ForeignKey or\n+            # OneToOneField) to match what get_related_selections() uses.\n+            if hasattr(field, \"field\"):\n+                field = field.field\n             field_select_mask = select_mask.setdefault(field, {})\n             if field_mask:\n                 if not field.is_relation:\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "mwaskom__seaborn-3010",
+    "model_patch": "diff --git a/seaborn/_stats/regression.py b/seaborn/_stats/regression.py\nindex 7b7ddc8d..510e0992 100644\n--- a/seaborn/_stats/regression.py\n+++ b/seaborn/_stats/regression.py\n@@ -21,9 +21,10 @@ class PolyFit(Stat):\n \n     def _fit_predict(self, data):\n \n-        x = data[\"x\"]\n-        y = data[\"y\"]\n-        if x.nunique() <= self.order:\n+        drop = data[[\"x\", \"y\"]].isna().any(axis=1)\n+        x = data.loc[~drop, \"x\"]\n+        y = data.loc[~drop, \"y\"]\n+        if len(x) <= self.order:\n             # TODO warn?\n             xx = yy = []\n         else:\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "django__django-15738",
+    "model_patch": "",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "mwaskom__seaborn-2848",
+    "model_patch": "",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-23987",
+    "model_patch": "diff --git a/lib/matplotlib/figure.py b/lib/matplotlib/figure.py\nindex 5bbb786984..4e280eb5f4 100644\n--- a/lib/matplotlib/figure.py\n+++ b/lib/matplotlib/figure.py\n@@ -2416,8 +2416,8 @@ class Figure(FigureBase):\n                     \"The Figure parameters 'layout' and 'constrained_layout' \"\n                     \"cannot be used together. Please use 'layout' only.\")\n             self.set_layout_engine(layout=layout)\n-        elif tight_layout is not None:\n-            if constrained_layout is not None:\n+        elif tight_layout is not None and tight_layout is not False:\n+            if constrained_layout is not None and constrained_layout is not False:\n                 _api.warn_external(\n                     \"The Figure parameters 'tight_layout' and \"\n                     \"'constrained_layout' cannot be used together. Please use \"\n@@ -2425,7 +2425,7 @@ class Figure(FigureBase):\n             self.set_layout_engine(layout='tight')\n             if isinstance(tight_layout, dict):\n                 self.get_layout_engine().set(**tight_layout)\n-        elif constrained_layout is not None:\n+        elif constrained_layout is not None and constrained_layout is not False:\n             self.set_layout_engine(layout='constrained')\n             if isinstance(constrained_layout, dict):\n                 self.get_layout_engine().set(**constrained_layout)\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "django__django-16400",
+    "model_patch": "",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "pydata__xarray-4248",
+    "model_patch": "diff --git a/xarray/core/formatting.py b/xarray/core/formatting.py\nindex 28eaae5f..48e971a1 100644\n--- a/xarray/core/formatting.py\n+++ b/xarray/core/formatting.py\n@@ -278,7 +278,8 @@ def summarize_variable(\n             raise TypeError(f\"`max_width` value of `{max_width}` is not a valid int\")\n         else:\n             max_width = max_width_options\n-    first_col = pretty_print(f\"  {marker} {name} \", col_width)\n+    name_str = f\"{name}, in {var.attrs['units']}\" if var.attrs.get(\"units\") else name\n+    first_col = pretty_print(f\"  {marker} {name_str} \", col_width)\n     if var.dims:\n         dims_str = \"({}) \".format(\", \".join(map(str, var.dims)))\n     else:\n@@ -347,8 +348,11 @@ def _get_col_items(mapping):\n \n     col_items = []\n     for k, v in mapping.items():\n-        col_items.append(k)\n         var = getattr(v, \"variable\", v)\n+        col_items.append(k)\n+        attrs = getattr(var, \"attrs\", {})\n+        if attrs.get(\"units\"):\n+            col_items.append(f\"{k}, in {attrs['units']}\")\n         if isinstance(var, IndexVariable):\n             level_names = var.to_index_variable().level_names\n             if level_names is not None:\n@@ -364,7 +368,7 @@ def _calculate_col_width(col_items):\n \n def _mapping_repr(mapping, title, summarizer, col_width=None):\n     if col_width is None:\n-        col_width = _calculate_col_width(mapping)\n+        col_width = _calculate_col_width(_get_col_items(mapping))\n     summary = [f\"{title}:\"]\n     if mapping:\n         summary += [summarizer(k, v, col_width) for k, v in mapping.items()]\ndiff --git a/xarray/core/formatting_html.py b/xarray/core/formatting_html.py\nindex 5521b33e..0a304d36 100644\n--- a/xarray/core/formatting_html.py\n+++ b/xarray/core/formatting_html.py\n@@ -103,6 +103,8 @@ def summarize_variable(name, var, is_index=False, dtype=None, preview=None):\n     cssclass_idx = \" class='xr-has-index'\" if is_index else \"\"\n     dims_str = f\"({', '.join(escape(dim) for dim in var.dims)})\"\n     name = escape(str(name))\n+    if var.attrs.get(\"units\"):\n+        name += f\", in {escape(str(var.attrs['units']))}\"\n     dtype = dtype or escape(str(var.dtype))\n \n     # \"unique\" ids required to expand/collapse subsections\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "mwaskom__seaborn-3407",
+    "model_patch": "diff --git a/seaborn/axisgrid.py b/seaborn/axisgrid.py\nindex 75349099..49211d03 100644\n--- a/seaborn/axisgrid.py\n+++ b/seaborn/axisgrid.py\n@@ -1472,8 +1472,9 @@ class PairGrid(Grid):\n                 for ax in diag_axes[1:]:\n                     share_axis(diag_axes[0], ax, \"y\")\n \n-            self.diag_vars = np.array(diag_vars, np.object_)\n-            self.diag_axes = np.array(diag_axes, np.object_)\n+            self.diag_vars = np.empty(len(diag_vars), dtype=object)\n+            self.diag_vars[:] = diag_vars\n+            self.diag_axes = np.array(diag_axes, dtype=object)\n \n         if \"hue\" not in signature(func).parameters:\n             return self._map_diag_iter_hue(func, **kwargs)\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "pydata__xarray-4493",
+    "model_patch": "diff --git a/xarray/core/variable.py b/xarray/core/variable.py\nindex 64c1895d..5714ca3d 100644\n--- a/xarray/core/variable.py\n+++ b/xarray/core/variable.py\n@@ -218,7 +218,13 @@ def as_compatible_data(data, fastpath=False):\n         data = np.timedelta64(getattr(data, \"value\", data), \"ns\")\n \n     # we don't want nested self-described arrays\n-    data = getattr(data, \"values\", data)\n+    # use .data rather than .values to avoid triggering dask computation\n+    from .dataarray import DataArray\n+\n+    if isinstance(data, DataArray):\n+        data = data.data\n+    else:\n+        data = getattr(data, \"values\", data)\n \n     if isinstance(data, np.ma.MaskedArray):\n         mask = np.ma.getmaskarray(data)\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "pytest-dev__pytest-5495",
+    "model_patch": "diff --git a/src/_pytest/assertion/util.py b/src/_pytest/assertion/util.py\nindex 762e5761d..a875834cb 100644\n--- a/src/_pytest/assertion/util.py\n+++ b/src/_pytest/assertion/util.py\n@@ -259,20 +259,35 @@ def _compare_eq_sequence(left, right, verbose=0):\n     len_right = len(right)\n     for i in range(min(len_left, len_right)):\n         if left[i] != right[i]:\n-            explanation += [\n-                \"At index {} diff: {!r} != {!r}\".format(i, left[i], right[i])\n-            ]\n+            if isinstance(left, bytes):\n+                explanation += [\n+                    \"At index {} diff: {} != {}\".format(\n+                        i,\n+                        saferepr(bytes([left[i]])),\n+                        saferepr(bytes([right[i]])),\n+                    )\n+                ]\n+            else:\n+                explanation += [\n+                    \"At index {} diff: {!r} != {!r}\".format(i, left[i], right[i])\n+                ]\n             break\n     len_diff = len_left - len_right\n \n     if len_diff:\n         if len_diff > 0:\n             dir_with_more = \"Left\"\n-            extra = saferepr(left[len_right])\n+            if isinstance(left, bytes):\n+                extra = saferepr(bytes([left[len_right]]))\n+            else:\n+                extra = saferepr(left[len_right])\n         else:\n             len_diff = 0 - len_diff\n             dir_with_more = \"Right\"\n-            extra = saferepr(right[len_left])\n+            if isinstance(right, bytes):\n+                extra = saferepr(bytes([right[len_left]]))\n+            else:\n+                extra = saferepr(right[len_left])\n \n         if len_diff == 1:\n             explanation += [\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-10297",
+    "model_patch": "diff --git a/sklearn/linear_model/ridge.py b/sklearn/linear_model/ridge.py\nindex 911c74ae3b..c0404922d4 100644\n--- a/sklearn/linear_model/ridge.py\n+++ b/sklearn/linear_model/ridge.py\n@@ -1301,6 +1301,12 @@ class RidgeClassifierCV(LinearClassifierMixin, _BaseRidgeCV):\n         weights inversely proportional to class frequencies in the input data\n         as ``n_samples / (n_classes * np.bincount(y))``\n \n+    store_cv_values : boolean, default=False\n+        Flag indicating if the cross-validation values corresponding to\n+        each alpha should be stored in the ``cv_values_`` attribute. This\n+        flag is only compatible with ``cv=None`` (i.e. using Generalized\n+        Cross-Validation).\n+\n     Attributes\n     ----------\n     cv_values_ : array, shape = [n_samples, n_alphas] or \\\n@@ -1333,10 +1339,11 @@ class RidgeClassifierCV(LinearClassifierMixin, _BaseRidgeCV):\n     advantage of the multi-variate response support in Ridge.\n     \"\"\"\n     def __init__(self, alphas=(0.1, 1.0, 10.0), fit_intercept=True,\n-                 normalize=False, scoring=None, cv=None, class_weight=None):\n+                 normalize=False, scoring=None, cv=None, class_weight=None,\n+                 store_cv_values=False):\n         super(RidgeClassifierCV, self).__init__(\n             alphas=alphas, fit_intercept=fit_intercept, normalize=normalize,\n-            scoring=scoring, cv=cv)\n+            scoring=scoring, cv=cv, store_cv_values=store_cv_values)\n         self.class_weight = class_weight\n \n     def fit(self, X, y, sample_weight=None):\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "pytest-dev__pytest-7432",
+    "model_patch": "diff --git a/src/_pytest/skipping.py b/src/_pytest/skipping.py\nindex 7bd975e5a..c9bdfee89 100644\n--- a/src/_pytest/skipping.py\n+++ b/src/_pytest/skipping.py\n@@ -291,7 +291,7 @@ def pytest_runtest_makereport(item: Item, call: CallInfo[None]):\n             else:\n                 rep.outcome = \"passed\"\n                 rep.wasxfail = xfailed.reason\n-    elif (\n+    if (\n         item._store.get(skipped_by_mark_key, True)\n         and rep.skipped\n         and type(rep.longrepr) is tuple\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "pylint-dev__pylint-7114",
+    "model_patch": "diff --git a/pylint/lint/expand_modules.py b/pylint/lint/expand_modules.py\nindex 289e1afce..2210dedbd 100644\n--- a/pylint/lint/expand_modules.py\n+++ b/pylint/lint/expand_modules.py\n@@ -121,7 +121,7 @@ def expand_modules(\n         else:\n             is_namespace = modutils.is_namespace(spec)\n             is_directory = modutils.is_directory(spec)\n-        if not is_namespace:\n+        if not is_namespace and os.path.isfile(filepath):\n             result.append(\n                 {\n                     \"path\": filepath,\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-25747",
+    "model_patch": "",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-13497",
+    "model_patch": "diff --git a/sklearn/feature_selection/mutual_info_.py b/sklearn/feature_selection/mutual_info_.py\nindex d5d1b7fb59..6c6a70e42a 100644\n--- a/sklearn/feature_selection/mutual_info_.py\n+++ b/sklearn/feature_selection/mutual_info_.py\n@@ -247,7 +247,12 @@ def _estimate_mi(X, y, discrete_features='auto', discrete_target=False,\n     X, y = check_X_y(X, y, accept_sparse='csc', y_numeric=not discrete_target)\n     n_samples, n_features = X.shape\n \n-    if discrete_features == 'auto':\n+    if isinstance(discrete_features, str):\n+        if discrete_features != 'auto':\n+            raise ValueError(\"Unknown value for discrete_features: {}. \"\n+                             \"Allowed values are: 'auto', True, False, \"\n+                             \"an array_like.\"\n+                             .format(discrete_features))\n         discrete_features = issparse(X)\n \n     if isinstance(discrete_features, bool):\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-14092",
+    "model_patch": "diff --git a/sklearn/utils/tests/test_validation.py b/sklearn/utils/tests/test_validation.py\nindex 7484eb1688..6dc11bb7b5 100644\n--- a/sklearn/utils/tests/test_validation.py\n+++ b/sklearn/utils/tests/test_validation.py\n@@ -838,9 +838,9 @@ def test_check_scalar_valid(x, target_type, min_val, max_val):\n \n @pytest.mark.parametrize('x, target_name, target_type, min_val, max_val, '\n                          'err_msg',\n-                         [(1, \"test_name1\", float, 2, 4,\n+                         [(\"foo\", \"test_name1\", float, 2, 4,\n                            TypeError(\"`test_name1` must be an instance of \"\n-                                     \"<class 'float'>, not <class 'int'>.\")),\n+                                     \"<class 'float'>, not <class 'str'>.\")),\n                           (1, \"test_name2\", int, 2, 4,\n                            ValueError('`test_name2`= 1, must be >= 2.')),\n                           (5, \"test_name3\", int, 2, 4,\ndiff --git a/sklearn/utils/validation.py b/sklearn/utils/validation.py\nindex 8747844e5c..2bec07a9c4 100644\n--- a/sklearn/utils/validation.py\n+++ b/sklearn/utils/validation.py\n@@ -973,8 +973,17 @@ def check_scalar(x, name, target_type, min_val=None, max_val=None):\n     \"\"\"\n \n     if not isinstance(x, target_type):\n-        raise TypeError('`{}` must be an instance of {}, not {}.'\n-                        .format(name, target_type, type(x)))\n+        # Accept numpy integer types when int is expected, and accept int\n+        # when float is expected (e.g. for GridSearchCV parameter grids).\n+        if (target_type is int\n+                and isinstance(x, np.integer)):\n+            pass\n+        elif (target_type is float\n+              and isinstance(x, (int, np.integer))):\n+            pass\n+        else:\n+            raise TypeError('`{}` must be an instance of {}, not {}.'\n+                            .format(name, target_type, type(x)))\n \n     if min_val is not None and x < min_val:\n         raise ValueError('`{}`= {}, must be >= {}.'.format(name, x, min_val))\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "sphinx-doc__sphinx-7975",
+    "model_patch": "diff --git a/sphinx/environment/adapters/indexentries.py b/sphinx/environment/adapters/indexentries.py\nindex 5af213932..1fb47f9ac 100644\n--- a/sphinx/environment/adapters/indexentries.py\n+++ b/sphinx/environment/adapters/indexentries.py\n@@ -110,6 +110,8 @@ class IndexEntries:\n                 lckey = lckey[1:]\n             if lckey[0:1].isalpha() or lckey.startswith('_'):\n                 lckey = chr(127) + lckey\n+            else:\n+                lckey = chr(126) + lckey\n             # ensure a determinstic order *within* letters by also sorting on\n             # the entry itself\n             return (lckey, entry[0])\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-10949",
+    "model_patch": "diff --git a/sklearn/utils/validation.py b/sklearn/utils/validation.py\nindex fe1f7236ec..932a2d9644 100644\n--- a/sklearn/utils/validation.py\n+++ b/sklearn/utils/validation.py\n@@ -464,7 +464,11 @@ def check_array(array, accept_sparse=False, accept_large_sparse=True,\n     dtype_orig = getattr(array, \"dtype\", None)\n     if not hasattr(dtype_orig, 'kind'):\n         # not a data type (e.g. a column named dtype in a pandas DataFrame)\n-        dtype_orig = None\n+        # Try to get dtype from DataFrame-like objects\n+        if hasattr(array, \"values\"):\n+            dtype_orig = getattr(array.values, \"dtype\", None)\n+        else:\n+            dtype_orig = None\n \n     if dtype_numeric:\n         if dtype_orig is not None and dtype_orig.kind == \"O\":\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-25500",
+    "model_patch": "diff --git a/sklearn/calibration.py b/sklearn/calibration.py\nindex 2c4a33616d..34aadd2e9b 100644\n--- a/sklearn/calibration.py\n+++ b/sklearn/calibration.py\n@@ -760,7 +760,7 @@ class _CalibratedClassifier:\n                 # When binary, `predictions` consists only of predictions for\n                 # clf.classes_[1] but `pos_class_indices` = 0\n                 class_idx += 1\n-            proba[:, class_idx] = calibrator.predict(this_pred)\n+            proba[:, class_idx] = np.asarray(calibrator.predict(this_pred)).ravel()\n \n         # Normalize the probabilities\n         if n_classes == 2:\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "sympy__sympy-13647",
+    "model_patch": "diff --git a/sympy/matrices/common.py b/sympy/matrices/common.py\nindex 056d9bc497..4aa75e4d77 100644\n--- a/sympy/matrices/common.py\n+++ b/sympy/matrices/common.py\n@@ -86,7 +86,7 @@ def entry(i, j):\n                 return self[i, j]\n             elif pos <= j < pos + other.cols:\n                 return other[i, j - pos]\n-            return self[i, j - pos - other.cols]\n+            return self[i, j - other.cols]\n \n         return self._new(self.rows, self.cols + other.cols,\n                          lambda i, j: entry(i, j))\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "sympy__sympy-12454",
+    "model_patch": "diff --git a/sympy/matrices/matrices.py b/sympy/matrices/matrices.py\nindex 90ea232faf..7e6d4395b8 100644\n--- a/sympy/matrices/matrices.py\n+++ b/sympy/matrices/matrices.py\n@@ -641,7 +641,7 @@ def _eval_is_zero(self):\n     def _eval_is_upper_hessenberg(self):\n         return all(self[i, j].is_zero\n                    for i in range(2, self.rows)\n-                   for j in range(i - 1))\n+                   for j in range(min(i - 1, self.cols)))\n \n     def _eval_values(self):\n         return [i for i in self if not i.is_zero]\n@@ -1112,7 +1112,7 @@ def is_upper(self):\n         \"\"\"\n         return all(self[i, j].is_zero\n                    for i in range(1, self.rows)\n-                   for j in range(i))\n+                   for j in range(min(i, self.cols)))\n \n     @property\n     def is_zero(self):\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "sphinx-doc__sphinx-8627",
+    "model_patch": "diff --git a/sphinx/util/typing.py b/sphinx/util/typing.py\nindex 2d4f67bba..536e50544 100644\n--- a/sphinx/util/typing.py\n+++ b/sphinx/util/typing.py\n@@ -315,6 +315,16 @@ def stringify(annotation: Any) -> str:\n def _stringify_py37(annotation: Any) -> str:\n     \"\"\"stringify() for py37+.\"\"\"\n     module = getattr(annotation, '__module__', None)\n+    if module and hasattr(annotation, '__qualname__'):\n+        # For C extension types (e.g., struct.Struct where __module__ is '_struct'),\n+        # try to find the public module that re-exports the type\n+        if module.startswith('_'):\n+            parent_module = module[1:]\n+            if parent_module in sys.modules:\n+                parent = sys.modules[parent_module]\n+                obj = getattr(parent, annotation.__qualname__, None)\n+                if obj is annotation:\n+                    module = parent_module\n     if module == 'typing':\n         if getattr(annotation, '_name', None):\n             qualname = annotation._name\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "sphinx-doc__sphinx-8506",
+    "model_patch": "diff --git a/sphinx/domains/std.py b/sphinx/domains/std.py\nindex c87217c56..c7b28d2a8 100644\n--- a/sphinx/domains/std.py\n+++ b/sphinx/domains/std.py\n@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)\n \n \n # RE for option descriptions\n-option_desc_re = re.compile(r'((?:/|--|-|\\+)?[^\\s=[]+)(=?\\s*.*)')\n+option_desc_re = re.compile(r'((?:/|--|-|\\+)?\\[?[^\\s=[]+)(=?\\s*.*)')\n # RE for grammar tokens\n token_re = re.compile(r'`(\\w+)`', re.U)\n \n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "sympy__sympy-15609",
+    "model_patch": "diff --git a/sympy/printing/latex.py b/sympy/printing/latex.py\nindex 901918674a..8923ff6791 100644\n--- a/sympy/printing/latex.py\n+++ b/sympy/printing/latex.py\n@@ -1438,7 +1438,7 @@ def _print_MatrixBase(self, expr):\n \n     def _print_MatrixElement(self, expr):\n         return self.parenthesize(expr.parent, PRECEDENCE[\"Atom\"], strict=True) \\\n-            + '_{%s, %s}' % (expr.i, expr.j)\n+            + '_{%s, %s}' % (self._print(expr.i), self._print(expr.j))\n \n     def _print_MatrixSlice(self, expr):\n         def latexslice(x):\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "sympy__sympy-15011",
+    "model_patch": "diff --git a/sympy/utilities/lambdify.py b/sympy/utilities/lambdify.py\nindex f71bea25f5..bf3722d507 100644\n--- a/sympy/utilities/lambdify.py\n+++ b/sympy/utilities/lambdify.py\n@@ -531,7 +531,7 @@ def lambdastr(args, expr, printer=None, dummify=False):\n     'lambda _0,_1: (lambda x,y,z: (x + y))(_0,_1[0],_1[1])'\n     \"\"\"\n     # Transforming everything to strings.\n-    from sympy.matrices import DeferredVector\n+    from sympy.matrices import DeferredVector, MatrixSymbol\n     from sympy import Dummy, sympify, Symbol, Function, flatten\n \n     if printer is not None:\n@@ -560,6 +560,10 @@ def sub_args(args, dummies_dict):\n                 dummies = Dummy()\n                 dummies_dict.update({args : dummies})\n                 return str(dummies)\n+            elif isinstance(args, MatrixSymbol):\n+                dummies = Dummy()\n+                dummies_dict.update({args : dummies})\n+                return str(dummies)\n             else:\n                 return str(args)\n \n@@ -708,7 +712,7 @@ def _preprocess(self, args, expr):\n         Returns string form of args, and updated expr.\n         \"\"\"\n         from sympy import Dummy, Symbol, Function, flatten\n-        from sympy.matrices import DeferredVector\n+        from sympy.matrices import DeferredVector, MatrixSymbol\n \n         dummify = self._dummify\n \n@@ -728,6 +732,15 @@ def _preprocess(self, args, expr):\n             elif isinstance(arg, Symbol):\n                 argrep = self._argrepr(arg)\n \n+                if dummify or not self._is_safe_ident(argrep):\n+                    dummy = Dummy()\n+                    argstrs.append(self._argrepr(dummy))\n+                    expr = self._subexpr(expr, {arg: dummy})\n+                else:\n+                    argstrs.append(argrep)\n+            elif isinstance(arg, MatrixSymbol):\n+                argrep = str(arg.name)\n+\n                 if dummify or not self._is_safe_ident(argrep):\n                     dummy = Dummy()\n                     argstrs.append(self._argrepr(dummy))\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "sympy__sympy-18532",
+    "model_patch": "diff --git a/sympy/core/basic.py b/sympy/core/basic.py\nindex 6866648d4e..6571793972 100644\n--- a/sympy/core/basic.py\n+++ b/sympy/core/basic.py\n@@ -503,13 +503,14 @@ def atoms(self, *types):\n         if types:\n             types = tuple(\n                 [t if isinstance(t, type) else type(t) for t in types])\n+            result = set()\n+            for expr in preorder_traversal(self):\n+                if isinstance(expr, types):\n+                    result.add(expr)\n+            return result\n         else:\n-            types = (Atom,)\n-        result = set()\n-        for expr in preorder_traversal(self):\n-            if isinstance(expr, types):\n-                result.add(expr)\n-        return result\n+            return {expr for expr in preorder_traversal(self)\n+                    if not expr.args}\n \n     @property\n     def free_symbols(self):\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "sympy__sympy-16988",
+    "model_patch": "diff --git a/sympy/sets/sets.py b/sympy/sets/sets.py\nindex 03cf57a30b..efb23acb65 100644\n--- a/sympy/sets/sets.py\n+++ b/sympy/sets/sets.py\n@@ -1265,6 +1265,8 @@ def __new__(cls, *args, **kwargs):\n         # Reduce sets using known rules\n         if evaluate:\n             args = list(cls._new_args_filter(args))\n+            # Remove duplicate sets\n+            args = list(ordered(set(args), Set._infimum_key))\n             return simplify_intersection(args)\n \n         args = list(ordered(args, Set._infimum_key))\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "sympy__sympy-13177",
+    "model_patch": "diff --git a/sympy/core/mod.py b/sympy/core/mod.py\nindex 11c800704b..f7efc66964 100644\n--- a/sympy/core/mod.py\n+++ b/sympy/core/mod.py\n@@ -39,7 +39,7 @@ def doit(p, q):\n             if p.is_infinite or q.is_infinite or p is nan or q is nan:\n                 return nan\n             if (p == q or p == -q or\n-                    p.is_Pow and p.exp.is_Integer and p.base == q or\n+                    p.is_Pow and p.exp.is_Integer and p.base == q and q.is_integer or\n                     p.is_integer and q == 1):\n                 return S.Zero\n \n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "sympy__sympy-19487",
+    "model_patch": "diff --git a/sympy/functions/elementary/complexes.py b/sympy/functions/elementary/complexes.py\nindex 7fda45982b..f2354bcf72 100644\n--- a/sympy/functions/elementary/complexes.py\n+++ b/sympy/functions/elementary/complexes.py\n@@ -394,6 +394,9 @@ def _eval_rewrite_as_Heaviside(self, arg, **kwargs):\n         if arg.is_extended_real:\n             return Heaviside(arg, H0=S(1)/2) * 2 - 1\n \n+    def _eval_rewrite_as_Abs(self, arg, **kwargs):\n+        return Piecewise((0, Eq(arg, 0)), (arg/Abs(arg), True))\n+\n     def _eval_simplify(self, **kwargs):\n         return self.func(self.args[0].factor())  # XXX include doit?\n \n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "sympy__sympy-17655",
+    "model_patch": "diff --git a/sympy/geometry/point.py b/sympy/geometry/point.py\nindex 7c978c47be..226dd50d6e 100644\n--- a/sympy/geometry/point.py\n+++ b/sympy/geometry/point.py\n@@ -21,7 +21,7 @@\n \n import warnings\n \n-from sympy.core import S, sympify, Expr\n+from sympy.core import S, sympify, Expr, Mul\n from sympy.core.compatibility import is_sequence\n from sympy.core.containers import Tuple\n from sympy.simplify import nsimplify, simplify\n@@ -213,6 +213,13 @@ def __add__(self, other):\n         sympy.geometry.point.Point.translate\n \n         \"\"\"\n+        if isinstance(other, Mul):\n+            # e.g. 2*Point(1,1) or sympify(2.0)*Point(1,1)\n+            # Try to extract the Point factor and resolve the multiplication\n+            pts = [a for a in other.args if isinstance(a, Point)]\n+            if len(pts) == 1:\n+                other = pts[0] * Mul(*[a for a in other.args\n+                                       if not isinstance(a, Point)])\n         try:\n             s, o = Point._normalize_dimension(self, Point(other, evaluate=False))\n         except TypeError:\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "sympy__sympy-13915",
+    "model_patch": "diff --git a/sympy/core/mul.py b/sympy/core/mul.py\nindex 4f01eeedbd..dab2689cd0 100644\n--- a/sympy/core/mul.py\n+++ b/sympy/core/mul.py\n@@ -423,6 +423,12 @@ def _gather(c_powers):\n             changed = False\n             for b, e in c_powers:\n                 if e.is_zero:\n+                    # if the base is or contains an infinity then we have\n+                    # an expression like zoo*zoo**(-1) or (zoo + x)/(zoo + x)\n+                    # which should be nan, not 1\n+                    if b.is_finite is False or b.has(S.ComplexInfinity) \\\n+                            or b.has(S.Infinity) or b.has(S.NegativeInfinity):\n+                        return [S.NaN], [], order_symbols\n                     continue\n                 if e is S.One:\n                     if b.is_Number:\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "sympy__sympy-22840",
+    "model_patch": "diff --git a/sympy/simplify/cse_main.py b/sympy/simplify/cse_main.py\nindex d649dd02a9..26d8d23ee0 100644\n--- a/sympy/simplify/cse_main.py\n+++ b/sympy/simplify/cse_main.py\n@@ -586,6 +586,9 @@ def _find_repeated(expr):\n         if isinstance(expr, RootOf):\n             return\n \n+        if isinstance(expr, MatrixSymbol):\n+            return\n+\n         if isinstance(expr, Basic) and (expr.is_Atom or expr.is_Order):\n             if expr.is_Symbol:\n                 excluded_symbols.add(expr)\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "sympy__sympy-24213",
+    "model_patch": "diff --git a/sympy/physics/units/unitsystem.py b/sympy/physics/units/unitsystem.py\nindex a436880c4b..5705c821c2 100644\n--- a/sympy/physics/units/unitsystem.py\n+++ b/sympy/physics/units/unitsystem.py\n@@ -175,7 +175,7 @@ def _collect_factor_and_dimension(self, expr):\n             for addend in expr.args[1:]:\n                 addend_factor, addend_dim = \\\n                     self._collect_factor_and_dimension(addend)\n-                if dim != addend_dim:\n+                if not self.get_dimension_system().equivalent_dims(dim, addend_dim):\n                     raise ValueError(\n                         'Dimension of \"{}\" is {}, '\n                         'but it should be {}'.format(\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "sympy__sympy-20639",
+    "model_patch": "diff --git a/sympy/printing/pretty/pretty.py b/sympy/printing/pretty/pretty.py\nindex df7452ee87..769090c7ca 100644\n--- a/sympy/printing/pretty/pretty.py\n+++ b/sympy/printing/pretty/pretty.py\n@@ -1954,7 +1954,7 @@ def _print_Pow(self, power):\n             if e is S.NegativeOne:\n                 return prettyForm(\"1\")/self._print(b)\n             n, d = fraction(e)\n-            if n is S.One and d.is_Atom and not e.is_Integer and self._settings['root_notation']:\n+            if n is S.One and (d.is_Integer or d.is_Symbol) and not e.is_Integer and self._settings['root_notation']:\n                 return self._print_nth_root(b, e)\n             if e.is_Rational and e < 0:\n                 return prettyForm(\"1\")/self._print(Pow(b, -e, evaluate=False))\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "sympy__sympy-20049",
+    "model_patch": "diff --git a/sympy/physics/vector/point.py b/sympy/physics/vector/point.py\nindex d4e3cfcc90..dd3ce2a835 100644\n--- a/sympy/physics/vector/point.py\n+++ b/sympy/physics/vector/point.py\n@@ -518,10 +518,37 @@ def vel(self, frame):\n         \"\"\"\n \n         _check_frame(frame)\n-        if not (frame in self._vel_dict):\n+        if frame in self._vel_dict:\n+            return self._vel_dict[frame]\n+        # Attempt to automatically calculate the velocity from position\n+        # relationships. BFS through the position tree to find the shortest\n+        # path to a point that has its velocity defined in the frame.\n+        visited = {self}\n+        queue = [[self]]\n+        found_path = None\n+        while queue:\n+            path = queue.pop(0)\n+            current = path[-1]\n+            for point in current._pos_dict:\n+                if point in visited:\n+                    continue\n+                visited.add(point)\n+                new_path = path + [point]\n+                if frame in point._vel_dict:\n+                    found_path = new_path\n+                    break\n+                queue.append(new_path)\n+            if found_path is not None:\n+                break\n+        if found_path is None:\n             raise ValueError('Velocity of point ' + self.name + ' has not been'\n                              ' defined in ReferenceFrame ' + frame.name)\n-        return self._vel_dict[frame]\n+        # Walk the path backward: start from the terminal point with known\n+        # velocity and accumulate derivatives of position vectors.\n+        vel = found_path[-1].vel(frame)\n+        for i in range(len(found_path) - 2, -1, -1):\n+            vel += found_path[i]._pos_dict[found_path[i + 1]].dt(frame)\n+        return vel\n \n     def partial_velocity(self, frame, *gen_speeds):\n         \"\"\"Returns the partial velocities of the linear velocity vector of this\n",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  },
+  {
+    "instance_id": "sympy__sympy-21612",
+    "model_patch": "",
+    "model_name_or_path": "xiaomi/mimo-v2.5"
+  }
+]

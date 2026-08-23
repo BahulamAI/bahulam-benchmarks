@@ -1,0 +1,45 @@
+{
+  "http": 200,
+  "endpoints": [
+    {
+      "provider": "GMICloud",
+      "input_usd_per_1m": 0.119,
+      "output_usd_per_1m": 0.238,
+      "cache_read_usd_per_1m": 0.00255,
+      "context_length": 1050000,
+      "supports_tools": true
+    },
+    {
+      "provider": "Xiaomi",
+      "input_usd_per_1m": 0.14,
+      "output_usd_per_1m": 0.28,
+      "cache_read_usd_per_1m": 0.0028,
+      "context_length": 1048576,
+      "supports_tools": true
+    },
+    {
+      "provider": "Parasail",
+      "input_usd_per_1m": 0.14,
+      "output_usd_per_1m": 0.28,
+      "cache_read_usd_per_1m": 0.049999999999999996,
+      "context_length": 1048576,
+      "supports_tools": true
+    },
+    {
+      "provider": "Novita",
+      "input_usd_per_1m": 0.16799999999999998,
+      "output_usd_per_1m": 0.33599999999999997,
+      "cache_read_usd_per_1m": 0.0034,
+      "context_length": 1048576,
+      "supports_tools": true
+    },
+    {
+      "provider": "DeepInfra",
+      "input_usd_per_1m": 0.39999999999999997,
+      "output_usd_per_1m": 2.0,
+      "cache_read_usd_per_1m": 0.08,
+      "context_length": 262144,
+      "supports_tools": true
+    }
+  ]
+}
