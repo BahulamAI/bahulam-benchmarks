@@ -1,0 +1,226 @@
+{
+  "schema_version": 2,
+  "run_id": "2026-08-23_xiaomi-mimo-v2-5",
+  "run_started_at": "2026-08-23T02:03:05.664472Z",
+  "run_finished_at": "2026-08-23T05:07:06.276247Z",
+  "wall_clock_seconds": 4339.3,
+  "stage": "verified",
+  "gates_verdict": "PASS",
+  "gates_pending_vm": [
+    "resolve_rate",
+    "resolve_per_patch",
+    "dashboard_cost_usd",
+    "cost_delta_pct"
+  ],
+  "model": {
+    "slug": "xiaomi/mimo-v2.5"
+  },
+  "harness": {
+    "cli_version": "0.1.1",
+    "cli_package": "@bahulam/code@0.1.1",
+    "harness_git_sha": "vendored-unpinned",
+    "gateway_url": "https://gateway.bahulam.ai/v1",
+    "dataset": "swe-bench-lite",
+    "instance_file": "screening-300-shard1.txt",
+    "instance_count": 60,
+    "parallel": 5,
+    "timeout_s": 1200
+  },
+  "environment": {
+    "hostname": "b9d517a12e83",
+    "railway_deployment_id": "4a476ec7-95ae-4166-b844-9186434757a8",
+    "railway_service_id": "3a27666f-a29f-4f4d-ab0c-224a2c1c3421",
+    "railway_project_id": "5752685d-0c17-4c9f-9a3c-887b58f1be68",
+    "railway_region": null,
+    "python": "3.11.16"
+  },
+  "preflight": {
+    "http": 200,
+    "passed": true,
+    "reason": null,
+    "sample_response": {
+      "finish_reason": "tool_calls",
+      "has_tool_calls": true,
+      "provider": "Xiaomi"
+    }
+  },
+  "pricing_snapshot_path": "pricing.json",
+  "totals": {
+    "input_tokens": 230350753,
+    "output_tokens": 2465273,
+    "cache_read_tokens": 220539136,
+    "cache_write_tokens": 0,
+    "reasoning_tokens": 0,
+    "tools_invoked": 7603,
+    "sub_agent_invocations": 4,
+    "harness_cost_usd": 130.2168,
+    "stagnation_triggers": 94
+  },
+  "distributions": {
+    "cost_usd": {
+      "n": 300,
+      "mean": 0.4341,
+      "median": 0.2944,
+      "p95": 1.2476,
+      "min": 0,
+      "max": 2.807,
+      "sum": 130.2167
+    },
+    "duration_s": {
+      "n": 300,
+      "mean": 376.9123,
+      "median": 241.0,
+      "p95": 1200,
+      "min": 5.9,
+      "max": 1200,
+      "sum": 113073.7
+    },
+    "input_tokens": {
+      "n": 300,
+      "mean": 767835.8433,
+      "median": 440893.5,
+      "p95": 2373769,
+      "min": 0,
+      "max": 5775490,
+      "sum": 230350753
+    },
+    "output_tokens": {
+      "n": 300,
+      "mean": 8217.5767,
+      "median": 4590.0,
+      "p95": 27757,
+      "min": 0,
+      "max": 73251,
+      "sum": 2465273
+    },
+    "tools_per_instance": {
+      "n": 300,
+      "mean": 25.3433,
+      "median": 20.0,
+      "p95": 62.0,
+      "min": 0.0,
+      "max": 115.0,
+      "sum": 7603.0
+    }
+  },
+  "cache": {
+    "cache_read_tokens": 220539136,
+    "cache_write_tokens": 0,
+    "cache_hit_ratio_input": 0.9574
+  },
+  "tool_breakdown": {
+    "search_code": 1610,
+    "get_project_overview": 353,
+    "edit_file": 521,
+    "read_file": 1581,
+    "run_tests": 699,
+    "grep": 492,
+    "shell": 2084,
+    "git_diff": 102,
+    "analyze_code": 76,
+    "delegate": 3,
+    "search_files": 43,
+    "list_files": 23,
+    "web_search": 7,
+    "explore": 1,
+    "write_file": 9,
+    "validate_file": 1,
+    "read_attachment": 3,
+    "bash": 1,
+    "git_status": 1
+  },
+  "outcome_counts": {
+    "patched": 265,
+    "bahulam_failed": 22,
+    "no_changes": 13
+  },
+  "metrics": {
+    "instances_submitted": 300,
+    "patched": 265,
+    "patch_rate": 0.8833,
+    "tool_call_emission_rate": 0.9267,
+    "zero_tool_timeout_count": 22,
+    "avg_duration_s": 376.9,
+    "avg_input_tokens": 767835,
+    "avg_output_tokens": 8217,
+    "cache_hit_pct": 0.9574,
+    "harness_cost_usd": 130.2168,
+    "harness_cost_per_patched_usd": 0.4914,
+    "total_tools_invoked": 7603,
+    "resolved": 189,
+    "resolve_rate": 0.63,
+    "resolve_per_patch": 0.7132,
+    "dashboard_cost_usd": 0.0,
+    "cost_per_resolved_usd": 0.0,
+    "cost_delta_pct": null,
+    "cost_note": "free model \u2014 dashboard cost not applicable; harness_cost_usd is a placeholder from catalog pricing"
+  },
+  "shards_merged": 5,
+  "docker_eval": {
+    "resolved_instances": 189,
+    "unresolved_instances": 74,
+    "empty_patch_instances": 35,
+    "error_instances": 2,
+    "report_path": "docker-eval.json"
+  },
+  "is_reasoning_model": false,
+  "gate_results": [
+    {
+      "metric": "resolve_rate",
+      "actual": 0.63,
+      "threshold": 0.3,
+      "op": ">=",
+      "passed": true
+    },
+    {
+      "metric": "cache_hit_pct",
+      "actual": 0.9574,
+      "threshold": 0.7,
+      "op": ">=",
+      "passed": true
+    },
+    {
+      "metric": "tool_call_emission_rate",
+      "actual": 0.9267,
+      "threshold": 0.9,
+      "op": ">=",
+      "passed": true
+    },
+    {
+      "metric": "cost_per_resolved_usd",
+      "actual": 0.0,
+      "threshold": 2.0,
+      "op": "<=",
+      "passed": true
+    },
+    {
+      "metric": "dashboard_cost_usd",
+      "skipped": true,
+      "reason": "n/a for free-tier model"
+    },
+    {
+      "metric": "cost_delta_pct",
+      "skipped": true,
+      "reason": "n/a for free-tier model"
+    },
+    {
+      "metric": "resolve_per_patch",
+      "actual": 0.7132,
+      "threshold": 0.6,
+      "op": ">=",
+      "passed": true
+    },
+    {
+      "metric": "reasoning_token_ratio",
+      "skipped": true,
+      "reason": "n/a for non-reasoning model"
+    }
+  ],
+  "full_300_projection": {
+    "full_300_cost_usd": 0.0,
+    "full_300_resolved": 189,
+    "full_300_cost_per_resolved_usd": 0.0,
+    "full_300_cache_hit_pct": 0.957,
+    "notes": "cost * 15.0x (accounts for sympy/sphinx tail); cache penalty 0.1 for reasoning models"
+  }
+}
