@@ -36,27 +36,30 @@ RUN pip install --no-cache-dir --quiet \
         swebench \
     && rm -rf /root/.cache/pip
 
-# --- Bahulam CLI + Linux runtime (installed as a plain npm package tree
-#     so the harness scripts can `node src/terminal/main.mjs` against it) ---
-WORKDIR /opt/bahulam-cli
-RUN npm pack "@bahulam/code@${BAHULAM_CODE_VERSION}" \
-        --pack-destination /tmp \
-    && tar xzf /tmp/bahulam-code-*.tgz --strip-components=1 -C /opt/bahulam-cli \
-    && npm install --no-save --omit=optional "@bahulam/runtime-linux-x64@${BAHULAM_CODE_VERSION}" \
-    && rm /tmp/bahulam-code-*.tgz
+# --- Bahulam CLI (global install so postinstall runs and drops the runtime
+#     at /root/.bahulam/runtime/current/, which the CLI hardcodes).
+#     Symlink /opt/bahulam-cli -> $(npm root -g)/@bahulam/code so the
+#     vendored benchmark scripts (KEPLER_MAIN = /opt/bahulam-cli/src/
+#     terminal/main.mjs) keep resolving. ---
+RUN npm install -g "@bahulam/code@${BAHULAM_CODE_VERSION}" \
+    && ln -sfn "$(npm root -g)/@bahulam/code" /opt/bahulam-cli \
+    && ls -la /root/.bahulam/runtime/current/bin/ 2>&1 | head -5 \
+    && node /opt/bahulam-cli/src/terminal/main.mjs --version 2>&1 | head -3
 
 # --- Copy harness + benchmark scripts into the CLI tree so screen.py can
 #     invoke the standard swe-bench/harness.py entrypoint. The harness
-#     scripts live in the git repo, not the npm package. Railway builds
-#     mount them via COPY. ---
+#     scripts live in the git repo, not the npm package. Vendored here for
+#     reproducibility from this public repo. ---
 COPY vendor/benchmark/  /opt/bahulam-cli/benchmark/
-COPY vendor/scripts/    /opt/bahulam-cli/scripts/
 
-# --- Screen script + configs ---
-COPY screen.py          /opt/screen/screen.py
-COPY configs/           /opt/screen/configs/
-COPY scripts/entrypoint.sh /opt/screen/entrypoint.sh
-RUN chmod +x /opt/screen/entrypoint.sh
+# --- Screen script + configs + benchmarks push ---
+# CACHE_BUST 2026-08-22-1926 (bumps this line invalidates the COPY layer)
+COPY screen.py                         /opt/screen/screen.py
+COPY configs/                          /opt/screen/configs/
+COPY scripts/entrypoint.sh             /opt/screen/entrypoint.sh
+COPY scripts/push-to-benchmarks.sh     /opt/screen/push-to-benchmarks.sh
+RUN chmod +x /opt/screen/entrypoint.sh /opt/screen/push-to-benchmarks.sh \
+    && sha256sum /opt/screen/entrypoint.sh /opt/screen/push-to-benchmarks.sh
 
 WORKDIR /opt/screen
 
@@ -64,7 +67,8 @@ ENV BAHULAM_CLI_DIR=/opt/bahulam-cli \
     BAHULAM_RUNTIME_MODE=bundled \
     LLM_GATEWAY=BahulamGateway
 
-# Railway persistent volumes are mounted at /data
-VOLUME ["/data"]
+# /data is ephemeral inside the container. If a Railway Volume is attached
+# via `railway volume add --mount /data`, it will overlay this path.
+RUN mkdir -p /data
 
 ENTRYPOINT ["/opt/screen/entrypoint.sh"]
