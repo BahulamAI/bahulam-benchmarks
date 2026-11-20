@@ -155,8 +155,11 @@ def run_kepler(repo_dir: Path, instance: dict, model: str, timeout: int = 600, d
         f"{problem}"
     )
 
+    # --local: run the agent loop in this container and call Bahulam Gateway
+    # directly. Without it the CLI posts /api/execute to the cloud backend and
+    # every parallel instance becomes an agent loop on prod.
     cmd = [
-        "node", str(KEPLER_MAIN), "--headless", "--verbose",
+        "node", str(KEPLER_MAIN), "--headless", "--verbose", "--local",
         "--timeout", str(timeout),
         "-p", instruction,
     ]
