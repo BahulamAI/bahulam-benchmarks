@@ -4,8 +4,8 @@
   "run_started_at": "2026-11-20T03:36:17.811634Z",
   "run_finished_at": "2026-11-20T06:03:37.112620Z",
   "wall_clock_seconds": 8839.3,
-  "stage": "railway-inference-complete",
-  "gates_verdict": "PENDING-VM",
+  "stage": "verified",
+  "gates_verdict": "REJECT",
   "gates_pending_vm": [
     "resolve_rate",
     "resolve_per_patch",
@@ -136,6 +136,81 @@
     "reasoning_token_ratio": 0,
     "harness_cost_usd": 0,
     "harness_cost_per_patched_usd": 0.0,
-    "total_tools_invoked": 288
+    "total_tools_invoked": 288,
+    "resolved": 0,
+    "resolve_rate": 0.0,
+    "resolve_per_patch": 0.0,
+    "dashboard_cost_usd": 0.0,
+    "cost_per_resolved_usd": null,
+    "cost_delta_pct": null,
+    "cost_note": "free model \u2014 dashboard cost not applicable; harness_cost_usd is a placeholder from catalog pricing"
+  },
+  "docker_eval": {
+    "resolved_instances": 0,
+    "unresolved_instances": 0,
+    "empty_patch_instances": 287,
+    "error_instances": 13,
+    "report_path": "docker-eval.json"
+  },
+  "is_reasoning_model": false,
+  "gate_results": [
+    {
+      "metric": "resolve_rate",
+      "actual": 0.0,
+      "threshold": 0.3,
+      "op": ">=",
+      "passed": false
+    },
+    {
+      "metric": "cache_hit_pct",
+      "actual": 0.0,
+      "threshold": 0.7,
+      "op": ">=",
+      "passed": false
+    },
+    {
+      "metric": "tool_call_emission_rate",
+      "actual": 1.0,
+      "threshold": 0.9,
+      "op": ">=",
+      "passed": true
+    },
+    {
+      "metric": "cost_per_resolved_usd",
+      "actual": null,
+      "threshold": 2.0,
+      "op": "<=",
+      "passed": false,
+      "reason": "metric missing from screen"
+    },
+    {
+      "metric": "dashboard_cost_usd",
+      "skipped": true,
+      "reason": "n/a for free-tier model"
+    },
+    {
+      "metric": "cost_delta_pct",
+      "skipped": true,
+      "reason": "n/a for free-tier model"
+    },
+    {
+      "metric": "resolve_per_patch",
+      "actual": 0.0,
+      "threshold": 0.6,
+      "op": ">=",
+      "passed": false
+    },
+    {
+      "metric": "reasoning_token_ratio",
+      "skipped": true,
+      "reason": "n/a for non-reasoning model"
+    }
+  ],
+  "full_300_projection": {
+    "full_300_cost_usd": 0.0,
+    "full_300_resolved": 0,
+    "full_300_cost_per_resolved_usd": null,
+    "full_300_cache_hit_pct": 0,
+    "notes": "cost * 15.0x (accounts for sympy/sphinx tail); cache penalty 0.1 for reasoning models"
   }
 }
