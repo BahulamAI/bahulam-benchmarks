@@ -48,7 +48,12 @@ def run_docker_eval(predictions: Path, output_dir: Path, run_id: str) -> Path:
     cmd = [
         "python", "-m", "swebench.harness.run_evaluation",
         "--predictions_path", str(predictions),
-        "--dataset_name", "princeton-nlp/SWE-bench_Lite",
+        # swebench>=4 moved to pre-built per-instance Docker images; the
+        # legacy "princeton-nlp/SWE-bench_Lite" dataset has no "image" field
+        # and fails with KeyError('image') in make_test_spec(). The official
+        # successor namespace carries it (e.g.
+        # swebench/sweb.eval.x86_64.astropy_1776_astropy-12907:latest).
+        "--dataset_name", "SWE-bench/SWE-bench_Lite",
         "--run_id", run_id,
         "--max_workers", "1",
     ]
@@ -122,9 +127,12 @@ def compute_full_300_projection(metrics: dict, gates_yaml: dict, is_reasoning: b
     """Extrapolate screen cost/resolve to full-300."""
     mult = float(gates_yaml.get("projection", {}).get("full_300_cost_multiplier", 15.0))
     penalty = float(gates_yaml.get("projection", {}).get("cache_hit_scale_penalty_reasoning", 0.10))
-    projected_cost = metrics.get("dashboard_cost_usd", 0) * mult
-    projected_resolve = metrics.get("resolve_rate", 0) * 300
-    projected_cache = metrics.get("cache_hit_pct", 0)
+    # dict.get(key, default) only applies the default when the key is
+    # MISSING, not when it's present but None (e.g. cache_hit_pct is None
+    # for providers that don't report cache stats). `or 0` catches both.
+    projected_cost = (metrics.get("dashboard_cost_usd") or 0) * mult
+    projected_resolve = (metrics.get("resolve_rate") or 0) * 300
+    projected_cache = metrics.get("cache_hit_pct") or 0
     if is_reasoning:
         projected_cache = max(0.0, projected_cache - penalty)
     return {
