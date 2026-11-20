@@ -1,0 +1,143 @@
+{
+  "schema_version": 2,
+  "run_id": "2026-11-20_z-ai-glm-5-3-flash",
+  "run_started_at": "2026-11-20T04:32:28.920771Z",
+  "run_finished_at": "2026-11-20T17:04:41.093025Z",
+  "wall_clock_seconds": 45132.2,
+  "stage": "railway-inference-complete",
+  "gates_verdict": "PENDING-VM",
+  "gates_pending_vm": [
+    "resolve_rate",
+    "resolve_per_patch",
+    "dashboard_cost_usd",
+    "cost_delta_pct"
+  ],
+  "model": {
+    "slug": "z-ai/glm-5.3-flash"
+  },
+  "harness": {
+    "cli_version": "0.2.4",
+    "cli_package": "@bahulam/code@0.2.4",
+    "harness_git_sha": "vendored-unpinned",
+    "gateway_url": "https://gateway.bahulam.ai/v1",
+    "dataset": "swe-bench-lite",
+    "instance_file": "screening-300.txt",
+    "instance_count": 300,
+    "parallel": 2,
+    "timeout_s": 1200
+  },
+  "environment": {
+    "hostname": "e2bf3bfcb45c",
+    "railway_deployment_id": "08baff4c-c4cb-430d-8f99-e052300cd0e5",
+    "railway_service_id": "3efa92e4-b09e-4972-b28f-8d5f0b82043c",
+    "railway_project_id": "5752685d-0c17-4c9f-9a3c-887b58f1be68",
+    "railway_region": null,
+    "python": "3.11.18"
+  },
+  "preflight": {
+    "http": 200,
+    "passed": true,
+    "reason": null,
+    "sample_response": {
+      "finish_reason": "tool_calls",
+      "has_tool_calls": true,
+      "provider": "Mistral"
+    }
+  },
+  "pricing_snapshot_path": "pricing.json",
+  "totals": {
+    "input_tokens": 135451600,
+    "output_tokens": 2039461,
+    "cache_read_tokens": 0,
+    "cache_write_tokens": 0,
+    "reasoning_tokens": 0,
+    "tools_invoked": 4452,
+    "sub_agent_invocations": 0,
+    "harness_cost_usd": 6.76,
+    "stagnation_triggers": 0
+  },
+  "distributions": {
+    "cost_usd": {
+      "n": 300,
+      "mean": 0.0225,
+      "median": 0.0,
+      "p95": 0.135,
+      "min": 0,
+      "max": 0.2313,
+      "sum": 6.76
+    },
+    "duration_s": {
+      "n": 300,
+      "mean": 291.7767,
+      "median": 131.35,
+      "p95": 1200,
+      "min": 4.5,
+      "max": 1200,
+      "sum": 87533.0
+    },
+    "input_tokens": {
+      "n": 300,
+      "mean": 451505.3333,
+      "median": 0.0,
+      "p95": 2848950,
+      "min": 0,
+      "max": 4878021,
+      "sum": 135451600
+    },
+    "output_tokens": {
+      "n": 300,
+      "mean": 6798.2033,
+      "median": 0.0,
+      "p95": 40029,
+      "min": 0,
+      "max": 83529,
+      "sum": 2039461
+    },
+    "tools_per_instance": {
+      "n": 300,
+      "mean": 14.84,
+      "median": 5.0,
+      "p95": 54.0,
+      "min": 0.0,
+      "max": 65.0,
+      "sum": 4452.0
+    }
+  },
+  "cache": {
+    "cache_read_tokens": 0,
+    "cache_write_tokens": 0,
+    "cache_hit_ratio_input": 0.0
+  },
+  "tool_breakdown": {
+    "read_file": 613,
+    "edit_file": 192,
+    "shell": 3119,
+    "write_file": 120,
+    "search_code": 336,
+    "list_files": 62,
+    "search_files": 3,
+    "delete_file": 5,
+    "read_files": 1,
+    "validate_file": 1
+  },
+  "outcome_counts": {
+    "patched": 101,
+    "no_changes": 178,
+    "bahulam_failed": 21
+  },
+  "metrics": {
+    "instances_submitted": 300,
+    "patched": 101,
+    "patch_rate": 0.3367,
+    "tool_call_emission_rate": 0.93,
+    "zero_tool_timeout_count": 21,
+    "avg_duration_s": 291.8,
+    "avg_input_tokens": 451505,
+    "avg_output_tokens": 6798,
+    "cache_hit_pct": 0.0,
+    "reasoning_token_ratio": 0,
+    "harness_cost_usd": 6.76,
+    "harness_cost_per_patched_usd": 0.0669,
+    "total_tools_invoked": 4452
+  }
+}
