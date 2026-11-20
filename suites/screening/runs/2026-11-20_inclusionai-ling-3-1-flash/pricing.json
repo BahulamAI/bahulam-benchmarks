@@ -1,0 +1,13 @@
+{
+  "http": 200,
+  "endpoints": [
+    {
+      "provider": "Novita",
+      "input_usd_per_1m": 0.06,
+      "output_usd_per_1m": 0.18,
+      "cache_read_usd_per_1m": 0.012,
+      "context_length": 1000000,
+      "supports_tools": true
+    }
+  ]
+}
