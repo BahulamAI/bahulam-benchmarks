@@ -83,7 +83,10 @@ def preflight_tools_accepted(model: str) -> dict:
             },
         }],
         "tool_choice": "auto",
-        "max_tokens": 50,
+        # Reasoning models (e.g. cohere/north-mini-code) emit a thinking
+        # block before the tool call; 50 tokens cut that off and produced a
+        # false REJECT (finish='length', no tool_calls). 1024 is still cheap.
+        "max_tokens": 1024,
     }).encode()
     status, resp = _http_json(
         f"{GATEWAY_URL}/chat/completions",
@@ -383,9 +386,17 @@ def build_partial_report(
 
 
 def _run_id(model: str, started_at: str) -> str:
-    """Match published-run naming convention: <YYYY-MM-DD>_<vendor>-<slug>."""
+    """Match published-run naming convention: <YYYY-MM-DD>_<vendor>-<slug>.
+
+    OpenRouter free-tier model slugs carry a ":free" suffix (e.g.
+    "nvidia/nemotron-3.5-lightning:free"). ":" is not a valid character in a
+    git ref, so push-to-benchmarks.sh's `git checkout -b "$BRANCH"` was
+    failing silently for every free-model run (caught by entrypoint.sh's
+    `|| echo ... continuing anyway`, so the harness still printed DONE).
+    Strip it so free-model runs actually publish.
+    """
     date = started_at.split("T", 1)[0]
-    slug = model.replace("/", "-").replace(".", "-")
+    slug = model.replace("/", "-").replace(".", "-").replace(":", "-")
     return f"{date}_{slug}"
 
 

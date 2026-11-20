@@ -40,6 +40,27 @@ if [[ -z "$B0_TOKEN" || -z "$BENCHMARKS_GH_TOKEN" ]]; then
   exit 2
 fi
 
+# Pre-flight: b0_ tokens expire 30 days after `bahulam login`. Verify the
+# token against the gateway BEFORE baking it into 5 shard services, otherwise
+# every shard builds, boots, and crashes on "Invalid or expired token".
+GATEWAY_URL="${BAHULAM_GATEWAY_URL:-https://gateway.bahulam.ai/v1}"
+# The gateway resolves tokens via the backend with a 10s timeout; a backend
+# ReadTimeout surfaces as a spurious 401, so retry before declaring expiry.
+TOKEN_HTTP=000
+for attempt in 1 2 3; do
+  TOKEN_HTTP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 \
+    -H "Authorization: Bearer $B0_TOKEN" "$GATEWAY_URL/models" || echo 000)
+  [[ "$TOKEN_HTTP" == "200" ]] && break
+  echo "[pre-flight] attempt $attempt: HTTP $TOKEN_HTTP from $GATEWAY_URL/models — retrying" >&2
+  sleep 3
+done
+if [[ "$TOKEN_HTTP" != "200" ]]; then
+  echo "B0_TOKEN rejected by $GATEWAY_URL/models (HTTP $TOKEN_HTTP, 3 attempts)." >&2
+  echo "Token is expired or invalid — run 'bahulam logout && bahulam login' and retry." >&2
+  exit 2
+fi
+echo "[pre-flight] B0_TOKEN accepted by gateway (HTTP 200)"
+
 echo "==============================================================="
 echo "  Sharded dispatch"
 echo "  model:        $MODEL"

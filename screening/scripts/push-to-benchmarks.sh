@@ -50,6 +50,15 @@ if [[ -z "$RUN_ID" ]]; then
   RUN_ID="${DATE}_${SLUG}"
 fi
 
+# ":" is not valid in a git ref. Free-tier OpenRouter slugs carry a ":free"
+# suffix (e.g. "nvidia/nemotron-3.5-lightning:free"), and that suffix can
+# reach here two ways: via the fallback slug above, or via a stale
+# screening-report.json written by an older screen.py build (which is
+# exactly what happened on 2026-11-20 — SALVAGE_MODE reused an on-disk
+# report's bad run_id and `git checkout -b` failed silently). Sanitize
+# unconditionally, regardless of where RUN_ID came from.
+RUN_ID="${RUN_ID//:/-}"
+
 BRANCH="screening/${RUN_ID}"
 RUN_DIR_REL="suites/screening/runs/${RUN_ID}"
 if [[ -n "$SHARD" ]]; then
