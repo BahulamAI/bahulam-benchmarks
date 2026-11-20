@@ -1,0 +1,172 @@
+{
+  "benchmark": "swe-bench-lite",
+  "model": "deepseek/deepseek-v4-flash",
+  "timestamp": "2026-08-22T16:41:47.139407",
+  "total": 5,
+  "passed": 5,
+  "failed": 0,
+  "errors": 0,
+  "pass_rate": 100.0,
+  "total_cost_usd": 0.087,
+  "avg_cost_usd": 0.017,
+  "results": [
+    {
+      "instance_id": "psf__requests-2317",
+      "repo": "psf/requests",
+      "model": "deepseek/deepseek-v4-flash",
+      "timestamp": "2026-08-22T16:33:40.898243",
+      "kepler": {
+        "success": true,
+        "duration_s": 82.1,
+        "cost_usd": 0.007501,
+        "tools": 18,
+        "tool_breakdown": {
+          "search_code": 3,
+          "get_project_overview": 1,
+          "analyze_code": 1,
+          "grep": 3,
+          "read_file": 7,
+          "edit_file": 2,
+          "run_tests": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 259485,
+          "output_tokens": 3260,
+          "cache_read": 236032,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/requests/sessions.py b/requests/sessions.py\nindex d701ff2e..7015eba6 100644\n--- a/requests/sessions.py\n+++ b/requests/sessions.py\n@@ -425,6 +425,8 @@ class Session(SessionRedirectMixin):\n             If Tuple, ('cert', 'key') pair.\n         \"\"\"\n \n+        if isinstance(method, bytes):\n+            method = method.decode('utf-8')\n         method = builtin_str(method)\n \n         # Create the Request.\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-10914",
+      "repo": "django/django",
+      "model": "deepseek/deepseek-v4-flash",
+      "timestamp": "2026-08-22T16:33:40.897816",
+      "kepler": {
+        "success": true,
+        "duration_s": 124.0,
+        "cost_usd": 0.015253,
+        "tools": 19,
+        "tool_breakdown": {
+          "search_code": 6,
+          "get_project_overview": 1,
+          "read_file": 5,
+          "grep": 3,
+          "edit_file": 1,
+          "run_tests": 3
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 1,
+        "usage": {
+          "input_tokens": 416923,
+          "output_tokens": 4988,
+          "cache_read": 353280,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/django/conf/global_settings.py b/django/conf/global_settings.py\nindex acee9887d2..bdeec80610 100644\n--- a/django/conf/global_settings.py\n+++ b/django/conf/global_settings.py\n@@ -304,7 +304,7 @@ FILE_UPLOAD_TEMP_DIR = None\n \n # The numeric mode to set newly-uploaded files to. The value should be a mode\n # you'd pass directly to os.chmod; see https://docs.python.org/library/os.html#files-and-directories.\n-FILE_UPLOAD_PERMISSIONS = None\n+FILE_UPLOAD_PERMISSIONS = 0o644\n \n # The numeric mode to assign to newly-created directories, when uploading files.\n # The value should be a mode as you'd pass to os.chmod;\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "astropy__astropy-12907",
+      "repo": "astropy/astropy",
+      "model": "deepseek/deepseek-v4-flash",
+      "timestamp": "2026-08-22T16:33:40.896917",
+      "kepler": {
+        "success": true,
+        "duration_s": 194.3,
+        "cost_usd": 0.014862,
+        "tools": 21,
+        "tool_breakdown": {
+          "search_code": 4,
+          "get_project_overview": 1,
+          "read_file": 3,
+          "edit_file": 1,
+          "shell": 11,
+          "git_diff": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 1,
+        "usage": {
+          "input_tokens": 529138,
+          "output_tokens": 12342,
+          "cache_read": 497408,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/astropy/modeling/separable.py b/astropy/modeling/separable.py\nindex a308e27297..45bea36085 100644\n--- a/astropy/modeling/separable.py\n+++ b/astropy/modeling/separable.py\n@@ -242,7 +242,7 @@ def _cstack(left, right):\n         cright = _coord_matrix(right, 'right', noutp)\n     else:\n         cright = np.zeros((noutp, right.shape[1]))\n-        cright[-right.shape[0]:, -right.shape[1]:] = 1\n+        cright[-right.shape[0]:, -right.shape[1]:] = right\n \n     return np.hstack([cleft, cright])\n \n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-13496",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "deepseek/deepseek-v4-flash",
+      "timestamp": "2026-08-22T16:35:04.087462",
+      "kepler": {
+        "success": true,
+        "duration_s": 141.8,
+        "cost_usd": 0.020767,
+        "tools": 30,
+        "tool_breakdown": {
+          "search_code": 7,
+          "grep": 7,
+          "get_project_overview": 1,
+          "read_file": 9,
+          "edit_file": 4,
+          "run_tests": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 2,
+        "usage": {
+          "input_tokens": 862349,
+          "output_tokens": 5872,
+          "cache_read": 806400,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 69,
+      "model_patch": "diff --git a/sklearn/ensemble/iforest.py b/sklearn/ensemble/iforest.py\nindex 8a1bd36259..c665370abc 100644\n--- a/sklearn/ensemble/iforest.py\n+++ b/sklearn/ensemble/iforest.py\n@@ -120,6 +120,10 @@ class IsolationForest(BaseBagging, OutlierMixin):\n     verbose : int, optional (default=0)\n         Controls the verbosity of the tree building process.\n \n+    warm_start : bool, optional (default=False)\n+        When set to ``True``, reuse the solution of the previous call to fit\n+        and add more estimators to the ensemble, otherwise, just fit a whole\n+        new forest. See :term:`the Glossary <warm_start>`.\n \n     Attributes\n     ----------\n@@ -173,7 +177,8 @@ class IsolationForest(BaseBagging, OutlierMixin):\n                  n_jobs=None,\n                  behaviour='old',\n                  random_state=None,\n-                 verbose=0):\n+                 verbose=0,\n+                 warm_start=False):\n         super().__init__(\n             base_estimator=ExtraTreeRegressor(\n                 max_features=1,\n@@ -187,7 +192,8 @@ class IsolationForest(BaseBagging, OutlierMixin):\n             max_features=max_features,\n             n_jobs=n_jobs,\n             random_state=random_state,\n-            verbose=verbose)\n+            verbose=verbose,\n+            warm_start=warm_start)\n \n         self.behaviour = behaviour\n         self.contamination = contamination\ndiff --git a/sklearn/ensemble/tests/test_iforest.py b/sklearn/ensemble/tests/test_iforest.py\nindex 9ab679ef66..30f9506e85 100644\n--- a/sklearn/ensemble/tests/test_iforest.py\n+++ b/sklearn/ensemble/tests/test_iforest.py\n@@ -381,3 +381,28 @@ def test_iforest_chunks_works2(\n ):\n     test_iforest_works(contamination)\n     assert mocked_get_chunk.call_count == n_predict_calls\n+\n+\n+@pytest.mark.filterwarnings('ignore:default contamination')\n+@pytest.mark.filterwarnings('ignore:behaviour=\"old\"')\n+def test_warm_start():\n+    \"\"\"Test that warm_start=True adds more trees on repeated fit calls.\"\"\"\n+    X = iris.data\n+    y = iris.target\n+\n+    clf = IsolationForest(n_estimators=5, warm_start=True, random_state=0)\n+    clf.fit(X)\n+    assert len(clf.estimators_) == 5\n+\n+    clf.set_params(n_estimators=10)\n+    clf.fit(X)\n+    assert len(clf.estimators_) == 10\n+\n+    # Without warm_start, fit resets the estimators\n+    clf2 = IsolationForest(n_estimators=5, warm_start=False, random_state=0)\n+    clf2.fit(X)\n+    assert len(clf2.estimators_) == 5\n+\n+    clf2.set_params(n_estimators=10)\n+    clf2.fit(X)\n+    assert len(clf2.estimators_) == 10  # reset to 10, not additive\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "sympy__sympy-13471",
+      "repo": "sympy/sympy",
+      "model": "deepseek/deepseek-v4-flash",
+      "timestamp": "2026-08-22T16:36:03.143651",
+      "kepler": {
+        "success": true,
+        "duration_s": 332.0,
+        "cost_usd": 0.02871,
+        "tools": 44,
+        "tool_breakdown": {
+          "get_project_overview": 2,
+          "search_code": 11,
+          "read_file": 11,
+          "grep": 8,
+          "shell": 8,
+          "edit_file": 2,
+          "git_diff": 1,
+          "run_tests": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 4,
+        "usage": {
+          "input_tokens": 1178184,
+          "output_tokens": 24818,
+          "cache_read": 1136384,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 16,
+      "model_patch": "diff --git a/sympy/core/numbers.py b/sympy/core/numbers.py\nindex 7bc96e68eb..5dda9b8315 100644\n--- a/sympy/core/numbers.py\n+++ b/sympy/core/numbers.py\n@@ -1041,8 +1041,9 @@ def __new__(cls, num, dps=None, prec=None, precision=None):\n             if type(num[1]) is str:\n                 # it's a hexadecimal (coming from a pickled object)\n                 # assume that it is in standard form\n+                # strip trailing L from Python 2 repr of long\n                 num = list(num)\n-                num[1] = long(num[1], 16)\n+                num[1] = long(num[1].rstrip('L'), 16)\n                 _mpf_ = tuple(num)\n             else:\n                 if len(num) == 4:\n",
+      "status": "patched"
+    }
+  ]
+}
