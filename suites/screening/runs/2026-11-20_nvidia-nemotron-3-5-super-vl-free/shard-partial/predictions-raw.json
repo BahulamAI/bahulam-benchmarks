@@ -1,0 +1,6151 @@
+{
+  "benchmark": "swe-bench-lite",
+  "model": "nvidia/nemotron-3.5-super-vl:free",
+  "timestamp": "2026-11-20T06:03:36.866057",
+  "total": 300,
+  "passed": 13,
+  "failed": 0,
+  "errors": 287,
+  "pass_rate": 4.3,
+  "total_cost_usd": 0,
+  "avg_cost_usd": 0.0,
+  "results": [
+    {
+      "instance_id": "astropy__astropy-14182",
+      "repo": "astropy/astropy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T03:36:24.268534",
+      "kepler": {
+        "success": true,
+        "duration_s": 124.3,
+        "cost_usd": 0,
+        "tools": 13,
+        "tool_breakdown": {
+          "search_code": 2,
+          "read_file": 5,
+          "edit_file": 1,
+          "shell": 5
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 16,
+      "model_patch": "diff --git a/astropy/io/ascii/rst.py b/astropy/io/ascii/rst.py\nindex abdeba8efb..78e42b7d63 100644\n--- a/astropy/io/ascii/rst.py\n+++ b/astropy/io/ascii/rst.py\n@@ -57,8 +57,8 @@ class RST(FixedWidth):\n     data_class = SimpleRSTData\n     header_class = SimpleRSTHeader\n \n-    def __init__(self):\n-        super().__init__(delimiter_pad=None, bookend=False)\n+    def __init__(self, header_rows=None):\n+        super().__init__(delimiter_pad=None, bookend=False, header_rows=header_rows)\n \n     def write(self, lines):\n         lines = super().write(lines)\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "astropy__astropy-14365",
+      "repo": "astropy/astropy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T03:38:37.335443",
+      "kepler": {
+        "success": true,
+        "duration_s": 59.9,
+        "cost_usd": 0,
+        "tools": 5,
+        "tool_breakdown": {
+          "read_file": 3,
+          "edit_file": 1,
+          "shell": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/astropy/io/ascii/qdp.py b/astropy/io/ascii/qdp.py\nindex 83a4f004aa..768beb0de9 100644\n--- a/astropy/io/ascii/qdp.py\n+++ b/astropy/io/ascii/qdp.py\n@@ -68,7 +68,7 @@ def _line_type(line, delimiter=None):\n     _new_re = rf\"NO({sep}NO)+\"\n     _data_re = rf\"({_decimal_re}|NO|[-+]?nan)({sep}({_decimal_re}|NO|[-+]?nan))*)\"\n     _type_re = rf\"^\\s*((?P<command>{_command_re})|(?P<new>{_new_re})|(?P<data>{_data_re})?\\s*(\\!(?P<comment>.*))?\\s*$\"\n-    _line_type_re = re.compile(_type_re)\n+    _line_type_re = re.compile(_type_re, re.IGNORECASE)\n     line = line.strip()\n     if not line:\n         return \"comment\"\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "astropy__astropy-12907",
+      "repo": "astropy/astropy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T03:36:24.267636",
+      "kepler": {
+        "success": true,
+        "duration_s": 518.2,
+        "cost_usd": 0,
+        "tools": 29,
+        "tool_breakdown": {
+          "read_file": 9,
+          "search_code": 1,
+          "shell": 18,
+          "edit_file": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 1170293,
+          "output_tokens": 13669,
+          "cache_read": 0,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/astropy/modeling/separable.py b/astropy/modeling/separable.py\nindex a308e27297..45bea36085 100644\n--- a/astropy/modeling/separable.py\n+++ b/astropy/modeling/separable.py\n@@ -242,7 +242,7 @@ def _cstack(left, right):\n         cright = _coord_matrix(right, 'right', noutp)\n     else:\n         cright = np.zeros((noutp, right.shape[1]))\n-        cright[-right.shape[0]:, -right.shape[1]:] = 1\n+        cright[-right.shape[0]:, -right.shape[1]:] = right\n \n     return np.hstack([cleft, cright])\n \n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "astropy__astropy-14995",
+      "repo": "astropy/astropy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T03:39:44.057808",
+      "kepler": {
+        "success": true,
+        "duration_s": 473.2,
+        "cost_usd": 0,
+        "tools": 27,
+        "tool_breakdown": {
+          "read_file": 3,
+          "shell": 23,
+          "edit_file": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 15,
+      "model_patch": "diff --git a/astropy/nddata/mixins/ndarithmetic.py b/astropy/nddata/mixins/ndarithmetic.py\nindex 4153dfccb2..2f2ca4fafd 100644\n--- a/astropy/nddata/mixins/ndarithmetic.py\n+++ b/astropy/nddata/mixins/ndarithmetic.py\n@@ -520,6 +520,9 @@ class NDArithmeticMixin:\n         elif self.mask is None and operand is not None:\n             # Make a copy so there is no reference in the result.\n             return deepcopy(operand.mask)\n+        elif self.mask is not None and operand is not None and operand.mask is None:\n+            # Only self has a mask, so just copy it.\n+            return deepcopy(self.mask)\n         elif operand is None:\n             return deepcopy(self.mask)\n         else:\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "astropy__astropy-6938",
+      "repo": "astropy/astropy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T03:45:11.037360",
+      "kepler": {
+        "success": true,
+        "duration_s": 279.1,
+        "cost_usd": 0,
+        "tools": 16,
+        "tool_breakdown": {
+          "read_file": 2,
+          "search_code": 1,
+          "edit_file": 2,
+          "shell": 11
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 30,
+      "model_patch": "diff --git a/astropy/extern/configobj/configobj.py b/astropy/extern/configobj/configobj.py\nindex 0c02b9b7ad..46860e1ac5 100755\n--- a/astropy/extern/configobj/configobj.py\n+++ b/astropy/extern/configobj/configobj.py\n@@ -17,6 +17,9 @@ import os\n import re\n import sys\n import collections\n+import collections.abc\n+\n+collections.Mapping = collections.abc.Mapping\n \n from codecs import BOM_UTF8, BOM_UTF16, BOM_UTF16_BE, BOM_UTF16_LE\n \ndiff --git a/astropy/io/fits/fitsrec.py b/astropy/io/fits/fitsrec.py\nindex 574b4073b1..43d5394d8f 100644\n--- a/astropy/io/fits/fitsrec.py\n+++ b/astropy/io/fits/fitsrec.py\n@@ -1261,7 +1261,9 @@ class FITS_rec(np.recarray):\n \n         # Replace exponent separator in floating point numbers\n         if 'D' in format:\n-            output_field.replace(encode_ascii('E'), encode_ascii('D'))\n+            output_field[:] = np.char.replace(output_field,\n+                                              encode_ascii('E'),\n+                                              encode_ascii('D'))\n \n \n def _get_recarray_field(array, key):\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "astropy__astropy-7746",
+      "repo": "astropy/astropy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T03:47:44.277812",
+      "kepler": {
+        "success": true,
+        "duration_s": 129.0,
+        "cost_usd": 0,
+        "tools": 4,
+        "tool_breakdown": {
+          "search_code": 1,
+          "shell": 1,
+          "read_file": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-10914",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T03:49:57.715696",
+      "kepler": {
+        "success": true,
+        "duration_s": 42.2,
+        "cost_usd": 0,
+        "tools": 4,
+        "tool_breakdown": {
+          "search_code": 2,
+          "read_file": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-10924",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T03:50:00.653742",
+      "kepler": {
+        "success": true,
+        "duration_s": 50.5,
+        "cost_usd": 0,
+        "tools": 5,
+        "tool_breakdown": {
+          "search_code": 3,
+          "read_file": 1,
+          "search_files": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-11001",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T03:50:51.435403",
+      "kepler": {
+        "success": true,
+        "duration_s": 186.1,
+        "cost_usd": 0,
+        "tools": 12,
+        "tool_breakdown": {
+          "read_file": 2,
+          "edit_file": 2,
+          "shell": 7,
+          "search_files": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 30,
+      "model_patch": "diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py\nindex 7649c39262..39c520f429 100644\n--- a/django/db/models/sql/compiler.py\n+++ b/django/db/models/sql/compiler.py\n@@ -353,7 +353,12 @@ class SQLCompiler:\n             # not taken into account so we strip it. When this entire method\n             # is refactored into expressions, then we can check each part as we\n             # generate it.\n-            without_ordering = self.ordering_parts.search(sql).group(1)\n+            # The ordering SQL can be multiline, so replace newlines with\n+            # spaces to ensure the full SQL is considered when detecting\n+            # duplicates.\n+            without_ordering = self.ordering_parts.search(\n+                ' '.join(sql.splitlines())\n+            ).group(1)\n             params_hash = make_hashable(params)\n             if (without_ordering, params_hash) in seen:\n                 continue\n@@ -366,7 +371,9 @@ class SQLCompiler:\n         if self.query.distinct and not self.query.distinct_fields:\n             select_sql = [t[1] for t in select]\n             for expr, (sql, params, is_ref) in order_by:\n-                without_ordering = self.ordering_parts.search(sql).group(1)\n+                without_ordering = self.ordering_parts.search(\n+                    ' '.join(sql.splitlines())\n+                ).group(1)\n                 if not is_ref and (without_ordering, params) not in select_sql:\n                     extra_select.append((expr, (without_ordering, params), None))\n         return extra_select\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-11019",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T03:51:02.681985",
+      "kepler": {
+        "success": true,
+        "duration_s": 373.8,
+        "cost_usd": 0,
+        "tools": 10,
+        "tool_breakdown": {
+          "search_code": 1,
+          "read_file": 3,
+          "shell": 6
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-11039",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T03:54:08.366059",
+      "kepler": {
+        "success": true,
+        "duration_s": 292.6,
+        "cost_usd": 0,
+        "tools": 15,
+        "tool_breakdown": {
+          "read_file": 5,
+          "search_code": 1,
+          "edit_file": 1,
+          "shell": 8
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 404387,
+          "output_tokens": 3566,
+          "cache_read": 0,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/django/core/management/commands/sqlmigrate.py b/django/core/management/commands/sqlmigrate.py\nindex f0b663222a..b51d1739a4 100644\n--- a/django/core/management/commands/sqlmigrate.py\n+++ b/django/core/management/commands/sqlmigrate.py\n@@ -56,7 +56,7 @@ class Command(BaseCommand):\n         targets = [(app_label, migration.name)]\n \n         # Show begin/end around output only for atomic migrations\n-        self.output_transaction = migration.atomic\n+        self.output_transaction = migration.atomic and connection.features.can_rollback_ddl\n \n         # Make a plan that represents just the requested migrations and show SQL\n         # for it\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-11049",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T03:57:26.869562",
+      "kepler": {
+        "success": true,
+        "duration_s": 146.8,
+        "cost_usd": 0,
+        "tools": 10,
+        "tool_breakdown": {
+          "read_file": 2,
+          "edit_file": 1,
+          "shell": 7
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/django/db/models/fields/__init__.py b/django/db/models/fields/__init__.py\nindex f32ce64629..71005490f3 100644\n--- a/django/db/models/fields/__init__.py\n+++ b/django/db/models/fields/__init__.py\n@@ -1587,7 +1587,7 @@ class DurationField(Field):\n     empty_strings_allowed = False\n     default_error_messages = {\n         'invalid': _(\"'%(value)s' value has an invalid format. It must be in \"\n-                     \"[DD] [HH:[MM:]]ss[.uuuuuu] format.\")\n+                     \"[DD] [[HH:]MM:]ss[.uuuuuu] format.\")\n     }\n     description = _(\"Duration\")\n \n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-11099",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T03:59:11.481839",
+      "kepler": {
+        "success": true,
+        "duration_s": 107.8,
+        "cost_usd": 0,
+        "tools": 3,
+        "tool_breakdown": {
+          "search_code": 1,
+          "search_files": 1,
+          "read_file": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-11133",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:00:04.156169",
+      "kepler": {
+        "success": true,
+        "duration_s": 54.4,
+        "cost_usd": 0,
+        "tools": 4,
+        "tool_breakdown": {
+          "read_file": 2,
+          "edit_file": 1,
+          "shell": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/django/http/response.py b/django/http/response.py\nindex 6a84e193ba..a9ede09dd9 100644\n--- a/django/http/response.py\n+++ b/django/http/response.py\n@@ -229,7 +229,7 @@ class HttpResponseBase:\n         # Handle string types -- we can't rely on force_bytes here because:\n         # - Python attempts str conversion first\n         # - when self._charset != 'utf-8' it re-encodes the content\n-        if isinstance(value, bytes):\n+        if isinstance(value, (bytes, memoryview)):\n             return bytes(value)\n         if isinstance(value, str):\n             return bytes(value.encode(self.charset))\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-11179",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:01:09.897503",
+      "kepler": {
+        "success": true,
+        "duration_s": 29.4,
+        "cost_usd": 0,
+        "tools": 2,
+        "tool_breakdown": {
+          "read_file": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-11283",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:01:10.441092",
+      "kepler": {
+        "success": true,
+        "duration_s": 233.5,
+        "cost_usd": 0,
+        "tools": 15,
+        "tool_breakdown": {
+          "search_code": 3,
+          "search_files": 3,
+          "read_file": 5,
+          "edit_file": 1,
+          "shell": 3
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 48,
+      "model_patch": "diff --git a/django/contrib/auth/migrations/0011_update_proxy_permissions.py b/django/contrib/auth/migrations/0011_update_proxy_permissions.py\nindex 0e66649695..fe5cd26b8b 100644\n--- a/django/contrib/auth/migrations/0011_update_proxy_permissions.py\n+++ b/django/contrib/auth/migrations/0011_update_proxy_permissions.py\n@@ -1,6 +1,10 @@\n+import logging\n+\n from django.db import migrations\n from django.db.models import Q\n \n+logger = logging.getLogger(__name__)\n+\n \n def update_proxy_model_permissions(apps, schema_editor, reverse=False):\n     \"\"\"\n@@ -24,10 +28,29 @@ def update_proxy_model_permissions(apps, schema_editor, reverse=False):\n         proxy_content_type = ContentType.objects.get_for_model(Model, for_concrete_model=False)\n         old_content_type = proxy_content_type if reverse else concrete_content_type\n         new_content_type = concrete_content_type if reverse else proxy_content_type\n-        Permission.objects.filter(\n+        old_permissions = Permission.objects.filter(\n             permissions_query,\n             content_type=old_content_type,\n-        ).update(content_type=new_content_type)\n+        )\n+        new_permissions = Permission.objects.filter(\n+            permissions_query,\n+            content_type=new_content_type,\n+        )\n+        for old_permission in old_permissions:\n+            if new_permissions.filter(\n+                codename=old_permission.codename,\n+            ).exists():\n+                logger.warning(\n+                    \"A problem arose migrating proxy model permissions for model %s.%s. \"\n+                    \"Permission codename '%s' already exists for content type %s.\",\n+                    Model._meta.app_label,\n+                    Model.__name__,\n+                    old_permission.codename,\n+                    new_content_type,\n+                )\n+            else:\n+                old_permission.content_type = new_content_type\n+                old_permission.save()\n \n \n def revert_proxy_model_permissions(apps, schema_editor):\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-11422",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:01:51.734434",
+      "kepler": {
+        "success": true,
+        "duration_s": 222.4,
+        "cost_usd": 0,
+        "tools": 10,
+        "tool_breakdown": {
+          "search_code": 2,
+          "read_file": 5,
+          "write_file": 1,
+          "edit_file": 1,
+          "shell": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 14,
+      "model_patch": "diff --git a/django/utils/autoreload.py b/django/utils/autoreload.py\nindex 7ca0d68fae..8a52b8de2f 100644\n--- a/django/utils/autoreload.py\n+++ b/django/utils/autoreload.py\n@@ -218,7 +218,7 @@ def restart_with_reloader():\n \n class BaseReloader:\n     def __init__(self):\n-        self.extra_files = set()\n+        self.extra_files = {Path(sys.argv[0]).resolve()}\n         self.directory_globs = defaultdict(set)\n         self._stop_condition = threading.Event()\n \n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-11583",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:05:46.692007",
+      "kepler": {
+        "success": true,
+        "duration_s": 15.5,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-11564",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:05:16.816053",
+      "kepler": {
+        "success": true,
+        "duration_s": 81.7,
+        "cost_usd": 0,
+        "tools": 2,
+        "tool_breakdown": {
+          "skill_view": 1,
+          "list_files": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-11620",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:06:13.719933",
+      "kepler": {
+        "success": true,
+        "duration_s": 88.0,
+        "cost_usd": 0,
+        "tools": 4,
+        "tool_breakdown": {
+          "search_code": 3,
+          "read_file": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-11630",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:06:49.775294",
+      "kepler": {
+        "success": true,
+        "duration_s": 54.2,
+        "cost_usd": 0,
+        "tools": 3,
+        "tool_breakdown": {
+          "search_code": 2,
+          "read_file": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-11742",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:07:53.839083",
+      "kepler": {
+        "success": true,
+        "duration_s": 79.8,
+        "cost_usd": 0,
+        "tools": 5,
+        "tool_breakdown": {
+          "shell": 1,
+          "search_code": 2,
+          "read_file": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-11797",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:07:55.127140",
+      "kepler": {
+        "success": true,
+        "duration_s": 83.6,
+        "cost_usd": 0,
+        "tools": 5,
+        "tool_breakdown": {
+          "shell": 1,
+          "search_code": 3,
+          "read_file": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-11815",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:09:25.956183",
+      "kepler": {
+        "success": true,
+        "duration_s": 60.9,
+        "cost_usd": 0,
+        "tools": 5,
+        "tool_breakdown": {
+          "skill_view": 1,
+          "search_code": 2,
+          "read_file": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-11905",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:10:37.809658",
+      "kepler": {
+        "success": true,
+        "duration_s": 75.7,
+        "cost_usd": 0,
+        "tools": 4,
+        "tool_breakdown": {
+          "search_code": 1,
+          "read_file": 3
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-11848",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:09:30.916669",
+      "kepler": {
+        "success": true,
+        "duration_s": 317.0,
+        "cost_usd": 0,
+        "tools": 11,
+        "tool_breakdown": {
+          "read_file": 4,
+          "search_code": 1,
+          "edit_file": 2,
+          "shell": 4
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {
+          "input_tokens": 267465,
+          "output_tokens": 7212,
+          "cache_read": 0,
+          "cache_write": 0
+        }
+      },
+      "patch_lines": 24,
+      "model_patch": "diff --git a/django/utils/http.py b/django/utils/http.py\nindex 572cfb4347..0d7ffbd45e 100644\n--- a/django/utils/http.py\n+++ b/django/utils/http.py\n@@ -176,10 +176,14 @@ def parse_http_date(date):\n     try:\n         year = int(m.group('year'))\n         if year < 100:\n-            if year < 70:\n-                year += 2000\n-            else:\n-                year += 1900\n+            # RFC 7231 section 7.1.1.1: two-digit years are interpreted relative\n+            # to the current time. If the year appears more than 50 years in the\n+            # future, interpret it as the most recent past year with the same\n+            # last two digits.\n+            now = datetime.datetime.utcnow()\n+            year += 2000\n+            if year > now.year + 50:\n+                year -= 100\n         month = MONTHS.index(m.group('mon').lower()) + 1\n         day = int(m.group('day'))\n         hour = int(m.group('hour'))\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-11910",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:12:04.829099",
+      "kepler": {
+        "success": true,
+        "duration_s": 189.7,
+        "cost_usd": 0,
+        "tools": 6,
+        "tool_breakdown": {
+          "task": 1,
+          "search_code": 4,
+          "read_file": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-11964",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:14:59.506466",
+      "kepler": {
+        "success": true,
+        "duration_s": 15.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-11999",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:15:24.900883",
+      "kepler": {
+        "success": true,
+        "duration_s": 46.5,
+        "cost_usd": 0,
+        "tools": 2,
+        "tool_breakdown": {
+          "search_code": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-12113",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:15:26.261334",
+      "kepler": {
+        "success": true,
+        "duration_s": 48.2,
+        "cost_usd": 0,
+        "tools": 2,
+        "tool_breakdown": {
+          "read_file": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-12125",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:16:23.697393",
+      "kepler": {
+        "success": true,
+        "duration_s": 14.9,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-12184",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:16:26.592811",
+      "kepler": {
+        "success": true,
+        "duration_s": 15.1,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-12284",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:16:50.031246",
+      "kepler": {
+        "success": true,
+        "duration_s": 57.7,
+        "cost_usd": 0,
+        "tools": 1,
+        "tool_breakdown": {
+          "search_code": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-12286",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:16:52.995096",
+      "kepler": {
+        "success": true,
+        "duration_s": 60.9,
+        "cost_usd": 0,
+        "tools": 2,
+        "tool_breakdown": {
+          "read_file": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-12453",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:18:05.695116",
+      "kepler": {
+        "success": true,
+        "duration_s": 53.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-12308",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:17:58.983437",
+      "kepler": {
+        "success": true,
+        "duration_s": 68.1,
+        "cost_usd": 0,
+        "tools": 1,
+        "tool_breakdown": {
+          "search_code": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-12497",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:19:18.136927",
+      "kepler": {
+        "success": true,
+        "duration_s": 52.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-12470",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:19:10.604694",
+      "kepler": {
+        "success": true,
+        "duration_s": 67.8,
+        "cost_usd": 0,
+        "tools": 1,
+        "tool_breakdown": {
+          "search_code": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-12589",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:20:21.205281",
+      "kepler": {
+        "success": true,
+        "duration_s": 15.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-12700",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:20:28.906391",
+      "kepler": {
+        "success": true,
+        "duration_s": 15.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-12708",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:20:46.949842",
+      "kepler": {
+        "success": true,
+        "duration_s": 58.8,
+        "cost_usd": 0,
+        "tools": 2,
+        "tool_breakdown": {
+          "task": 1,
+          "read_file": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-12747",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:20:54.458031",
+      "kepler": {
+        "success": true,
+        "duration_s": 58.9,
+        "cost_usd": 0,
+        "tools": 1,
+        "tool_breakdown": {
+          "shell": 1
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-12856",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:21:55.915329",
+      "kepler": {
+        "success": true,
+        "duration_s": 15.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-12908",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:22:04.126042",
+      "kepler": {
+        "success": true,
+        "duration_s": 15.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-12983",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:22:29.841576",
+      "kepler": {
+        "success": true,
+        "duration_s": 48.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-12915",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:22:22.145103",
+      "kepler": {
+        "success": true,
+        "duration_s": 57.2,
+        "cost_usd": 0,
+        "tools": 2,
+        "tool_breakdown": {
+          "read_file": 2
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-13028",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:23:28.742158",
+      "kepler": {
+        "success": true,
+        "duration_s": 262.9,
+        "cost_usd": 0,
+        "tools": 25,
+        "tool_breakdown": {
+          "search_code": 7,
+          "read_file": 4,
+          "edit_file": 1,
+          "shell": 13
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 17,
+      "model_patch": "diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py\nindex ce18098fd2..81eb38e0bb 100644\n--- a/django/db/models/sql/query.py\n+++ b/django/db/models/sql/query.py\n@@ -1124,7 +1124,10 @@ class Query(BaseExpression):\n \n     def check_filterable(self, expression):\n         \"\"\"Raise an error if expression cannot be used in a WHERE clause.\"\"\"\n-        if not getattr(expression, 'filterable', True):\n+        if hasattr(expression, '_meta'):\n+            # Model instances are always filterable values.\n+            pass\n+        elif not getattr(expression, 'filterable', True):\n             raise NotSupportedError(\n                 expression.__class__.__name__ + ' is disallowed in the filter '\n                 'clause.'\n",
+      "status": "patched"
+    },
+    {
+      "instance_id": "django__django-13033",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:23:29.833855",
+      "kepler": {
+        "success": true,
+        "duration_s": 284.7,
+        "cost_usd": 0,
+        "tools": 20,
+        "tool_breakdown": {
+          "shell": 1,
+          "search_code": 13,
+          "read_file": 6
+        },
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-13158",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:28:03.258351",
+      "kepler": {
+        "success": true,
+        "duration_s": 23.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-13220",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:28:26.330108",
+      "kepler": {
+        "success": true,
+        "duration_s": 21.5,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-13230",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:28:37.404898",
+      "kepler": {
+        "success": true,
+        "duration_s": 26.4,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-13265",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:28:58.199680",
+      "kepler": {
+        "success": true,
+        "duration_s": 26.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-13315",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:29:14.646139",
+      "kepler": {
+        "success": true,
+        "duration_s": 21.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-13321",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:29:35.552324",
+      "kepler": {
+        "success": true,
+        "duration_s": 20.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-13401",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:29:46.695436",
+      "kepler": {
+        "success": true,
+        "duration_s": 25.5,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-13447",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:30:06.982751",
+      "kepler": {
+        "success": true,
+        "duration_s": 20.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-13448",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:30:23.306241",
+      "kepler": {
+        "success": true,
+        "duration_s": 17.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-13551",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:30:38.229554",
+      "kepler": {
+        "success": true,
+        "duration_s": 22.9,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-13590",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:30:51.840677",
+      "kepler": {
+        "success": true,
+        "duration_s": 22.4,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-13658",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:31:11.557051",
+      "kepler": {
+        "success": true,
+        "duration_s": 22.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-13660",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:31:24.664874",
+      "kepler": {
+        "success": true,
+        "duration_s": 20.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-13710",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:31:44.054070",
+      "kepler": {
+        "success": true,
+        "duration_s": 20.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-13757",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:31:55.884605",
+      "kepler": {
+        "success": true,
+        "duration_s": 26.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-13768",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:32:15.983276",
+      "kepler": {
+        "success": true,
+        "duration_s": 31.4,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-13933",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:32:58.017503",
+      "kepler": {
+        "success": true,
+        "duration_s": 15.1,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-13925",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:32:33.777171",
+      "kepler": {
+        "success": true,
+        "duration_s": 46.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-13964",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:33:23.546590",
+      "kepler": {
+        "success": true,
+        "duration_s": 43.4,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-14016",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:33:30.764885",
+      "kepler": {
+        "success": true,
+        "duration_s": 42.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-14017",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:34:17.118991",
+      "kepler": {
+        "success": true,
+        "duration_s": 44.5,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-14155",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:34:23.454312",
+      "kepler": {
+        "success": true,
+        "duration_s": 57.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-14238",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:35:11.978996",
+      "kepler": {
+        "success": true,
+        "duration_s": 53.1,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-14382",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:35:31.884048",
+      "kepler": {
+        "success": true,
+        "duration_s": 46.5,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-14534",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:36:29.267091",
+      "kepler": {
+        "success": true,
+        "duration_s": 15.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-14411",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:36:18.280467",
+      "kepler": {
+        "success": true,
+        "duration_s": 48.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-14580",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:36:54.816041",
+      "kepler": {
+        "success": true,
+        "duration_s": 46.1,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-14608",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:37:17.199678",
+      "kepler": {
+        "success": true,
+        "duration_s": 49.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-14667",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:37:51.153329",
+      "kepler": {
+        "success": true,
+        "duration_s": 48.4,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-14672",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:38:16.475658",
+      "kepler": {
+        "success": true,
+        "duration_s": 56.1,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-14730",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:38:50.265941",
+      "kepler": {
+        "success": true,
+        "duration_s": 34.1,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-14752",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:39:23.148684",
+      "kepler": {
+        "success": true,
+        "duration_s": 35.9,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-14787",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:39:34.126593",
+      "kepler": {
+        "success": true,
+        "duration_s": 26.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-14855",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:40:09.434563",
+      "kepler": {
+        "success": true,
+        "duration_s": 34.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-14915",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:40:10.625620",
+      "kepler": {
+        "success": true,
+        "duration_s": 36.4,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-14999",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:40:58.805737",
+      "kepler": {
+        "success": true,
+        "duration_s": 30.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-14997",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:40:55.820478",
+      "kepler": {
+        "success": true,
+        "duration_s": 49.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-15061",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:41:40.623906",
+      "kepler": {
+        "success": true,
+        "duration_s": 48.5,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-15202",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:41:55.851930",
+      "kepler": {
+        "success": true,
+        "duration_s": 37.1,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-15213",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:42:40.190968",
+      "kepler": {
+        "success": true,
+        "duration_s": 45.5,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-15252",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:42:44.352039",
+      "kepler": {
+        "success": true,
+        "duration_s": 46.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-15320",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:43:36.769982",
+      "kepler": {
+        "success": true,
+        "duration_s": 46.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-15347",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:43:42.071927",
+      "kepler": {
+        "success": true,
+        "duration_s": 50.1,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-15388",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:44:34.166289",
+      "kepler": {
+        "success": true,
+        "duration_s": 35.9,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-15400",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:44:44.143971",
+      "kepler": {
+        "success": true,
+        "duration_s": 38.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-15498",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:45:20.698734",
+      "kepler": {
+        "success": true,
+        "duration_s": 33.1,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-15695",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:45:34.175086",
+      "kepler": {
+        "success": true,
+        "duration_s": 50.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-15738",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:46:04.210888",
+      "kepler": {
+        "success": true,
+        "duration_s": 48.5,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-15781",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:46:35.394449",
+      "kepler": {
+        "success": true,
+        "duration_s": 26.4,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-15789",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:47:02.756823",
+      "kepler": {
+        "success": true,
+        "duration_s": 16.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-15790",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:47:12.070093",
+      "kepler": {
+        "success": true,
+        "duration_s": 42.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-15814",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:47:31.116045",
+      "kepler": {
+        "success": true,
+        "duration_s": 52.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-15819",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:48:04.861850",
+      "kepler": {
+        "success": true,
+        "duration_s": 48.4,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-15851",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:48:34.221123",
+      "kepler": {
+        "success": true,
+        "duration_s": 47.4,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-15902",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:49:03.594336",
+      "kepler": {
+        "success": true,
+        "duration_s": 46.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-15996",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:49:31.845485",
+      "kepler": {
+        "success": true,
+        "duration_s": 57.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-16041",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:50:00.873658",
+      "kepler": {
+        "success": true,
+        "duration_s": 51.9,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-16046",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:50:39.719199",
+      "kepler": {
+        "success": true,
+        "duration_s": 49.5,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-16139",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:51:03.220929",
+      "kepler": {
+        "success": true,
+        "duration_s": 48.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-16229",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:51:39.572632",
+      "kepler": {
+        "success": true,
+        "duration_s": 38.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-16255",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:52:02.123689",
+      "kepler": {
+        "success": true,
+        "duration_s": 43.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-16379",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:52:28.891440",
+      "kepler": {
+        "success": true,
+        "duration_s": 47.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-16400",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:52:55.910338",
+      "kepler": {
+        "success": true,
+        "duration_s": 46.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-16527",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:53:53.224172",
+      "kepler": {
+        "success": true,
+        "duration_s": 15.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-16408",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:53:26.475535",
+      "kepler": {
+        "success": true,
+        "duration_s": 53.1,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-16816",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:54:30.448506",
+      "kepler": {
+        "success": true,
+        "duration_s": 26.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-16595",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:54:19.806241",
+      "kepler": {
+        "success": true,
+        "duration_s": 40.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-16873",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:55:09.855347",
+      "kepler": {
+        "success": true,
+        "duration_s": 39.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-16820",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:55:07.900615",
+      "kepler": {
+        "success": true,
+        "duration_s": 45.9,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-17051",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:56:05.647746",
+      "kepler": {
+        "success": true,
+        "duration_s": 26.5,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-16910",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:56:00.881166",
+      "kepler": {
+        "success": true,
+        "duration_s": 53.1,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "django__django-17087",
+      "repo": "django/django",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:56:43.493292",
+      "kepler": {
+        "success": true,
+        "duration_s": 53.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-18869",
+      "repo": "matplotlib/matplotlib",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:57:04.796989",
+      "kepler": {
+        "success": true,
+        "duration_s": 47.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-22711",
+      "repo": "matplotlib/matplotlib",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:57:47.210380",
+      "kepler": {
+        "success": true,
+        "duration_s": 45.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-22835",
+      "repo": "matplotlib/matplotlib",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:58:02.474309",
+      "kepler": {
+        "success": true,
+        "duration_s": 47.9,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-23299",
+      "repo": "matplotlib/matplotlib",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:58:43.156737",
+      "kepler": {
+        "success": true,
+        "duration_s": 40.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-23314",
+      "repo": "matplotlib/matplotlib",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:59:01.070334",
+      "kepler": {
+        "success": true,
+        "duration_s": 46.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-23476",
+      "repo": "matplotlib/matplotlib",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:59:34.193501",
+      "kepler": {
+        "success": true,
+        "duration_s": 47.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-23562",
+      "repo": "matplotlib/matplotlib",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T04:59:57.703638",
+      "kepler": {
+        "success": true,
+        "duration_s": 44.9,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-23563",
+      "repo": "matplotlib/matplotlib",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:00:32.186172",
+      "kepler": {
+        "success": true,
+        "duration_s": 50.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-23913",
+      "repo": "matplotlib/matplotlib",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:00:54.087772",
+      "kepler": {
+        "success": true,
+        "duration_s": 43.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-23964",
+      "repo": "matplotlib/matplotlib",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:01:33.979424",
+      "kepler": {
+        "success": true,
+        "duration_s": 21.1,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-23987",
+      "repo": "matplotlib/matplotlib",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:01:48.721289",
+      "kepler": {
+        "success": true,
+        "duration_s": 12.4,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-24149",
+      "repo": "matplotlib/matplotlib",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:02:06.264764",
+      "kepler": {
+        "success": true,
+        "duration_s": 35.9,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-24265",
+      "repo": "matplotlib/matplotlib",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:02:13.525259",
+      "kepler": {
+        "success": true,
+        "duration_s": 44.5,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-24970",
+      "repo": "matplotlib/matplotlib",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:03:09.648739",
+      "kepler": {
+        "success": true,
+        "duration_s": 12.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-24334",
+      "repo": "matplotlib/matplotlib",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:02:53.682227",
+      "kepler": {
+        "success": true,
+        "duration_s": 29.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-25311",
+      "repo": "matplotlib/matplotlib",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:03:34.481875",
+      "kepler": {
+        "success": true,
+        "duration_s": 37.4,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-25079",
+      "repo": "matplotlib/matplotlib",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:03:33.420054",
+      "kepler": {
+        "success": true,
+        "duration_s": 38.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-25332",
+      "repo": "matplotlib/matplotlib",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:04:24.490909",
+      "kepler": {
+        "success": true,
+        "duration_s": 16.5,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-25433",
+      "repo": "matplotlib/matplotlib",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:04:24.569990",
+      "kepler": {
+        "success": true,
+        "duration_s": 16.5,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-25498",
+      "repo": "matplotlib/matplotlib",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:04:53.767368",
+      "kepler": {
+        "success": true,
+        "duration_s": 42.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-25442",
+      "repo": "matplotlib/matplotlib",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:04:53.654319",
+      "kepler": {
+        "success": true,
+        "duration_s": 43.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-26011",
+      "repo": "matplotlib/matplotlib",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:05:48.558732",
+      "kepler": {
+        "success": true,
+        "duration_s": 37.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-26020",
+      "repo": "matplotlib/matplotlib",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:05:49.340799",
+      "kepler": {
+        "success": true,
+        "duration_s": 37.5,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "mwaskom__seaborn-2848",
+      "repo": "mwaskom/seaborn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:06:38.770506",
+      "kepler": {
+        "success": true,
+        "duration_s": 21.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "mwaskom__seaborn-3010",
+      "repo": "mwaskom/seaborn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:06:38.826481",
+      "kepler": {
+        "success": true,
+        "duration_s": 38.5,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "mwaskom__seaborn-3190",
+      "repo": "mwaskom/seaborn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:07:01.385795",
+      "kepler": {
+        "success": true,
+        "duration_s": 29.1,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "mwaskom__seaborn-3407",
+      "repo": "mwaskom/seaborn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:07:18.704963",
+      "kepler": {
+        "success": true,
+        "duration_s": 34.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pallets__flask-4045",
+      "repo": "pallets/flask",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:07:31.758361",
+      "kepler": {
+        "success": true,
+        "duration_s": 35.4,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pallets__flask-4992",
+      "repo": "pallets/flask",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:07:54.659808",
+      "kepler": {
+        "success": true,
+        "duration_s": 21.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "psf__requests-1963",
+      "repo": "psf/requests",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:08:16.473139",
+      "kepler": {
+        "success": true,
+        "duration_s": 10.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pallets__flask-5063",
+      "repo": "pallets/flask",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:08:07.817148",
+      "kepler": {
+        "success": true,
+        "duration_s": 21.1,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "psf__requests-2148",
+      "repo": "psf/requests",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:08:27.618286",
+      "kepler": {
+        "success": true,
+        "duration_s": 10.5,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "psf__requests-2317",
+      "repo": "psf/requests",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:08:29.582980",
+      "kepler": {
+        "success": true,
+        "duration_s": 10.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "psf__requests-2674",
+      "repo": "psf/requests",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:08:38.733943",
+      "kepler": {
+        "success": true,
+        "duration_s": 10.5,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "psf__requests-3362",
+      "repo": "psf/requests",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:08:40.685795",
+      "kepler": {
+        "success": true,
+        "duration_s": 10.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "psf__requests-863",
+      "repo": "psf/requests",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:08:49.793574",
+      "kepler": {
+        "success": true,
+        "duration_s": 10.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pydata__xarray-3364",
+      "repo": "pydata/xarray",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:08:51.838764",
+      "kepler": {
+        "success": true,
+        "duration_s": 41.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pydata__xarray-4094",
+      "repo": "pydata/xarray",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:09:00.891268",
+      "kepler": {
+        "success": true,
+        "duration_s": 36.9,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pydata__xarray-4248",
+      "repo": "pydata/xarray",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:09:35.378140",
+      "kepler": {
+        "success": true,
+        "duration_s": 29.9,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pydata__xarray-4493",
+      "repo": "pydata/xarray",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:09:40.201150",
+      "kepler": {
+        "success": true,
+        "duration_s": 29.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pydata__xarray-5131",
+      "repo": "pydata/xarray",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:10:07.644453",
+      "kepler": {
+        "success": true,
+        "duration_s": 50.9,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pylint-dev__pylint-5859",
+      "repo": "pylint-dev/pylint",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:10:11.875507",
+      "kepler": {
+        "success": true,
+        "duration_s": 49.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pylint-dev__pylint-6506",
+      "repo": "pylint-dev/pylint",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:11:00.997502",
+      "kepler": {
+        "success": true,
+        "duration_s": 21.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pylint-dev__pylint-7080",
+      "repo": "pylint-dev/pylint",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:11:03.676706",
+      "kepler": {
+        "success": true,
+        "duration_s": 25.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pylint-dev__pylint-7114",
+      "repo": "pylint-dev/pylint",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:11:24.337768",
+      "kepler": {
+        "success": true,
+        "duration_s": 45.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pylint-dev__pylint-7228",
+      "repo": "pylint-dev/pylint",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:11:31.494188",
+      "kepler": {
+        "success": true,
+        "duration_s": 44.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pylint-dev__pylint-7993",
+      "repo": "pylint-dev/pylint",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:12:12.468910",
+      "kepler": {
+        "success": true,
+        "duration_s": 50.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-11143",
+      "repo": "pytest-dev/pytest",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:12:18.036553",
+      "kepler": {
+        "success": true,
+        "duration_s": 44.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-5103",
+      "repo": "pytest-dev/pytest",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:13:05.051803",
+      "kepler": {
+        "success": true,
+        "duration_s": 38.4,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-11148",
+      "repo": "pytest-dev/pytest",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:13:04.957521",
+      "kepler": {
+        "success": true,
+        "duration_s": 46.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-5221",
+      "repo": "pytest-dev/pytest",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:13:46.011572",
+      "kepler": {
+        "success": true,
+        "duration_s": 10.9,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-5227",
+      "repo": "pytest-dev/pytest",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:13:54.271186",
+      "kepler": {
+        "success": true,
+        "duration_s": 10.9,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-5413",
+      "repo": "pytest-dev/pytest",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:13:59.315527",
+      "kepler": {
+        "success": true,
+        "duration_s": 44.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-5495",
+      "repo": "pytest-dev/pytest",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:14:07.331008",
+      "kepler": {
+        "success": true,
+        "duration_s": 48.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-5692",
+      "repo": "pytest-dev/pytest",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:14:46.253396",
+      "kepler": {
+        "success": true,
+        "duration_s": 36.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-6116",
+      "repo": "pytest-dev/pytest",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:14:58.449076",
+      "kepler": {
+        "success": true,
+        "duration_s": 55.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-7168",
+      "repo": "pytest-dev/pytest",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:15:24.465927",
+      "kepler": {
+        "success": true,
+        "duration_s": 41.9,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-7220",
+      "repo": "pytest-dev/pytest",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:15:56.690775",
+      "kepler": {
+        "success": true,
+        "duration_s": 21.5,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-7373",
+      "repo": "pytest-dev/pytest",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:16:08.628169",
+      "kepler": {
+        "success": true,
+        "duration_s": 45.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-7432",
+      "repo": "pytest-dev/pytest",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:16:20.656885",
+      "kepler": {
+        "success": true,
+        "duration_s": 36.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-7490",
+      "repo": "pytest-dev/pytest",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:16:56.244142",
+      "kepler": {
+        "success": true,
+        "duration_s": 40.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-8365",
+      "repo": "pytest-dev/pytest",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:16:59.582934",
+      "kepler": {
+        "success": true,
+        "duration_s": 46.9,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-8906",
+      "repo": "pytest-dev/pytest",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:17:39.192842",
+      "kepler": {
+        "success": true,
+        "duration_s": 47.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-9359",
+      "repo": "pytest-dev/pytest",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:17:49.011886",
+      "kepler": {
+        "success": true,
+        "duration_s": 43.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-10297",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:18:28.585178",
+      "kepler": {
+        "success": true,
+        "duration_s": 11.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-10508",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:18:35.031310",
+      "kepler": {
+        "success": true,
+        "duration_s": 11.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-10949",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:18:46.508676",
+      "kepler": {
+        "success": true,
+        "duration_s": 42.4,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-11040",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:18:52.752533",
+      "kepler": {
+        "success": true,
+        "duration_s": 42.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-11281",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:19:34.900462",
+      "kepler": {
+        "success": true,
+        "duration_s": 47.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-12471",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:19:40.810933",
+      "kepler": {
+        "success": true,
+        "duration_s": 49.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-13241",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:20:36.083697",
+      "kepler": {
+        "success": true,
+        "duration_s": 11.9,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-13142",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:20:28.469904",
+      "kepler": {
+        "success": true,
+        "duration_s": 47.9,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-13439",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:20:53.958077",
+      "kepler": {
+        "success": true,
+        "duration_s": 47.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-13496",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:21:22.452466",
+      "kepler": {
+        "success": true,
+        "duration_s": 42.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-13497",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:21:47.632513",
+      "kepler": {
+        "success": true,
+        "duration_s": 35.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-13584",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:22:10.895315",
+      "kepler": {
+        "success": true,
+        "duration_s": 40.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-13779",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:22:28.957228",
+      "kepler": {
+        "success": true,
+        "duration_s": 43.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-14092",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:23:18.517512",
+      "kepler": {
+        "success": true,
+        "duration_s": 11.9,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-14087",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:22:57.643226",
+      "kepler": {
+        "success": true,
+        "duration_s": 42.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-14894",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:23:36.336289",
+      "kepler": {
+        "success": true,
+        "duration_s": 43.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-14983",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:23:45.752099",
+      "kepler": {
+        "success": true,
+        "duration_s": 44.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-15512",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:24:25.573943",
+      "kepler": {
+        "success": true,
+        "duration_s": 12.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-15535",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:24:36.571795",
+      "kepler": {
+        "success": true,
+        "duration_s": 40.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-25500",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:24:43.983563",
+      "kepler": {
+        "success": true,
+        "duration_s": 52.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-25570",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:25:23.210409",
+      "kepler": {
+        "success": true,
+        "duration_s": 46.4,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-25638",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:25:42.753439",
+      "kepler": {
+        "success": true,
+        "duration_s": 41.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-25747",
+      "repo": "scikit-learn/scikit-learn",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:26:15.502717",
+      "kepler": {
+        "success": true,
+        "duration_s": 45.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-10325",
+      "repo": "sphinx-doc/sphinx",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:26:30.692790",
+      "kepler": {
+        "success": true,
+        "duration_s": 43.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-10451",
+      "repo": "sphinx-doc/sphinx",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:27:07.116831",
+      "kepler": {
+        "success": true,
+        "duration_s": 40.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-11445",
+      "repo": "sphinx-doc/sphinx",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:27:18.685706",
+      "kepler": {
+        "success": true,
+        "duration_s": 39.5,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-7686",
+      "repo": "sphinx-doc/sphinx",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:27:51.762328",
+      "kepler": {
+        "success": true,
+        "duration_s": 11.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-7975",
+      "repo": "sphinx-doc/sphinx",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:28:07.358467",
+      "kepler": {
+        "success": true,
+        "duration_s": 41.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-7738",
+      "repo": "sphinx-doc/sphinx",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:28:02.513602",
+      "kepler": {
+        "success": true,
+        "duration_s": 51.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "repo": "sphinx-doc/sphinx",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:28:53.122000",
+      "kepler": {
+        "success": true,
+        "duration_s": 11.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8282",
+      "repo": "sphinx-doc/sphinx",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:28:57.953888",
+      "kepler": {
+        "success": true,
+        "duration_s": 11.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8435",
+      "repo": "sphinx-doc/sphinx",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:29:08.624649",
+      "kepler": {
+        "success": true,
+        "duration_s": 44.9,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8474",
+      "repo": "sphinx-doc/sphinx",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:29:13.702949",
+      "kepler": {
+        "success": true,
+        "duration_s": 41.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8595",
+      "repo": "sphinx-doc/sphinx",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:29:59.695410",
+      "kepler": {
+        "success": true,
+        "duration_s": 11.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8506",
+      "repo": "sphinx-doc/sphinx",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:29:57.911589",
+      "kepler": {
+        "success": true,
+        "duration_s": 42.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8627",
+      "repo": "sphinx-doc/sphinx",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:30:15.964898",
+      "kepler": {
+        "success": true,
+        "duration_s": 31.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8713",
+      "repo": "sphinx-doc/sphinx",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:30:45.449950",
+      "kepler": {
+        "success": true,
+        "duration_s": 41.1,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8721",
+      "repo": "sphinx-doc/sphinx",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:30:51.755402",
+      "kepler": {
+        "success": true,
+        "duration_s": 43.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8801",
+      "repo": "sphinx-doc/sphinx",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:31:31.359504",
+      "kepler": {
+        "success": true,
+        "duration_s": 42.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-11400",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:31:39.853185",
+      "kepler": {
+        "success": true,
+        "duration_s": 44.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-11870",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:32:18.021632",
+      "kepler": {
+        "success": true,
+        "duration_s": 13.5,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-12171",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:32:39.936093",
+      "kepler": {
+        "success": true,
+        "duration_s": 40.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-11897",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:32:32.327196",
+      "kepler": {
+        "success": true,
+        "duration_s": 48.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-12236",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:33:28.802030",
+      "kepler": {
+        "success": true,
+        "duration_s": 13.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-12419",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:33:28.906384",
+      "kepler": {
+        "success": true,
+        "duration_s": 34.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-12454",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:33:51.852238",
+      "kepler": {
+        "success": true,
+        "duration_s": 13.5,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-13031",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:34:13.923262",
+      "kepler": {
+        "success": true,
+        "duration_s": 31.4,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-12481",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:34:13.711081",
+      "kepler": {
+        "success": true,
+        "duration_s": 44.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-13043",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:34:55.638170",
+      "kepler": {
+        "success": true,
+        "duration_s": 46.1,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-13146",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:35:07.945595",
+      "kepler": {
+        "success": true,
+        "duration_s": 53.1,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-13437",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:36:09.534759",
+      "kepler": {
+        "success": true,
+        "duration_s": 13.5,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-13177",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:35:50.149215",
+      "kepler": {
+        "success": true,
+        "duration_s": 35.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-13471",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:36:31.217122",
+      "kepler": {
+        "success": true,
+        "duration_s": 38.4,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-13480",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:36:33.591568",
+      "kepler": {
+        "success": true,
+        "duration_s": 41.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-13647",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:37:18.567330",
+      "kepler": {
+        "success": true,
+        "duration_s": 46.9,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-13773",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:37:24.687012",
+      "kepler": {
+        "success": true,
+        "duration_s": 55.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-13895",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:38:13.929336",
+      "kepler": {
+        "success": true,
+        "duration_s": 27.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-13915",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:38:29.131520",
+      "kepler": {
+        "success": true,
+        "duration_s": 13.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-13971",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:38:49.788845",
+      "kepler": {
+        "success": true,
+        "duration_s": 41.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-14024",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:38:51.046959",
+      "kepler": {
+        "success": true,
+        "duration_s": 40.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-14308",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:39:40.773993",
+      "kepler": {
+        "success": true,
+        "duration_s": 39.4,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-14317",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:39:40.788317",
+      "kepler": {
+        "success": true,
+        "duration_s": 38.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-14396",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:40:29.987998",
+      "kepler": {
+        "success": true,
+        "duration_s": 24.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-14774",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:40:30.564435",
+      "kepler": {
+        "success": true,
+        "duration_s": 24.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-14817",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:41:04.197650",
+      "kepler": {
+        "success": true,
+        "duration_s": 42.5,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-15011",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:41:05.340665",
+      "kepler": {
+        "success": true,
+        "duration_s": 43.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-15345",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:41:58.833602",
+      "kepler": {
+        "success": true,
+        "duration_s": 39.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-15308",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:41:56.597392",
+      "kepler": {
+        "success": true,
+        "duration_s": 41.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-15609",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:42:47.710713",
+      "kepler": {
+        "success": true,
+        "duration_s": 14.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-15346",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:42:47.696403",
+      "kepler": {
+        "success": true,
+        "duration_s": 14.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-16106",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:43:11.917726",
+      "kepler": {
+        "success": true,
+        "duration_s": 43.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-15678",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:43:11.782127",
+      "kepler": {
+        "success": true,
+        "duration_s": 43.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-16503",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:44:05.275932",
+      "kepler": {
+        "success": true,
+        "duration_s": 24.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-16281",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:44:05.264028",
+      "kepler": {
+        "success": true,
+        "duration_s": 41.1,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-16792",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:44:39.898000",
+      "kepler": {
+        "success": true,
+        "duration_s": 42.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-16988",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:44:56.166598",
+      "kepler": {
+        "success": true,
+        "duration_s": 55.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-17022",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:45:31.109650",
+      "kepler": {
+        "success": true,
+        "duration_s": 41.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-17139",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:45:59.995498",
+      "kepler": {
+        "success": true,
+        "duration_s": 23.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-17630",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:46:21.532856",
+      "kepler": {
+        "success": true,
+        "duration_s": 43.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-17655",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:46:32.274503",
+      "kepler": {
+        "success": true,
+        "duration_s": 62.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-18057",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:47:13.559671",
+      "kepler": {
+        "success": true,
+        "duration_s": 44.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-18189",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:48:06.052845",
+      "kepler": {
+        "success": true,
+        "duration_s": 24.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-18087",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:47:43.193644",
+      "kepler": {
+        "success": true,
+        "duration_s": 48.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-18532",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:48:40.108731",
+      "kepler": {
+        "success": true,
+        "duration_s": 44.4,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-18199",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:48:39.305890",
+      "kepler": {
+        "success": true,
+        "duration_s": 60.1,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-18621",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:49:34.325853",
+      "kepler": {
+        "success": true,
+        "duration_s": 40.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-18698",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:49:49.309236",
+      "kepler": {
+        "success": true,
+        "duration_s": 42.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-18835",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:50:23.096348",
+      "kepler": {
+        "success": true,
+        "duration_s": 57.5,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-19007",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:50:40.673913",
+      "kepler": {
+        "success": true,
+        "duration_s": 47.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-19254",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:51:29.230617",
+      "kepler": {
+        "success": true,
+        "duration_s": 45.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-19487",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:51:36.253869",
+      "kepler": {
+        "success": true,
+        "duration_s": 48.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-20154",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:52:33.732449",
+      "kepler": {
+        "success": true,
+        "duration_s": 25.1,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-20049",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:52:23.069529",
+      "kepler": {
+        "success": true,
+        "duration_s": 36.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-20212",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:53:07.215471",
+      "kepler": {
+        "success": true,
+        "duration_s": 45.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-20322",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:53:07.588338",
+      "kepler": {
+        "success": true,
+        "duration_s": 54.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-20442",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:54:02.326709",
+      "kepler": {
+        "success": true,
+        "duration_s": 38.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-20590",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:54:12.184142",
+      "kepler": {
+        "success": true,
+        "duration_s": 63.0,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-20639",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:54:49.619971",
+      "kepler": {
+        "success": true,
+        "duration_s": 33.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-21171",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:55:31.779149",
+      "kepler": {
+        "success": true,
+        "duration_s": 42.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-21055",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:55:23.582942",
+      "kepler": {
+        "success": true,
+        "duration_s": 55.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-21379",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:56:22.954488",
+      "kepler": {
+        "success": true,
+        "duration_s": 47.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-21612",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:56:27.754768",
+      "kepler": {
+        "success": true,
+        "duration_s": 49.4,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-21614",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:57:19.285224",
+      "kepler": {
+        "success": true,
+        "duration_s": 31.6,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-21627",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:57:25.795631",
+      "kepler": {
+        "success": true,
+        "duration_s": 32.1,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-22005",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:58:06.261958",
+      "kepler": {
+        "success": true,
+        "duration_s": 36.4,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-21847",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:57:59.572454",
+      "kepler": {
+        "success": true,
+        "duration_s": 44.9,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-22840",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:58:52.991131",
+      "kepler": {
+        "success": true,
+        "duration_s": 48.3,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-22714",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:58:51.512358",
+      "kepler": {
+        "success": true,
+        "duration_s": 53.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-23117",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:59:51.037440",
+      "kepler": {
+        "success": true,
+        "duration_s": 16.4,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-23191",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T05:59:54.729786",
+      "kepler": {
+        "success": true,
+        "duration_s": 51.7,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-23262",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T06:00:16.093539",
+      "kepler": {
+        "success": true,
+        "duration_s": 48.4,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-24066",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T06:00:56.749682",
+      "kepler": {
+        "success": true,
+        "duration_s": 56.2,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-24102",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T06:01:13.477306",
+      "kepler": {
+        "success": true,
+        "duration_s": 56.1,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-24213",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T06:02:18.154136",
+      "kepler": {
+        "success": true,
+        "duration_s": 15.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-24152",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T06:02:01.868365",
+      "kepler": {
+        "success": true,
+        "duration_s": 33.8,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    },
+    {
+      "instance_id": "sympy__sympy-24909",
+      "repo": "sympy/sympy",
+      "model": "nvidia/nemotron-3.5-super-vl:free",
+      "timestamp": "2026-11-20T06:02:42.795283",
+      "kepler": {
+        "success": true,
+        "duration_s": 45.4,
+        "cost_usd": 0,
+        "tools": 0,
+        "tool_breakdown": {},
+        "sub_agents": [],
+        "stagnation_triggers": 0,
+        "usage": {}
+      },
+      "patch_lines": 0,
+      "model_patch": "",
+      "status": "no_changes",
+      "error": "Kepler made no file changes"
+    }
+  ]
+}

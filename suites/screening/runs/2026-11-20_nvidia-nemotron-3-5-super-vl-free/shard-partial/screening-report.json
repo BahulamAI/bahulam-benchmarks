@@ -1,0 +1,141 @@
+{
+  "schema_version": 2,
+  "run_id": "2026-11-20_nvidia-nemotron-3-5-super-vl:free",
+  "run_started_at": "2026-11-20T03:36:17.811634Z",
+  "run_finished_at": "2026-11-20T06:03:37.112620Z",
+  "wall_clock_seconds": 8839.3,
+  "stage": "railway-inference-complete",
+  "gates_verdict": "PENDING-VM",
+  "gates_pending_vm": [
+    "resolve_rate",
+    "resolve_per_patch",
+    "dashboard_cost_usd",
+    "cost_delta_pct"
+  ],
+  "model": {
+    "slug": "nvidia/nemotron-3.5-super-vl:free"
+  },
+  "harness": {
+    "cli_version": "0.2.4",
+    "cli_package": "@bahulam/code@0.2.4",
+    "harness_git_sha": "vendored-unpinned",
+    "gateway_url": "https://gateway.bahulam.ai/v1",
+    "dataset": "swe-bench-lite",
+    "instance_file": "screening-300.txt",
+    "instance_count": 300,
+    "parallel": 2,
+    "timeout_s": 1200
+  },
+  "environment": {
+    "hostname": "912a732a8bd4",
+    "railway_deployment_id": "5d79b7b4-cc55-4dbc-beb0-8f8b1b69f6d2",
+    "railway_service_id": "3cc25126-5875-44f1-b677-f5dc31569921",
+    "railway_project_id": "5752685d-0c17-4c9f-9a3c-887b58f1be68",
+    "railway_region": null,
+    "python": "3.11.18"
+  },
+  "preflight": {
+    "http": 200,
+    "passed": true,
+    "reason": null,
+    "sample_response": {
+      "finish_reason": "tool_calls",
+      "has_tool_calls": true,
+      "provider": "Nvidia"
+    }
+  },
+  "pricing_snapshot_path": "pricing.json",
+  "totals": {
+    "input_tokens": 1842145,
+    "output_tokens": 24447,
+    "cache_read_tokens": 0,
+    "cache_write_tokens": 0,
+    "reasoning_tokens": 0,
+    "tools_invoked": 288,
+    "sub_agent_invocations": 0,
+    "harness_cost_usd": 0,
+    "stagnation_triggers": 0
+  },
+  "distributions": {
+    "cost_usd": {
+      "n": 300,
+      "mean": 0.0,
+      "median": 0.0,
+      "p95": 0,
+      "min": 0,
+      "max": 0,
+      "sum": 0
+    },
+    "duration_s": {
+      "n": 300,
+      "mean": 50.2247,
+      "median": 42.55,
+      "p95": 107.8,
+      "min": 10.5,
+      "max": 518.2,
+      "sum": 15067.4
+    },
+    "input_tokens": {
+      "n": 300,
+      "mean": 6140.4833,
+      "median": 0.0,
+      "p95": 0,
+      "min": 0,
+      "max": 1170293,
+      "sum": 1842145
+    },
+    "output_tokens": {
+      "n": 300,
+      "mean": 81.49,
+      "median": 0.0,
+      "p95": 0,
+      "min": 0,
+      "max": 13669,
+      "sum": 24447
+    },
+    "tools_per_instance": {
+      "n": 300,
+      "mean": 0.96,
+      "median": 0.0,
+      "p95": 5.0,
+      "min": 0.0,
+      "max": 29.0,
+      "sum": 288.0
+    }
+  },
+  "cache": {
+    "cache_read_tokens": 0,
+    "cache_write_tokens": 0,
+    "cache_hit_ratio_input": 0.0
+  },
+  "tool_breakdown": {
+    "search_code": 61,
+    "read_file": 86,
+    "edit_file": 16,
+    "shell": 113,
+    "search_files": 6,
+    "write_file": 1,
+    "skill_view": 2,
+    "list_files": 1,
+    "task": 2
+  },
+  "outcome_counts": {
+    "patched": 13,
+    "no_changes": 287
+  },
+  "metrics": {
+    "instances_submitted": 300,
+    "patched": 13,
+    "patch_rate": 0.0433,
+    "tool_call_emission_rate": 1.0,
+    "zero_tool_timeout_count": 0,
+    "avg_duration_s": 50.2,
+    "avg_input_tokens": 6140,
+    "avg_output_tokens": 81,
+    "cache_hit_pct": 0.0,
+    "reasoning_token_ratio": 0,
+    "harness_cost_usd": 0,
+    "harness_cost_per_patched_usd": 0.0,
+    "total_tools_invoked": 288
+  }
+}
