@@ -1,0 +1,214 @@
+{
+  "schema_version": 2,
+  "run_id": "2026-11-20_nvidia-nemotron-3-ultra-550b-a55b:free",
+  "run_started_at": "2026-11-20T03:36:12.760933Z",
+  "run_finished_at": "2026-11-20T06:29:58.217856Z",
+  "wall_clock_seconds": 10425.5,
+  "stage": "verified",
+  "gates_verdict": "REJECT",
+  "gates_pending_vm": [
+    "resolve_rate",
+    "resolve_per_patch",
+    "dashboard_cost_usd",
+    "cost_delta_pct"
+  ],
+  "model": {
+    "slug": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  "harness": {
+    "cli_version": "0.2.4",
+    "cli_package": "@bahulam/code@0.2.4",
+    "harness_git_sha": "vendored-unpinned",
+    "gateway_url": "https://gateway.bahulam.ai/v1",
+    "dataset": "swe-bench-lite",
+    "instance_file": "screening-300.txt",
+    "instance_count": 300,
+    "parallel": 2,
+    "timeout_s": 1200
+  },
+  "environment": {
+    "hostname": "e8fa188849a3",
+    "railway_deployment_id": "f4b6cdc5-8640-4888-85de-b364ea89d0df",
+    "railway_service_id": "3a27666f-a29f-4f4d-ab0c-224a2c1c3421",
+    "railway_project_id": "5752685d-0c17-4c9f-9a3c-887b58f1be68",
+    "railway_region": null,
+    "python": "3.11.18"
+  },
+  "preflight": {
+    "http": 200,
+    "passed": true,
+    "reason": null,
+    "sample_response": {
+      "finish_reason": "tool_calls",
+      "has_tool_calls": true,
+      "provider": "Nvidia"
+    }
+  },
+  "pricing_snapshot_path": "pricing.json",
+  "totals": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_tokens": 0,
+    "cache_write_tokens": 0,
+    "reasoning_tokens": 0,
+    "tools_invoked": 243,
+    "sub_agent_invocations": 0,
+    "harness_cost_usd": 0,
+    "stagnation_triggers": 0
+  },
+  "distributions": {
+    "cost_usd": {
+      "n": 300,
+      "mean": 0.0,
+      "median": 0.0,
+      "p95": 0,
+      "min": 0,
+      "max": 0,
+      "sum": 0
+    },
+    "duration_s": {
+      "n": 300,
+      "mean": 57.1613,
+      "median": 46.5,
+      "p95": 73.5,
+      "min": 10.6,
+      "max": 912.1,
+      "sum": 17148.4
+    },
+    "input_tokens": {
+      "n": 300,
+      "mean": 0.0,
+      "median": 0.0,
+      "p95": 0,
+      "min": 0,
+      "max": 0,
+      "sum": 0
+    },
+    "output_tokens": {
+      "n": 300,
+      "mean": 0.0,
+      "median": 0.0,
+      "p95": 0,
+      "min": 0,
+      "max": 0,
+      "sum": 0
+    },
+    "tools_per_instance": {
+      "n": 300,
+      "mean": 0.81,
+      "median": 0.0,
+      "p95": 2.0,
+      "min": 0.0,
+      "max": 42.0,
+      "sum": 243.0
+    }
+  },
+  "cache": {
+    "cache_read_tokens": 0,
+    "cache_write_tokens": 0,
+    "cache_hit_ratio_input": null
+  },
+  "tool_breakdown": {
+    "search_code": 58,
+    "read_file": 70,
+    "shell": 98,
+    "edit_file": 9,
+    "search_files": 6,
+    "list_files": 2
+  },
+  "outcome_counts": {
+    "no_changes": 295,
+    "patched": 5
+  },
+  "metrics": {
+    "instances_submitted": 300,
+    "patched": 5,
+    "patch_rate": 0.0167,
+    "tool_call_emission_rate": 1.0,
+    "zero_tool_timeout_count": 0,
+    "avg_duration_s": 57.2,
+    "avg_input_tokens": 0,
+    "avg_output_tokens": 0,
+    "cache_hit_pct": null,
+    "reasoning_token_ratio": 0,
+    "harness_cost_usd": 0,
+    "harness_cost_per_patched_usd": 0.0,
+    "total_tools_invoked": 243,
+    "resolved": 0,
+    "resolve_rate": 0.0,
+    "resolve_per_patch": 0.0,
+    "dashboard_cost_usd": 0.0,
+    "cost_per_resolved_usd": null,
+    "cost_delta_pct": null,
+    "cost_note": "free model \u2014 dashboard cost not applicable; harness_cost_usd is a placeholder from catalog pricing"
+  },
+  "docker_eval": {
+    "resolved_instances": 0,
+    "unresolved_instances": 0,
+    "empty_patch_instances": 295,
+    "error_instances": 5,
+    "report_path": "docker-eval.json"
+  },
+  "is_reasoning_model": false,
+  "gate_results": [
+    {
+      "metric": "resolve_rate",
+      "actual": 0.0,
+      "threshold": 0.3,
+      "op": ">=",
+      "passed": false
+    },
+    {
+      "metric": "cache_hit_pct",
+      "actual": null,
+      "threshold": 0.7,
+      "op": ">=",
+      "passed": false,
+      "reason": "metric missing from screen"
+    },
+    {
+      "metric": "tool_call_emission_rate",
+      "actual": 1.0,
+      "threshold": 0.9,
+      "op": ">=",
+      "passed": true
+    },
+    {
+      "metric": "cost_per_resolved_usd",
+      "actual": null,
+      "threshold": 2.0,
+      "op": "<=",
+      "passed": false,
+      "reason": "metric missing from screen"
+    },
+    {
+      "metric": "dashboard_cost_usd",
+      "skipped": true,
+      "reason": "n/a for free-tier model"
+    },
+    {
+      "metric": "cost_delta_pct",
+      "skipped": true,
+      "reason": "n/a for free-tier model"
+    },
+    {
+      "metric": "resolve_per_patch",
+      "actual": 0.0,
+      "threshold": 0.6,
+      "op": ">=",
+      "passed": false
+    },
+    {
+      "metric": "reasoning_token_ratio",
+      "skipped": true,
+      "reason": "n/a for non-reasoning model"
+    }
+  ],
+  "full_300_projection": {
+    "full_300_cost_usd": 0.0,
+    "full_300_resolved": 0,
+    "full_300_cost_per_resolved_usd": null,
+    "full_300_cache_hit_pct": 0,
+    "notes": "cost * 15.0x (accounts for sympy/sphinx tail); cache penalty 0.1 for reasoning models"
+  }
+}

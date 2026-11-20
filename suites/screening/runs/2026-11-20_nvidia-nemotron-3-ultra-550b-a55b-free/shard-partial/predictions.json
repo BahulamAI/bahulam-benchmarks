@@ -1,0 +1,1502 @@
+[
+  {
+    "instance_id": "astropy__astropy-12907",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "astropy__astropy-14182",
+    "model_patch": "diff --git a/astropy/io/ascii/rst.py b/astropy/io/ascii/rst.py\nindex abdeba8efb..848edb16f5 100644\n--- a/astropy/io/ascii/rst.py\n+++ b/astropy/io/ascii/rst.py\n@@ -1,9 +1,8 @@\n # Licensed under a 3-clause BSD style license\n \"\"\"\n-:Author: Simon Gibbons (simongibbons@gmail.com)\n+:Author: Simon Gibbons (simongibbons@gmail.com).\n \"\"\"\n \n-\n from .core import DefaultSplitter\n from .fixedwidth import (\n     FixedWidth,\n@@ -39,12 +38,29 @@ class RST(FixedWidth):\n \n     Example::\n \n-        ==== ===== ======\n-        Col1  Col2  Col3\n-        ==== ===== ======\n-          1    2.3  Hello\n-          2    4.5  Worlds\n-        ==== ===== ======\n+      >>> from astropy.table import QTable\n+      >>> import astropy.units as u\n+      >>> import sys\n+      >>> tbl = QTable({\"wave\": [350, 950] * u.nm, \"response\": [0.7, 1.2] * u.count})\n+      >>> tbl.write(sys.stdout,  format=\"ascii.rst\")\n+      ===== ========\n+       wave response\n+      ===== ========\n+      350.0      0.7\n+      950.0      1.2\n+      ===== ========\n+\n+    Like other fixed-width formats, when writing a table you can provide ``header_rows``\n+    to specify a list of table rows to output as the header.  For example::\n+\n+      >>> tbl.write(sys.stdout,  format=\"ascii.rst\", header_rows=['name', 'unit'])\n+      ===== ========\n+       wave response\n+         nm       ct\n+      ===== ========\n+      350.0      0.7\n+      950.0      1.2\n+      ===== ========\n \n     Currently there is no support for reading tables which utilize continuation lines,\n     or for ones which define column spans through the use of an additional\n@@ -57,10 +73,28 @@ class RST(FixedWidth):\n     data_class = SimpleRSTData\n     header_class = SimpleRSTHeader\n \n-    def __init__(self):\n-        super().__init__(delimiter_pad=None, bookend=False)\n+    def __init__(self, header_rows=None):\n+        super().__init__(delimiter_pad=None, bookend=False, header_rows=header_rows)\n \n     def write(self, lines):\n+        \"\"\"\n+        Write the table data in RST format including header and footer separator lines.\n+\n+        Parameters\n+        ----------\n+        lines : list of str\n+            The formatted table lines to be written.\n+\n+        Returns\n+        -------\n+        list[str]\n+            The complete RST table with header separator, table content, and\n+            footer separator line.\n+        \"\"\"\n         lines = super().write(lines)\n-        lines = [lines[1]] + lines + [lines[1]]\n-        return lines\n+        idx = len(self.header.header_rows)\n+        return [lines[idx]] + lines + [lines[idx]]\n+\n+    def read(self, table):\n+        self.data.start_line = 2 + len(self.header.header_rows)\n+        return super().read(table)\n",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "astropy__astropy-14365",
+    "model_patch": "diff --git a/astropy/io/ascii/qdp.py b/astropy/io/ascii/qdp.py\nindex 83a4f004aa..09f2337874 100644\n--- a/astropy/io/ascii/qdp.py\n+++ b/astropy/io/ascii/qdp.py\n@@ -34,6 +34,8 @@ def _line_type(line, delimiter=None):\n     --------\n     >>> _line_type(\"READ SERR 3\")\n     'command'\n+    >>> _line_type(\"read serr 1 2\")\n+    'command'\n     >>> _line_type(\" \\\\n    !some gibberish\")\n     'comment'\n     >>> _line_type(\"   \")\n@@ -68,7 +70,7 @@ def _line_type(line, delimiter=None):\n     _new_re = rf\"NO({sep}NO)+\"\n     _data_re = rf\"({_decimal_re}|NO|[-+]?nan)({sep}({_decimal_re}|NO|[-+]?nan))*)\"\n     _type_re = rf\"^\\s*((?P<command>{_command_re})|(?P<new>{_new_re})|(?P<data>{_data_re})?\\s*(\\!(?P<comment>.*))?\\s*$\"\n-    _line_type_re = re.compile(_type_re)\n+    _line_type_re = re.compile(_type_re, re.IGNORECASE)\n     line = line.strip()\n     if not line:\n         return \"comment\"\n",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "astropy__astropy-14995",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "astropy__astropy-6938",
+    "model_patch": "diff --git a/astropy/io/fits/fitsrec.py b/astropy/io/fits/fitsrec.py\nindex 574b4073b1..8890e158e2 100644\n--- a/astropy/io/fits/fitsrec.py\n+++ b/astropy/io/fits/fitsrec.py\n@@ -1261,7 +1261,7 @@ class FITS_rec(np.recarray):\n \n         # Replace exponent separator in floating point numbers\n         if 'D' in format:\n-            output_field.replace(encode_ascii('E'), encode_ascii('D'))\n+            output_field[:] = output_field.replace(encode_ascii('E'), encode_ascii('D'))\n \n \n def _get_recarray_field(array, key):\n",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-10914",
+    "model_patch": "diff --git a/django/conf/global_settings.py b/django/conf/global_settings.py\nindex acee9887d2..bdeec80610 100644\n--- a/django/conf/global_settings.py\n+++ b/django/conf/global_settings.py\n@@ -304,7 +304,7 @@ FILE_UPLOAD_TEMP_DIR = None\n \n # The numeric mode to set newly-uploaded files to. The value should be a mode\n # you'd pass directly to os.chmod; see https://docs.python.org/library/os.html#files-and-directories.\n-FILE_UPLOAD_PERMISSIONS = None\n+FILE_UPLOAD_PERMISSIONS = 0o644\n \n # The numeric mode to assign to newly-created directories, when uploading files.\n # The value should be a mode as you'd pass to os.chmod;\n",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-10924",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "astropy__astropy-7746",
+    "model_patch": "diff --git a/astropy/io/fits/header.py b/astropy/io/fits/header.py\nindex aa65c5c224..500d93e8ab 100644\n--- a/astropy/io/fits/header.py\n+++ b/astropy/io/fits/header.py\n@@ -1,6 +1,7 @@\n # Licensed under a 3-clause BSD style license - see PYFITS.rst\n \n import collections\n+import collections.abc\n import copy\n import itertools\n import re\n@@ -1904,8 +1905,8 @@ class Header:\n             self[key] = value\n \n \n-collections.MutableSequence.register(Header)\n-collections.MutableMapping.register(Header)\n+collections.abc.MutableSequence.register(Header)\n+collections.abc.MutableMapping.register(Header)\n \n \n class _CardAccessor:\n@@ -1976,8 +1977,8 @@ class _CardAccessor:\n         return False\n \n \n-collections.Mapping.register(_CardAccessor)\n-collections.Sequence.register(_CardAccessor)\n+collections.abc.Mapping.register(_CardAccessor)\n+collections.abc.Sequence.register(_CardAccessor)\n \n \n class _HeaderComments(_CardAccessor):\n",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-11001",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-11019",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-11049",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-11039",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-11099",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-11133",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-11283",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-11179",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-11564",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-11422",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-11583",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-11630",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-11620",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-11742",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-11797",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-11815",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-11848",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-11905",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-11910",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-11964",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-12113",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-11999",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-12184",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-12125",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-12284",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-12286",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-12308",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-12453",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-12470",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-12497",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-12589",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-12700",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-12708",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-12747",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-12856",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-12908",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-12915",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-12983",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-13028",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-13033",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-13158",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-13220",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-13230",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-13265",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-13315",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-13401",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-13321",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-13447",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-13448",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-13551",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-13590",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-13660",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-13658",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-13710",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-13757",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-13925",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-13768",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-13964",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-13933",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-14016",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-14017",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-14155",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-14238",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-14382",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-14411",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-14534",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-14580",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-14608",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-14667",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-14672",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-14752",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-14730",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-14787",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-14855",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-14915",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-14997",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-14999",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-15061",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-15202",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-15213",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-15252",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-15320",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-15347",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-15388",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-15400",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-15498",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-15695",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-15738",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-15781",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-15789",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-15790",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-15814",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-15819",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-15851",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-15902",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-15996",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-16041",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-16046",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-16229",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-16139",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-16255",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-16379",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-16400",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-16408",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-16527",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-16595",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-16816",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-16820",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-16873",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-16910",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-17087",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "django__django-17051",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-18869",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-22711",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-22835",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-23299",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-23314",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-23476",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-23562",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-23563",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-23913",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-23964",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-23987",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-24149",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-24265",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-24334",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-25079",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-24970",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-25332",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-25311",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-25433",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-25442",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-25498",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-26011",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "matplotlib__matplotlib-26020",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "mwaskom__seaborn-2848",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "mwaskom__seaborn-3190",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "mwaskom__seaborn-3010",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "mwaskom__seaborn-3407",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pallets__flask-4992",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pallets__flask-4045",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "psf__requests-1963",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pallets__flask-5063",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "psf__requests-2148",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "psf__requests-2317",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "psf__requests-3362",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "psf__requests-2674",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "psf__requests-863",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pydata__xarray-4094",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pydata__xarray-3364",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pydata__xarray-4248",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pydata__xarray-4493",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pylint-dev__pylint-5859",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pydata__xarray-5131",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pylint-dev__pylint-6506",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pylint-dev__pylint-7080",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pylint-dev__pylint-7228",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pylint-dev__pylint-7114",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pylint-dev__pylint-7993",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pytest-dev__pytest-11143",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pytest-dev__pytest-11148",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pytest-dev__pytest-5103",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pytest-dev__pytest-5221",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pytest-dev__pytest-5227",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pytest-dev__pytest-5413",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pytest-dev__pytest-5495",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pytest-dev__pytest-5692",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pytest-dev__pytest-6116",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pytest-dev__pytest-7168",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pytest-dev__pytest-7220",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pytest-dev__pytest-7373",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pytest-dev__pytest-7432",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pytest-dev__pytest-7490",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pytest-dev__pytest-8365",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pytest-dev__pytest-8906",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "pytest-dev__pytest-9359",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-10297",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-10508",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-11040",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-10949",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-11281",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-12471",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-13142",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-13241",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-13439",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-13496",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-13497",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-13584",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-13779",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-14087",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-14092",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-14894",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-14983",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-15512",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-15535",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-25500",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-25638",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-25570",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sphinx-doc__sphinx-10325",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "scikit-learn__scikit-learn-25747",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sphinx-doc__sphinx-10451",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sphinx-doc__sphinx-11445",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sphinx-doc__sphinx-7686",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sphinx-doc__sphinx-7738",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sphinx-doc__sphinx-8273",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sphinx-doc__sphinx-7975",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sphinx-doc__sphinx-8282",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sphinx-doc__sphinx-8435",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sphinx-doc__sphinx-8474",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sphinx-doc__sphinx-8506",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sphinx-doc__sphinx-8595",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sphinx-doc__sphinx-8627",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sphinx-doc__sphinx-8713",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sphinx-doc__sphinx-8801",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sphinx-doc__sphinx-8721",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-11400",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-11870",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-11897",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-12171",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-12419",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-12236",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-12454",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-12481",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-13031",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-13043",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-13146",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-13177",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-13437",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-13471",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-13480",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-13647",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-13773",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-13895",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-13915",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-13971",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-14024",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-14308",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-14317",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-14396",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-14774",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-14817",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-15011",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-15345",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-15308",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-15609",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-15346",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-16106",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-15678",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-16503",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-16281",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-16792",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-16988",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-17022",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-17139",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-17630",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-17655",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-18057",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-18087",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-18189",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-18199",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-18532",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-18621",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-18698",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-18835",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-19007",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-19254",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-19487",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-20049",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-20154",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-20212",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-20322",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-20442",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-20590",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-20639",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-21055",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-21171",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-21379",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-21612",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-21614",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-21627",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-21847",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-22005",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-22714",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-22840",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-23117",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-23191",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-23262",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-24066",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-24102",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-24152",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-24213",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  {
+    "instance_id": "sympy__sympy-24909",
+    "model_patch": "",
+    "model_name_or_path": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  }
+]

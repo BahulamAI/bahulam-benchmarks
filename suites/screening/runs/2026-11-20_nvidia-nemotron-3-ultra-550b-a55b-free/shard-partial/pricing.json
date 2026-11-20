@@ -1,0 +1,13 @@
+{
+  "http": 200,
+  "endpoints": [
+    {
+      "provider": "Nvidia",
+      "input_usd_per_1m": 0.0,
+      "output_usd_per_1m": 0.0,
+      "cache_read_usd_per_1m": null,
+      "context_length": 1000000,
+      "supports_tools": true
+    }
+  ]
+}
