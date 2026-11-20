@@ -1,0 +1,146 @@
+{
+  "schema_version": 2,
+  "run_id": "2026-11-20_tencent-hy4-flash",
+  "run_started_at": "2026-11-20T04:32:38.510945Z",
+  "run_finished_at": "2026-11-20T16:57:48.915928Z",
+  "wall_clock_seconds": 44710.4,
+  "stage": "railway-inference-complete",
+  "gates_verdict": "PENDING-VM",
+  "gates_pending_vm": [
+    "resolve_rate",
+    "resolve_per_patch",
+    "dashboard_cost_usd",
+    "cost_delta_pct"
+  ],
+  "model": {
+    "slug": "tencent/hy4-flash"
+  },
+  "harness": {
+    "cli_version": "0.2.4",
+    "cli_package": "@bahulam/code@0.2.4",
+    "harness_git_sha": "vendored-unpinned",
+    "gateway_url": "https://gateway.bahulam.ai/v1",
+    "dataset": "swe-bench-lite",
+    "instance_file": "screening-300.txt",
+    "instance_count": 252,
+    "parallel": 2,
+    "timeout_s": 1200
+  },
+  "environment": {
+    "hostname": "75a6fb3a8eff",
+    "railway_deployment_id": "40377deb-51e2-47d5-91f5-f065704a882d",
+    "railway_service_id": "ec4eb199-5bd4-49e0-9470-8b75d7f24281",
+    "railway_project_id": "5752685d-0c17-4c9f-9a3c-887b58f1be68",
+    "railway_region": null,
+    "python": "3.11.18"
+  },
+  "preflight": {
+    "http": 200,
+    "passed": true,
+    "reason": null,
+    "sample_response": {
+      "finish_reason": "tool_calls",
+      "has_tool_calls": true,
+      "provider": "Tencent"
+    }
+  },
+  "pricing_snapshot_path": "pricing.json",
+  "totals": {
+    "input_tokens": 204886578,
+    "output_tokens": 677229,
+    "cache_read_tokens": 0,
+    "cache_write_tokens": 0,
+    "reasoning_tokens": 0,
+    "tools_invoked": 5767,
+    "sub_agent_invocations": 0,
+    "harness_cost_usd": 0.6973,
+    "stagnation_triggers": 0
+  },
+  "distributions": {
+    "cost_usd": {
+      "n": 252,
+      "mean": 0.0028,
+      "median": 0.0,
+      "p95": 0.0104,
+      "min": 0,
+      "max": 0.0231,
+      "sum": 0.6973
+    },
+    "duration_s": {
+      "n": 252,
+      "mean": 312.7659,
+      "median": 259.5,
+      "p95": 710.5,
+      "min": 13.2,
+      "max": 1200,
+      "sum": 78817.0
+    },
+    "input_tokens": {
+      "n": 252,
+      "mean": 813041.9762,
+      "median": 0.0,
+      "p95": 3525510,
+      "min": 0,
+      "max": 5803512,
+      "sum": 204886578
+    },
+    "output_tokens": {
+      "n": 252,
+      "mean": 2687.4167,
+      "median": 0.0,
+      "p95": 8513,
+      "min": 0,
+      "max": 18713,
+      "sum": 677229
+    },
+    "tools_per_instance": {
+      "n": 252,
+      "mean": 22.8849,
+      "median": 19.5,
+      "p95": 53.0,
+      "min": 0.0,
+      "max": 56.0,
+      "sum": 5767.0
+    }
+  },
+  "cache": {
+    "cache_read_tokens": 0,
+    "cache_write_tokens": 0,
+    "cache_hit_ratio_input": 0.0
+  },
+  "tool_breakdown": {
+    "search_code": 615,
+    "list_files": 105,
+    "read_file": 965,
+    "shell": 3431,
+    "write_file": 281,
+    "edit_file": 325,
+    "search_files": 18,
+    "delete_file": 13,
+    "validate_file": 7,
+    "read_files": 3,
+    "lint_check": 2,
+    "validate_build": 1,
+    "bash": 1
+  },
+  "outcome_counts": {
+    "no_changes": 115,
+    "patched": 136,
+    "bahulam_failed": 1
+  },
+  "metrics": {
+    "instances_submitted": 252,
+    "patched": 136,
+    "patch_rate": 0.5397,
+    "tool_call_emission_rate": 0.996,
+    "zero_tool_timeout_count": 1,
+    "avg_duration_s": 312.8,
+    "avg_input_tokens": 813041,
+    "avg_output_tokens": 2687,
+    "cache_hit_pct": 0.0,
+    "reasoning_token_ratio": 0,
+    "harness_cost_usd": 0.6973,
+    "harness_cost_per_patched_usd": 0.0051,
+    "total_tools_invoked": 5767
+  }
+}

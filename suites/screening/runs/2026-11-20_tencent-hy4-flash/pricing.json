@@ -1,0 +1,13 @@
+{
+  "http": 200,
+  "endpoints": [
+    {
+      "provider": "Tencent",
+      "input_usd_per_1m": 0.035,
+      "output_usd_per_1m": 0.14049999999999999,
+      "cache_read_usd_per_1m": 0.0015,
+      "context_length": 1048576,
+      "supports_tools": true
+    }
+  ]
+}
