@@ -1,0 +1,48 @@
+model,resolved,patch_lines,tools,turns,tool_breakdown,input_tokens,output_tokens,duration_s,wall_clock_s,cost_usd,rc,had_error,had_timeout
+anthropic/claude-fable-5.2,no_patch,0,0,,{},,,10.4,11,0,0,True,False
+anthropic/claude-haiku-5.5,unresolved,13,24,25,"{""search_code"": 4, ""read_file"": 2, ""shell"": 17, ""edit_file"": 1}",1867791,8979,270.2,270,0.32113187499999996,0,False,False
+anthropic/claude-opus-5.5,resolved,133,20,19,"{""search_code"": 2, ""shell"": 14, ""edit_file"": 2, ""read_file"": 1, ""write_file"": 1}",783066,11592,335.3,335,1.9379916000000001,0,False,False
+anthropic/claude-sonnet-5.5,resolved,120,20,20,"{""search_code"": 1, ""shell"": 17, ""read_file"": 1, ""edit_file"": 1}",1150923,9973,293.6,294,1.6480917000000002,0,False,False
+baidu/ernie-5.5-flash-preview:free,no_patch,0,0,,{},,,9.8,10,0,0,True,False
+deepseek/deepseek-flash-latest,no_patch,0,0,,{},,,9.9,10,0,0,True,False
+deepseek/deepseek-v4-flash,resolved,204,41,27,"{""search_code"": 1, ""shell"": 32, ""read_file"": 2, ""edit_file"": 4, ""write_file"": 2}",1330175,12136,256.1,256,0.02128209,0,False,False
+deepseek/deepseek-v4-flash-0731,resolved,204,54,40,"{""shell"": 39, ""search_code"": 5, ""read_file"": 4, ""edit_file"": 5, ""write_file"": 1}",4015832,28971,493.5,494,0.10669024960000001,0,False,False
+deepseek/deepseek-v4-pro,unresolved,13,42,,"{""get_project_overview"": 1, ""search_code"": 2, ""read_file"": 7, ""edit_file"": 1, ""shell"": 30, ""bash"": 1}",,,758.2,759,0,0,True,False
+deepseek/deepseek-v4-pro-0813,unresolved,15,12,,"{""search_code"": 2, ""read_file"": 1, ""edit_file"": 1, ""shell"": 8}",,,104.5,104,0,0,True,False
+deepseek/deepseek-v4.1-flash,unresolved,204,81,66,"{""shell"": 72, ""read_file"": 6, ""search_code"": 1, ""edit_file"": 1, ""write_file"": 1}",6114039,39420,680.7,681,0.04761682199999998,0,False,False
+deepseek/deepseek-v4.1-flash-1017,unresolved,131,88,87,"{""search_code"": 2, ""shell"": 78, ""read_file"": 2, ""edit_file"": 4, ""write_file"": 2}",7613953,35195,838.2,838,0.05957628599999998,0,False,False
+dots-studio/dots-3-note-preview:free,no_patch,0,0,,{},,,4.6,4,0,0,True,False
+google/gemini-3-flash-preview,unresolved,13,56,57,"{""write_file"": 1, ""shell"": 31, ""search_code"": 4, ""read_file"": 4, ""edit_file"": 15, ""list_files"": 1}",6245410,4105,533.3,534,2.758201883333333,0,False,False
+google/gemini-3.1-flash-lite,unresolved,13,16,17,"{""list_files"": 1, ""read_file"": 2, ""write_file"": 5, ""shell"": 6, ""edit_file"": 1, ""delete_file"": 1}",674624,1546,124.6,125,0.11786691666666665,0,False,False
+google/gemini-3.8-flash,no_patch,0,96,,"{""write_file"": 1, ""search_code"": 16, ""read_file"": 11, ""shell"": 68}",,,773.8,774,0,0,True,False
+google/gemini-4-argon,unresolved,140,60,57,"{""search_code"": 4, ""read_file"": 12, ""shell"": 37, ""write_file"": 3, ""edit_file"": 4}",6712022,7366,748.5,748,1.9918854,0,False,False
+google/gemini-4-carbon,no_patch,0,80,,"{""search_code"": 2, ""read_file"": 6, ""shell"": 72}",,,1109.4,1109,0,0,True,False
+google/gemma-4-26b-a4b-it,unresolved,13,23,24,"{""get_project_overview"": 1, ""shell"": 7, ""read_file"": 5, ""edit_file"": 10}",951588,3000,373.6,374,0.14423716,0,False,False
+google/gemma-4-31b-it,no_patch,0,0,,{},,,5.6,6,0,0,True,False
+meta/muse-ember,unresolved,204,56,56,"{""search_code"": 3, ""read_file"": 2, ""shell"": 48, ""edit_file"": 3}",4434511,20484,329.7,329,0.03861982,0,False,False
+meta/muse-spark-1.3-contributor,unresolved,16,,,{},,,,1700,,2,False,True
+minimax/minimax-m3,no_patch,0,0,,{},,,16,16,0,0,True,False
+minimax/minimax-m3.1-flash,no_patch,0,0,,{},,,5.3,5,0,0,True,False
+moonshotai/kimi-k3,unresolved,15,15,,"{""read_file"": 2, ""shell"": 11, ""search_code"": 1, ""edit_file"": 1}",,,1417.9,1418,0,0,True,False
+moonshotai/kimi-k3.1-pro,unresolved,204,60,26,"{""search_code"": 2, ""list_files"": 1, ""shell"": 39, ""read_file"": 5, ""get_project_overview"": 1, ""query_code_graph"": 1, ""write_file"": 4, ""edit_file"": 7}",2677359,12506,557.8,558,0.9459667999999999,0,False,False
+nvidia/nemotron-3-ultra-550b-a55b:free,unresolved,42,,,{},,,,1700,,2,False,True
+nvidia/nemotron-3.5-lightning,no_patch,0,0,,{},,,6.4,7,0,0,True,False
+nvidia/nemotron-3.5-super-vl,no_patch,0,0,,{},,,23.5,24,0,0,True,False
+nvidia/nemotron-3.5-super-vl:free,no_patch,0,0,,{},,,7.8,8,0,0,True,False
+openai/gpt-5.6-luna,unresolved,17,13,14,"{""search_code"": 2, ""shell"": 5, ""read_file"": 2, ""write_file"": 1, ""edit_file"": 3}",571902,2185,136.6,137,0.029373870000000003,0,False,False
+openai/gpt-6-luna,unresolved,15,24,23,"{""search_code"": 6, ""shell"": 6, ""read_file"": 5, ""list_files"": 1, ""edit_file"": 3, ""write_file"": 2, ""validate_file"": 1}",1193082,3354,230.6,231,0.023841670000000006,0,False,False
+openai/gpt-6-luna-pro,unresolved,13,23,,"{""search_code"": 7, ""read_file"": 5, ""list_files"": 2, ""get_project_overview"": 1, ""shell"": 4, ""edit_file"": 4}",,,225.4,225,0,0,True,False
+openai/gpt-6.1-sol,unresolved,96,23,19,"{""search_code"": 2, ""get_project_overview"": 1, ""read_file"": 1, ""shell"": 10, ""write_file"": 4, ""query_code_graph"": 1, ""edit_file"": 4}",847726,3295,165.5,166,0.2514413,0,False,False
+openai/gpt-6.1-terra,unresolved,18,32,21,"{""search_code"": 5, ""shell"": 13, ""write_file"": 3, ""read_file"": 4, ""get_project_overview"": 1, ""edit_file"": 5, ""query_code_graph"": 1}",1843401,3589,175.6,176,0.25018489999999993,0,False,False
+particle-ai/particle-1:free,no_patch,0,0,,{},,,2.8,3,0,0,True,False
+qwen/qwen3.8-27b,no_patch,0,0,,{},,,8.5,9,0,0,True,False
+qwen/qwen3.8-flash,unresolved,212,48,,"{""read_file"": 3, ""shell"": 38, ""edit_file"": 7}",,,772,772,0,0,True,False
+qwen/qwen4-max,unresolved,110,34,,"{""shell"": 29, ""read_file"": 2, ""write_file"": 1, ""edit_file"": 2}",,,781.6,782,0,0,True,False
+stepfun/step-5-preview,unresolved,188,82,82,"{""get_project_overview"": 1, ""shell"": 71, ""read_file"": 4, ""edit_file"": 6}",8323542,23915,1351.6,1352,1.0064708999999996,0,False,False
+tencent/hy3,no_patch,0,0,,{},,,5.6,6,0,0,True,False
+tencent/hy4,unresolved,204,57,57,"{""search_code"": 3, ""read_file"": 2, ""shell"": 43, ""write_file"": 3, ""edit_file"": 6}",3946027,14856,721.5,722,0.13334377499999997,0,False,False
+tencent/hy4-flash,unresolved,204,66,65,"{""shell"": 54, ""read_file"": 4, ""search_code"": 1, ""edit_file"": 5, ""write_file"": 2}",4882256,12692,731.6,732,0.012406762000000005,0,False,False
+thinkingmachines/inkling-2-small,no_patch,0,0,,{},,,7.5,8,0,0,True,False
+upstage/solar-mini4,no_patch,0,0,,{},,,6.5,7,0,0,True,False
+xiaomi/mimo-v2.6-flash,resolved,204,59,57,"{""search_code"": 2, ""search_files"": 1, ""shell"": 50, ""read_file"": 4, ""write_file"": 2}",5650685,27054,1416.4,1417,0.039992338399999994,0,False,False
+xiaomi/mimo-v2.6-pro,no_patch,0,22,,"{""search_code"": 5, ""read_file"": 3, ""shell"": 14}",,,491.2,492,0,0,True,False

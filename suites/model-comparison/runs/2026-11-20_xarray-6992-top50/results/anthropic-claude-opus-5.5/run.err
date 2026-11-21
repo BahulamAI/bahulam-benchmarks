@@ -1,0 +1,39 @@
+[headless] Local mode via Bahulam Gateway: anthropic/claude-opus-5.5
+[headless] Tool: search_code
+[headless] Tool: search_code
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: read_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: write_file
+[headless] Done: 20 tools (20 primary, 0 sub-agent), 335.3s, $1.938
+
+--- Response ---
+Your example now works: `ds.set_index(z=['a', 'b']).reset_index('z', drop=True)` prints without error, giving an empty dataset with no dimensions, and it passes xarray's internal consistency checks. Without `drop=True`, `a` and `b` come back as plain coordinates.
+
+**The cause:** `Dataset.reset_index(..., drop=True)` deleted the variables but left their names in `_coord_names`. `DataVariables.__len__` computed `len(_variables) - len(_coord_names)`, which went negative.
+
+**What I changed:**
+- **`xarray/core/dataset.py`, `reset_index`:**
+  - Dropped names are now removed from the coordinate names, and dimensions are recalculated afterwards (an unused `x` dimension disappears).
+  - Coordinates that lose their index become ordinary variables instead of index variables.
+  - When a multi-index is fully reset, its combined dimension coordinate (e.g. `x` holding tuples) is always dropped, and `drop=True` removes the level coordinates too.
+- **`xarray/core/indexes.py`, `PandasMultiIndex.keep_levels`:** if only one level remains, it is renamed to the dimension name. So `reset_index("level_1")` leaves the remaining level as the `x` index, which is what the updated tests expect.
+- **`DataVariables.__len__`:** now counts the data variables directly instead of subtracting, so a mismatch like this can't produce a negative length again.
+
+The rewrite goes beyond the reported bug. Before I started, someone had already edited `test_dataset.py`, `test_dataarray.py` and `test_groupby.py` (including the new `test_reset_index_drop_convert` and `test_reset_index_drop_dims`). My first, minimal fix still failed 11 of those tests, so I rebuilt `reset_index` to match what they expect.
+
+**Tests:** I ran the full `xarray/tests` suite before and after my change, both times with those edited tests. Failures went from 45 to 33. The 12 fixed are the `reset_index` tests in all three files plus `test_groupby_drops_nans`, and nothing newly fails. The other 33 were already failing before my change. I did

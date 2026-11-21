@@ -1,0 +1,47 @@
+[headless] Local mode via Bahulam Gateway: anthropic/claude-haiku-5.5
+[headless] Tool: search_code
+[headless] Tool: read_file
+[headless] Tool: search_code
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: search_code
+[headless] Tool: search_code
+[headless] Tool: shell
+[headless] Tool: read_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Done: 24 tools (24 primary, 0 sub-agent), 270.2s, $0.321
+
+--- Response ---
+The repro now renders, and the fix is a one-line change in `xarray/core/dataset.py`. But the test suite is not clean. Several failures predate my change and come from test edits already in the working tree.
+
+**Root cause:** `Dataset.reset_index` in `xarray/core/dataset.py` removes dropped variables from `variables` but built `coord_names` from `self._coord_names` without removing them. With `drop=True`, `z` stayed in `_coord_names` with no matching variable, so `DataVariables.__len__` went negative.
+
+**Fix:**
+```python
+coord_names = (set(new_variables) | self._coord_names) - set(drop_variables)
+```
+
+**Verification:**
+- The MVCE from the issue now returns a valid repr with `z` gone and `a`, `b` as coords.
+- `test_dataset.py`, `test_dataarray.py`, `test_indexes.py`: 12 failed both with and without my fix.
+- `test_groupby.py::test_groupby_drops_nans`: fails both with and without my fix.
+
+The failing tests are not caused by this change. The working tree already had uncommitted edits to `test_dataset.py`, `test_dataarray.py`, and `test_groupby.py` (for example, `reset_index` tests now expect different coords, and a `.drop_vars` line was removed from `test_groupby.py`). Those edits may be intended or may be wrong. I left them untouched and did not add a regression test to the test files, since they already have uncommitted changes.
+
+**Environment notes:**
+- No numpy or pandas were installed. I installed `numpy<2` and `pandas<2.1` because this codebase uses `np.unicode_`, which NumPy 2 removed.
+- I created `.bahulam/tasks/` with `active.md`, `done.md`, and `blocked.md`. The blocked item covers the 12 pre-existing test failures and the groupby failure, which need a decision on the uncommitted test edits.

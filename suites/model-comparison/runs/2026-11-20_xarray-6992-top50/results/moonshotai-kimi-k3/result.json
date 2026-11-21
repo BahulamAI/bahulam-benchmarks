@@ -1,0 +1,44 @@
+{
+  "model": "moonshotai/kimi-k3",
+  "instance_id": "pydata__xarray-6992",
+  "rc": 0,
+  "wall_clock_s": 1418,
+  "patch_lines": 15,
+  "resolved": "unresolved",
+  "complete_event": {
+    "type": "complete",
+    "tools": 15,
+    "tools_primary": 15,
+    "tools_sub_agent": 0,
+    "tools_forwarded_sub_agent_events": 0,
+    "turns": null,
+    "tool_breakdown": {
+      "read_file": 2,
+      "shell": 11,
+      "search_code": 1,
+      "edit_file": 1
+    },
+    "tool_breakdown_primary": {
+      "read_file": 2,
+      "shell": 11,
+      "search_code": 1,
+      "edit_file": 1
+    },
+    "tool_breakdown_sub_agent": {},
+    "sub_agents": [],
+    "stagnation_triggers": 0,
+    "usage": {},
+    "duration_s": 1417.9,
+    "cost_usd": 0,
+    "rate_limit": null,
+    "model": "moonshotai/kimi-k3",
+    "content_length": 48
+  },
+  "error_event": {
+    "type": "error",
+    "error": "The provider budget cannot cover this request. Reduce the output limit or choose a lower-cost model.",
+    "code": "gateway_http_402",
+    "rate_limit": null
+  },
+  "timeout_event": null
+}

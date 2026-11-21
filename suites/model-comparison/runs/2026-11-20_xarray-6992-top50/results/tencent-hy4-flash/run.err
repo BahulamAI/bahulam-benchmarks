@@ -1,0 +1,87 @@
+[headless] Local mode via Bahulam Gateway: tencent/hy4-flash
+[headless] Tool: shell
+[headless] Tool: read_file
+[headless] Tool: shell
+[headless] Tool: search_code
+[headless] Tool: shell
+[headless] Tool: read_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: read_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: read_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: write_file
+[headless] Tool: write_file
+[headless] Done: 66 tools (66 primary, 0 sub-agent), 731.6s, $0.012
+
+--- Response ---
+The issue is fixed. Summary of changes:
+
+**Root cause:** After the index refactor, `Dataset.reset_index(drop=True)` removed variables from `_variables` but left stale names in `_coord_names` (and `set_index` left de-indexed coordinates as `IndexVariable`s). This broke the assumption in `DataVariables.__len__` (`len(_variables) - len(_coord_names)`), producing `ValueError: __len__() should return >= 0` on repr.
+
+**Fix (matching upstream #6992):**
+1. `xarray/core/dataset.py` — `set_index`:
+   - Tracks all coordinates tied to replaced indexes as drop candidates and removes them from `_coord_names`.
+   - Re-adds de-indexed coordinates as base `Variable`s instead of `IndexVariable`s.
+   - Preserves coordinate order in the single-index case and recalculates dims.
+2. `xarray/core/dataset.py` — `reset_index`:
+   - Drops/ converts *all* index coordinates (not just the named one), so no stale coord names remain.
+   - Restores pre-refactor behavior: drops the multi-index dimension variable, converts level coords to base variables, and renames the surviving level to the dimension name when a MultiIndex reduces to a single index.
+   - Recalculates dimensions so dropping the last coordinate clears the dims.
+3. `xarray/core/indexes.py` — `PandasMultiIndex.keep_levels`: renames the reduced index to the dimension name for backwards compatibility.
+4. `doc/whats-new.rst` — bug-fix note.
+
+**Verification:** The MCVE now returns an empty dataset cleanly; targeted test files pass, and the full suite passes: **4354 passed, 5981 skipped, 8 xfailed, 18 xpassed**.

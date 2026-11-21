@@ -1,0 +1,42 @@
+diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py
+index 620f32f8..d60fc4ad 100644
+--- a/xarray/core/dataset.py
++++ b/xarray/core/dataset.py
+@@ -4169,6 +4169,17 @@ class Dataset(
+             if drop:
+                 drop_variables.append(name)
+ 
++        # Also drop dimension coordinates that are part of the reset indexes
++        # (these are virtual coordinates that only exist as part of a MultiIndex)
++        for name in dims_or_levels:
++            if name in self.dims:
++                # This is a dimension coordinate - check if it's a virtual coordinate
++                # (backed by PandasMultiIndex) or a real coordinate (backed by PandasIndex)
++                index = self._indexes[name]
++                if isinstance(index, PandasMultiIndex):
++                    # Virtual coordinate - drop it
++                    drop_variables.append(name)
++
+         indexes = {k: v for k, v in self._indexes.items() if k not in drop_indexes}
+         indexes.update(new_indexes)
+ 
+@@ -4177,9 +4188,17 @@ class Dataset(
+         }
+         variables.update(new_variables)
+ 
+-        coord_names = set(new_variables) | self._coord_names
++        if drop:
++            # When dropping coordinates, also remove them from coord_names
++            # to avoid having more _coord_names than _variables
++            coord_names = (set(new_variables) | self._coord_names) - set(drop_variables)
++        else:
++            coord_names = (set(new_variables) | self._coord_names) - set(drop_variables)
+ 
+-        return self._replace(variables, coord_names=coord_names, indexes=indexes)
++        # Use _replace_with_new_dims to recalculate dimensions from variables
++        return self._replace_with_new_dims(
++            variables, coord_names=coord_names, indexes=indexes
++        )
+ 
+     def reorder_levels(
+         self: T_Dataset,

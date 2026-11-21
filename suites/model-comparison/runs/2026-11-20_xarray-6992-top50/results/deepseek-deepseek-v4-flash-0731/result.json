@@ -1,0 +1,46 @@
+{
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "instance_id": "pydata__xarray-6992",
+  "rc": 0,
+  "wall_clock_s": 494,
+  "patch_lines": 204,
+  "resolved": "resolved",
+  "complete_event": {
+    "type": "complete",
+    "tools": 54,
+    "tools_primary": 54,
+    "tools_sub_agent": 0,
+    "tools_forwarded_sub_agent_events": 0,
+    "turns": 40,
+    "tool_breakdown": {
+      "shell": 39,
+      "search_code": 5,
+      "read_file": 4,
+      "edit_file": 5,
+      "write_file": 1
+    },
+    "tool_breakdown_primary": {
+      "shell": 39,
+      "search_code": 5,
+      "read_file": 4,
+      "edit_file": 5,
+      "write_file": 1
+    },
+    "tool_breakdown_sub_agent": {},
+    "sub_agents": [],
+    "stagnation_triggers": 0,
+    "usage": {
+      "input_tokens": 4015832,
+      "output_tokens": 28971,
+      "cache_read": 0,
+      "cache_write": 0
+    },
+    "duration_s": 493.5,
+    "cost_usd": 0.10669024960000001,
+    "rate_limit": null,
+    "model": "deepseek/deepseek-v4-flash-0731",
+    "content_length": 2301
+  },
+  "error_event": null,
+  "timeout_event": null
+}

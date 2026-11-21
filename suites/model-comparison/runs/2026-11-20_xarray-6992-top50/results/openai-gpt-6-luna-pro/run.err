@@ -1,0 +1,25 @@
+[headless] Local mode via Bahulam Gateway: openai/gpt-6-luna-pro
+[headless] Tool: search_code
+[headless] Tool: read_file
+[headless] Tool: read_file
+[headless] Tool: search_code
+[headless] Tool: search_code
+[headless] Tool: search_code
+[headless] Tool: list_files
+[headless] Tool: read_file
+[headless] Tool: search_code
+[headless] Tool: search_code
+[headless] Tool: get_project_overview
+[headless] Tool: list_files
+[headless] Tool: search_code
+[headless] Tool: read_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: read_file
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Done: 23 tools (23 primary, 0 sub-agent), 225.4s, $0.000

@@ -1,0 +1,46 @@
+{
+  "model": "tencent/hy4",
+  "instance_id": "pydata__xarray-6992",
+  "rc": 0,
+  "wall_clock_s": 722,
+  "patch_lines": 204,
+  "resolved": "unresolved",
+  "complete_event": {
+    "type": "complete",
+    "tools": 57,
+    "tools_primary": 57,
+    "tools_sub_agent": 0,
+    "tools_forwarded_sub_agent_events": 0,
+    "turns": 57,
+    "tool_breakdown": {
+      "search_code": 3,
+      "read_file": 2,
+      "shell": 43,
+      "write_file": 3,
+      "edit_file": 6
+    },
+    "tool_breakdown_primary": {
+      "search_code": 3,
+      "read_file": 2,
+      "shell": 43,
+      "write_file": 3,
+      "edit_file": 6
+    },
+    "tool_breakdown_sub_agent": {},
+    "sub_agents": [],
+    "stagnation_triggers": 0,
+    "usage": {
+      "input_tokens": 3946027,
+      "output_tokens": 14856,
+      "cache_read": 0,
+      "cache_write": 0
+    },
+    "duration_s": 721.5,
+    "cost_usd": 0.13334377499999997,
+    "rate_limit": null,
+    "model": "tencent/hy4",
+    "content_length": 1751
+  },
+  "error_event": null,
+  "timeout_event": null
+}

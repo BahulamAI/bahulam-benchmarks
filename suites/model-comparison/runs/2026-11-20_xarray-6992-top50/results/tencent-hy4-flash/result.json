@@ -1,0 +1,46 @@
+{
+  "model": "tencent/hy4-flash",
+  "instance_id": "pydata__xarray-6992",
+  "rc": 0,
+  "wall_clock_s": 732,
+  "patch_lines": 204,
+  "resolved": "unresolved",
+  "complete_event": {
+    "type": "complete",
+    "tools": 66,
+    "tools_primary": 66,
+    "tools_sub_agent": 0,
+    "tools_forwarded_sub_agent_events": 0,
+    "turns": 65,
+    "tool_breakdown": {
+      "shell": 54,
+      "read_file": 4,
+      "search_code": 1,
+      "edit_file": 5,
+      "write_file": 2
+    },
+    "tool_breakdown_primary": {
+      "shell": 54,
+      "read_file": 4,
+      "search_code": 1,
+      "edit_file": 5,
+      "write_file": 2
+    },
+    "tool_breakdown_sub_agent": {},
+    "sub_agents": [],
+    "stagnation_triggers": 0,
+    "usage": {
+      "input_tokens": 4882256,
+      "output_tokens": 12692,
+      "cache_read": 0,
+      "cache_write": 0
+    },
+    "duration_s": 731.6,
+    "cost_usd": 0.012406762000000005,
+    "rate_limit": null,
+    "model": "tencent/hy4-flash",
+    "content_length": 1563
+  },
+  "error_event": null,
+  "timeout_event": null
+}

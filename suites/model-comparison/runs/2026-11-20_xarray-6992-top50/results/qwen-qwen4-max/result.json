@@ -1,0 +1,44 @@
+{
+  "model": "qwen/qwen4-max",
+  "instance_id": "pydata__xarray-6992",
+  "rc": 0,
+  "wall_clock_s": 782,
+  "patch_lines": 110,
+  "resolved": "unresolved",
+  "complete_event": {
+    "type": "complete",
+    "tools": 34,
+    "tools_primary": 34,
+    "tools_sub_agent": 0,
+    "tools_forwarded_sub_agent_events": 0,
+    "turns": null,
+    "tool_breakdown": {
+      "shell": 29,
+      "read_file": 2,
+      "write_file": 1,
+      "edit_file": 2
+    },
+    "tool_breakdown_primary": {
+      "shell": 29,
+      "read_file": 2,
+      "write_file": 1,
+      "edit_file": 2
+    },
+    "tool_breakdown_sub_agent": {},
+    "sub_agents": [],
+    "stagnation_triggers": 0,
+    "usage": {},
+    "duration_s": 781.6,
+    "cost_usd": 0,
+    "rate_limit": null,
+    "model": "qwen/qwen4-max",
+    "content_length": 735
+  },
+  "error_event": {
+    "type": "error",
+    "error": "The provider denied access to this model. Choose another model or check model access.",
+    "code": "gateway_authentication_error",
+    "rate_limit": null
+  },
+  "timeout_event": null
+}

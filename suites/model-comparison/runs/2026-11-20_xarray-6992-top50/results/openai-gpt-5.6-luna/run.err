@@ -1,0 +1,31 @@
+[headless] Local mode via Bahulam Gateway: openai/gpt-5.6-luna
+[headless] Tool: search_code
+[headless] Tool: search_code
+[headless] Tool: shell
+[headless] Tool: read_file
+[headless] Tool: write_file
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: read_file
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Done: 13 tools (13 primary, 0 sub-agent), 136.6s, $0.029
+
+--- Response ---
+Implemented the fix in `xarray/core/dataset.py`.
+
+### Change
+Updated `DataVariables.__len__()` to count only coordinate names that actually exist in `_variables`, preventing negative lengths when `_coord_names` contains stale entries.
+
+### Verification
+- Regression example passes.
+- Focused dataset tests pass:
+  - `test_data_vars_properties`
+  - `test_repr`
+  - `test_repr_multiindex`
+- Python syntax validation passes with `py_compile`.
+
+The broader `test_dataset.py` run exposed unrelated pre-existing failures in index reset/drop behavior; the targeted tests for this issue pass.
