@@ -31,6 +31,8 @@ MAX_TURNS = os.environ.get("BAHULAM_MAX_TURNS", "999")
 
 _state_lock = threading.Lock()
 _state = {"phase": "starting", "started_at": time.time(), "dispatch_exit": None}
+_dispatch_lock = threading.Lock()
+ADMIN_TOKEN = os.environ.get("ADMIN_TOKEN", "")
 
 
 def _save_state():
@@ -49,26 +51,31 @@ def _set_phase(phase, **extra):
 
 
 def dispatcher_thread():
-    RUN_DIR.mkdir(parents=True, exist_ok=True)
-    if not REPO_BARE.exists():
-        _set_phase("cloning_repo")
-        subprocess.run(["git", "clone", "--quiet", "--bare", SOURCE_REPO, str(REPO_BARE)], check=True)
+    if not _dispatch_lock.acquire(blocking=False):
+        return  # a dispatch pass (initial or retry) is already running
+    try:
+        RUN_DIR.mkdir(parents=True, exist_ok=True)
+        if not REPO_BARE.exists():
+            _set_phase("cloning_repo")
+            subprocess.run(["git", "clone", "--quiet", "--bare", SOURCE_REPO, str(REPO_BARE)], check=True)
 
-    _set_phase("dispatching")
-    proc = subprocess.run(
-        [
-            "bash", str(RAILWAY_DIR / "dispatch-batch.sh"),
-            "--instance", str(INSTANCE_JSON),
-            "--models", str(MODELS_JSON),
-            "--repo-bare", str(REPO_BARE),
-            "--run-dir", str(RUN_DIR),
-            "--concurrency", CONCURRENCY,
-            "--timeout-s", TIMEOUT_S,
-            "--max-turns", MAX_TURNS,
-        ],
-        env={**os.environ, "BAHULAM_CODE_DIR": os.environ.get("BAHULAM_CODE_DIR", "/opt/bahulam-cli")},
-    )
-    _set_phase("done", dispatch_exit=proc.returncode, finished_at=time.time())
+        _set_phase("dispatching")
+        proc = subprocess.run(
+            [
+                "bash", str(RAILWAY_DIR / "dispatch-batch.sh"),
+                "--instance", str(INSTANCE_JSON),
+                "--models", str(MODELS_JSON),
+                "--repo-bare", str(REPO_BARE),
+                "--run-dir", str(RUN_DIR),
+                "--concurrency", CONCURRENCY,
+                "--timeout-s", TIMEOUT_S,
+                "--max-turns", MAX_TURNS,
+            ],
+            env={**os.environ, "BAHULAM_CODE_DIR": os.environ.get("BAHULAM_CODE_DIR", "/opt/bahulam-cli")},
+        )
+        _set_phase("done", dispatch_exit=proc.returncode, finished_at=time.time())
+    finally:
+        _dispatch_lock.release()
 
 
 def _model_tag(slug):
@@ -197,6 +204,47 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "text/html")
         self.end_headers()
         self.wfile.write(render_html(rows, state).encode())
+
+    def do_POST(self):
+        if self.path != "/admin/retry":
+            self.send_response(404)
+            self.end_headers()
+            return
+        if not ADMIN_TOKEN or self.headers.get("X-Admin-Token") != ADMIN_TOKEN:
+            self.send_response(403)
+            self.end_headers()
+            self.wfile.write(b"forbidden")
+            return
+        length = int(self.headers.get("Content-Length", 0))
+        try:
+            body = json.loads(self.rfile.read(length) or b"{}")
+        except Exception:
+            body = {}
+        tags = body.get("tags") or []
+        cleared = []
+        for tag in tags:
+            # tag is a model-derived directory name, never a path (no "/" or "..")
+            if "/" in tag or ".." in tag:
+                continue
+            result_dir = RESULTS_DIR / tag
+            log_file = RESULTS_DIR / f"{tag}.log"
+            if result_dir.exists():
+                import shutil
+                shutil.rmtree(result_dir, ignore_errors=True)
+            if log_file.exists():
+                log_file.unlink()
+            cleared.append(tag)
+        if _dispatch_lock.locked():
+            self.send_response(409)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"cleared": cleared, "dispatch": "already_running"}).encode())
+            return
+        threading.Thread(target=dispatcher_thread, daemon=True).start()
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+        self.wfile.write(json.dumps({"cleared": cleared, "dispatch": "started"}).encode())
 
 
 def main():
