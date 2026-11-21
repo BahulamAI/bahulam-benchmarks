@@ -200,6 +200,31 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(log_path.read_bytes() if log_path.exists() else b"")
             return
+        if self.path == "/archive.tar.gz":
+            # SFTP (railway service files download) is unreliable from this
+            # environment -- stream a tarball over plain HTTP instead.
+            if not ADMIN_TOKEN or self.headers.get("X-Admin-Token") != ADMIN_TOKEN:
+                self.send_response(403)
+                self.end_headers()
+                self.wfile.write(b"forbidden")
+                return
+            RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/gzip")
+            self.end_headers()
+            proc = subprocess.Popen(
+                ["tar", "czf", "-", "--exclude=*/repo", "-C", str(RESULTS_DIR), "."],
+                stdout=subprocess.PIPE,
+            )
+            try:
+                for chunk in iter(lambda: proc.stdout.read(65536), b""):
+                    self.wfile.write(chunk)
+            except BrokenPipeError:
+                pass
+            finally:
+                proc.stdout.close()
+                proc.wait()
+            return
         self.send_response(200)
         self.send_header("Content-Type", "text/html")
         self.end_headers()
