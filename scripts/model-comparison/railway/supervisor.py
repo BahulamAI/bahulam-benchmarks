@@ -89,20 +89,33 @@ def collect_rows():
             except Exception:
                 r = {}
             ce = r.get("complete_event") or {}
+            usage = ce.get("usage") or {}
             rows.append({
                 "rank": m.get("rank"),
                 "model": slug,
+                "tag": tag,
                 "state": r.get("resolved", "unknown"),
                 "turns": ce.get("turns"),
                 "tools": ce.get("tools"),
+                "input_tokens": usage.get("input_tokens"),
+                "output_tokens": usage.get("output_tokens"),
                 "cost_usd": ce.get("cost_usd"),
                 "wall_clock_s": r.get("wall_clock_s"),
+                "error": (r.get("error_event") or {}).get("error"),
             })
         elif log_path.exists():
-            rows.append({"rank": m.get("rank"), "model": slug, "state": "running", "turns": None, "tools": None, "cost_usd": None, "wall_clock_s": None})
+            rows.append(_empty_row(m, tag, "running"))
         else:
-            rows.append({"rank": m.get("rank"), "model": slug, "state": "queued", "turns": None, "tools": None, "cost_usd": None, "wall_clock_s": None})
+            rows.append(_empty_row(m, tag, "queued"))
     return rows
+
+
+def _empty_row(m, tag, state):
+    return {
+        "rank": m.get("rank"), "model": m["slug"], "tag": tag, "state": state,
+        "turns": None, "tools": None, "input_tokens": None, "output_tokens": None,
+        "cost_usd": None, "wall_clock_s": None, "error": None,
+    }
 
 
 def render_html(rows, state):
@@ -110,11 +123,14 @@ def render_html(rows, state):
     running = sum(1 for r in rows if r["state"] == "running")
     resolved = sum(1 for r in rows if r["state"] == "resolved")
     body_rows = "\n".join(
-        f"<tr><td>{r['rank']}</td><td>{r['model']}</td><td class='s-{r['state']}'>{r['state']}</td>"
+        f"<tr><td>{r['rank']}</td><td><a href='/result/{r['tag']}'>{r['model']}</a></td><td class='s-{r['state']}'>{r['state']}</td>"
         f"<td>{r['turns'] if r['turns'] is not None else '-'}</td>"
         f"<td>{r['tools'] if r['tools'] is not None else '-'}</td>"
+        f"<td>{r['input_tokens'] if r['input_tokens'] is not None else '-'}</td>"
+        f"<td>{r['output_tokens'] if r['output_tokens'] is not None else '-'}</td>"
         f"<td>{'$%.4f' % r['cost_usd'] if r['cost_usd'] is not None else '-'}</td>"
-        f"<td>{r['wall_clock_s'] if r['wall_clock_s'] is not None else '-'}</td></tr>"
+        f"<td>{r['wall_clock_s'] if r['wall_clock_s'] is not None else '-'}</td>"
+        f"<td title='{(r['error'] or '').replace(chr(39), chr(96))}'>{(r['error'] or '-')[:40]}</td></tr>"
         for r in rows
     )
     return f"""<!doctype html><html><head><meta charset="utf-8">
@@ -135,7 +151,7 @@ th{{color:#8b94a7;font-weight:600}}
 </style></head><body>
 <h2>Model comparison — pydata/xarray-6992</h2>
 <div class="summary">phase: {state.get('phase')} · done: {done}/{len(rows)} · running: {running} · resolved: {resolved}</div>
-<table><tr><th>#</th><th>model</th><th>state</th><th>turns</th><th>tools</th><th>cost</th><th>wall(s)</th></tr>
+<table><tr><th>#</th><th>model</th><th>state</th><th>turns</th><th>tools</th><th>in tok</th><th>out tok</th><th>cost</th><th>wall(s)</th><th>error</th></tr>
 {body_rows}
 </table>
 </body></html>"""
@@ -160,6 +176,22 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps({"state": state, "rows": rows}).encode())
+            return
+        if self.path.startswith("/result/"):
+            tag = self.path[len("/result/"):]
+            result_path = RESULTS_DIR / tag / "result.json"
+            self.send_response(200 if result_path.exists() else 404)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(result_path.read_bytes() if result_path.exists() else b"{}")
+            return
+        if self.path.startswith("/log/"):
+            tag = self.path[len("/log/"):]
+            log_path = RESULTS_DIR / f"{tag}.log"
+            self.send_response(200 if log_path.exists() else 404)
+            self.send_header("Content-Type", "text/plain")
+            self.end_headers()
+            self.wfile.write(log_path.read_bytes() if log_path.exists() else b"")
             return
         self.send_response(200)
         self.send_header("Content-Type", "text/html")
