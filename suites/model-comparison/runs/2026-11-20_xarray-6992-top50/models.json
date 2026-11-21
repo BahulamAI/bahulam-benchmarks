@@ -1,0 +1,459 @@
+{
+  "source": "OpenRouter Models directory, https://openrouter.ai/models?output_modalities=text&order=top-weekly",
+  "citation": "Source: OpenRouter (openrouter.ai/rankings). Licensed under CC BY 4.0.",
+  "snapshot_date": "2026-11-20",
+  "note": "Collected by scrolling the live page (OpenRouter's Data API /api/v1/datasets/rankings-daily requires an OpenRouter API key not available in this session). Figures are each model's weekly tokens processed on OpenRouter as of the snapshot date, text output modality only.",
+  "collection_method": "manual browser extraction (table view, incremental scroll capture) + slug resolution against /api/v1/models",
+  "models": [
+    {
+      "rank": 1,
+      "slug": "tencent/hy4-flash",
+      "display_name": "Hy4 flash",
+      "provider": "tencent",
+      "weekly_tokens_processed": "92.1T",
+      "price_usd_per_1m_input": 0.035,
+      "price_usd_per_1m_output": 0.1405
+    },
+    {
+      "rank": 2,
+      "slug": "deepseek/deepseek-v4.1-flash-1017",
+      "display_name": "DeepSeek V4.1 Flash 1017",
+      "provider": "deepseek",
+      "weekly_tokens_processed": "70.8T",
+      "price_usd_per_1m_input": 0.036,
+      "price_usd_per_1m_output": 0.5
+    },
+    {
+      "rank": 3,
+      "slug": "deepseek/deepseek-v4.1-flash",
+      "display_name": "DeepSeek V4.1 Flash",
+      "provider": "deepseek",
+      "weekly_tokens_processed": "17.9T",
+      "price_usd_per_1m_input": 0.0507,
+      "price_usd_per_1m_output": 0.2028
+    },
+    {
+      "rank": 4,
+      "slug": "tencent/hy4",
+      "display_name": "Hy4",
+      "provider": "tencent",
+      "weekly_tokens_processed": "12.5T",
+      "price_usd_per_1m_input": 0.417,
+      "price_usd_per_1m_output": 1.251
+    },
+    {
+      "rank": 5,
+      "slug": "z-ai/glm-5.3-flash",
+      "display_name": "GLM 5.3 Flash",
+      "provider": "z-ai",
+      "weekly_tokens_processed": "12.2T",
+      "price_usd_per_1m_input": 0.0399,
+      "price_usd_per_1m_output": 0.0784
+    },
+    {
+      "rank": 6,
+      "slug": "openai/gpt-6-luna",
+      "display_name": "GPT-6 Luna",
+      "provider": "openai",
+      "weekly_tokens_processed": "9.92T",
+      "price_usd_per_1m_input": 0.1,
+      "price_usd_per_1m_output": 0.5
+    },
+    {
+      "rank": 7,
+      "slug": "anthropic/claude-opus-5.5",
+      "display_name": "Claude Opus 5.5",
+      "provider": "anthropic",
+      "weekly_tokens_processed": "8.44T",
+      "price_usd_per_1m_input": 4.0,
+      "price_usd_per_1m_output": 20.0
+    },
+    {
+      "rank": 8,
+      "slug": "stepfun/step-5-preview",
+      "display_name": "Step 5 Preview",
+      "provider": "stepfun",
+      "weekly_tokens_processed": "5.76T",
+      "price_usd_per_1m_input": 1.0,
+      "price_usd_per_1m_output": 2.7
+    },
+    {
+      "rank": 9,
+      "slug": "minimax/minimax-m3.1-flash",
+      "display_name": "MiniMax M3.1 Flash",
+      "provider": "minimax",
+      "weekly_tokens_processed": "4.58T",
+      "price_usd_per_1m_input": 0.075,
+      "price_usd_per_1m_output": 0.3
+    },
+    {
+      "rank": 10,
+      "slug": "xiaomi/mimo-v2.6-flash",
+      "display_name": "MiMo-V2.6-Flash",
+      "provider": "xiaomi",
+      "weekly_tokens_processed": "4.49T",
+      "price_usd_per_1m_input": 0.1,
+      "price_usd_per_1m_output": 0.28
+    },
+    {
+      "rank": 11,
+      "slug": "moonshotai/kimi-k3.1-pro",
+      "display_name": "Kimi K3.1 Pro",
+      "provider": "moonshotai",
+      "weekly_tokens_processed": "3.97T",
+      "price_usd_per_1m_input": 0.2403,
+      "price_usd_per_1m_output": 8.402
+    },
+    {
+      "rank": 12,
+      "slug": "baidu/ernie-5.5-flash-preview:free",
+      "display_name": "ERNIE-5.5-Flash-Preview (free)",
+      "provider": "baidu",
+      "weekly_tokens_processed": "3.97T",
+      "price_usd_per_1m_input": 0.0,
+      "price_usd_per_1m_output": 0.0
+    },
+    {
+      "rank": 13,
+      "slug": "nvidia/nemotron-3-ultra-550b-a55b:free",
+      "display_name": "Nemotron 3 Ultra (free)",
+      "provider": "nvidia",
+      "weekly_tokens_processed": "3.95T",
+      "price_usd_per_1m_input": 0.0,
+      "price_usd_per_1m_output": 0.0
+    },
+    {
+      "rank": 14,
+      "slug": "z-ai/glm-5.3",
+      "display_name": "GLM 5.3",
+      "provider": "z-ai",
+      "weekly_tokens_processed": "3.86T",
+      "price_usd_per_1m_input": 0.0699,
+      "price_usd_per_1m_output": 1.4
+    },
+    {
+      "rank": 15,
+      "slug": "meta/muse-spark-1.3-contributor",
+      "display_name": "Muse Spark 1.3 Contributor",
+      "provider": "meta",
+      "weekly_tokens_processed": "3.39T",
+      "price_usd_per_1m_input": 0.1,
+      "price_usd_per_1m_output": 0.2
+    },
+    {
+      "rank": 16,
+      "slug": "nvidia/nemotron-3.5-super-vl:free",
+      "display_name": "Nemotron 3.5 Super VL (free)",
+      "provider": "nvidia",
+      "weekly_tokens_processed": "3.25T",
+      "price_usd_per_1m_input": 0.0,
+      "price_usd_per_1m_output": 0.0
+    },
+    {
+      "rank": 17,
+      "slug": "anthropic/claude-sonnet-5.5",
+      "display_name": "Claude Sonnet 5.5",
+      "provider": "anthropic",
+      "weekly_tokens_processed": "3.25T",
+      "price_usd_per_1m_input": 2.0,
+      "price_usd_per_1m_output": 10.0
+    },
+    {
+      "rank": 18,
+      "slug": "openai/gpt-6.1-sol",
+      "display_name": "GPT-6.1 Sol",
+      "provider": "openai",
+      "weekly_tokens_processed": "3.25T",
+      "price_usd_per_1m_input": 2.0,
+      "price_usd_per_1m_output": 10.0
+    },
+    {
+      "rank": 19,
+      "slug": "anthropic/claude-haiku-5.5",
+      "display_name": "Claude Haiku 5.5",
+      "provider": "anthropic",
+      "weekly_tokens_processed": "3.17T",
+      "price_usd_per_1m_input": 0.1,
+      "price_usd_per_1m_output": 0.5
+    },
+    {
+      "rank": 20,
+      "slug": "deepseek/deepseek-v4-flash-0731",
+      "display_name": "DeepSeek V4 Flash 0731",
+      "provider": "deepseek",
+      "weekly_tokens_processed": "3.1T",
+      "price_usd_per_1m_input": 0.044,
+      "price_usd_per_1m_output": 0.132
+    },
+    {
+      "rank": 21,
+      "slug": "deepseek/deepseek-v4-flash",
+      "display_name": "DeepSeek V4 Flash 0423",
+      "provider": "deepseek",
+      "weekly_tokens_processed": "2.23T",
+      "price_usd_per_1m_input": 0.0246,
+      "price_usd_per_1m_output": 0.45
+    },
+    {
+      "rank": 22,
+      "slug": "deepseek/deepseek-flash-latest",
+      "display_name": "DeepSeek Flash Latest",
+      "provider": "deepseek",
+      "weekly_tokens_processed": "2.11T",
+      "price_usd_per_1m_input": 0.036,
+      "price_usd_per_1m_output": 0.5
+    },
+    {
+      "rank": 23,
+      "slug": "google/gemini-4-carbon",
+      "display_name": "Gemini 4 Carbon",
+      "provider": "google",
+      "weekly_tokens_processed": "2.11T",
+      "price_usd_per_1m_input": 2.0,
+      "price_usd_per_1m_output": 10.0
+    },
+    {
+      "rank": 24,
+      "slug": "openai/gpt-5.6-luna",
+      "display_name": "GPT-5.6 Luna",
+      "provider": "openai",
+      "weekly_tokens_processed": "2.06T",
+      "price_usd_per_1m_input": 0.2,
+      "price_usd_per_1m_output": 1.2
+    },
+    {
+      "rank": 25,
+      "slug": "google/gemini-3.8-flash",
+      "display_name": "Gemini 3.8 Flash",
+      "provider": "google",
+      "weekly_tokens_processed": "1.89T",
+      "price_usd_per_1m_input": 0.75,
+      "price_usd_per_1m_output": 3.75
+    },
+    {
+      "rank": 26,
+      "slug": "upstage/solar-mini4",
+      "display_name": "Solar Mini 4",
+      "provider": "upstage",
+      "weekly_tokens_processed": "1.51T",
+      "price_usd_per_1m_input": 0.05,
+      "price_usd_per_1m_output": 0.2
+    },
+    {
+      "rank": 27,
+      "slug": "qwen/qwen3.8-flash",
+      "display_name": "Qwen3.8 Flash",
+      "provider": "qwen",
+      "weekly_tokens_processed": "1.43T",
+      "price_usd_per_1m_input": 0.15,
+      "price_usd_per_1m_output": 0.47
+    },
+    {
+      "rank": 28,
+      "slug": "nvidia/nemotron-3.5-lightning",
+      "display_name": "Nemotron 3.5 Lightning (free)",
+      "provider": "nvidia",
+      "weekly_tokens_processed": "1.28T",
+      "price_usd_per_1m_input": 0.0,
+      "price_usd_per_1m_output": 0.0
+    },
+    {
+      "rank": 29,
+      "slug": "moonshotai/kimi-k3",
+      "display_name": "Kimi K3",
+      "provider": "moonshotai",
+      "weekly_tokens_processed": "1.24T",
+      "price_usd_per_1m_input": 0.1805,
+      "price_usd_per_1m_output": 11.01
+    },
+    {
+      "rank": 30,
+      "slug": "openai/gpt-6.1-terra",
+      "display_name": "GPT-6.1 Terra",
+      "provider": "openai",
+      "weekly_tokens_processed": "1.13T",
+      "price_usd_per_1m_input": 1.0,
+      "price_usd_per_1m_output": 5.0
+    },
+    {
+      "rank": 31,
+      "slug": "qwen/qwen4-max",
+      "display_name": "Qwen4 Max",
+      "provider": "qwen",
+      "weekly_tokens_processed": "1.1T",
+      "price_usd_per_1m_input": 1.425,
+      "price_usd_per_1m_output": 4.275
+    },
+    {
+      "rank": 32,
+      "slug": "meta/muse-ember",
+      "display_name": "Muse Ember",
+      "provider": "meta",
+      "weekly_tokens_processed": "1.06T",
+      "price_usd_per_1m_input": 0.1,
+      "price_usd_per_1m_output": 0.5
+    },
+    {
+      "rank": 33,
+      "slug": "dots-studio/dots-3-note-preview:free",
+      "display_name": "Dots3-Note Preview (free)",
+      "provider": "dots-studio",
+      "weekly_tokens_processed": "1.05T",
+      "price_usd_per_1m_input": 0.0,
+      "price_usd_per_1m_output": 0.0
+    },
+    {
+      "rank": 34,
+      "slug": "z-ai/glm-5.2",
+      "display_name": "GLM 5.2",
+      "provider": "z-ai",
+      "weekly_tokens_processed": "1.05T",
+      "price_usd_per_1m_input": 0.007,
+      "price_usd_per_1m_output": 6.8
+    },
+    {
+      "rank": 35,
+      "slug": "particle-ai/particle-1:free",
+      "display_name": "Particle-1 (free)",
+      "provider": "particle-ai",
+      "weekly_tokens_processed": "1.01T",
+      "price_usd_per_1m_input": 0.0,
+      "price_usd_per_1m_output": 0.0
+    },
+    {
+      "rank": 36,
+      "slug": "xiaomi/mimo-v2.6-pro",
+      "display_name": "MiMo-V2.6-Pro",
+      "provider": "xiaomi",
+      "weekly_tokens_processed": "1T",
+      "price_usd_per_1m_input": 0.387,
+      "price_usd_per_1m_output": 0.783
+    },
+    {
+      "rank": 37,
+      "slug": "anthropic/claude-fable-5.2",
+      "display_name": "Claude Fable 5.2",
+      "provider": "anthropic",
+      "weekly_tokens_processed": "909B",
+      "price_usd_per_1m_input": 8.0,
+      "price_usd_per_1m_output": 40.0
+    },
+    {
+      "rank": 38,
+      "slug": "qwen/qwen3.8-27b",
+      "display_name": "Qwen3.8 27B",
+      "provider": "qwen",
+      "weekly_tokens_processed": "887B",
+      "price_usd_per_1m_input": 0.035,
+      "price_usd_per_1m_output": 1.5
+    },
+    {
+      "rank": 39,
+      "slug": "google/gemini-4-argon",
+      "display_name": "Gemini 4 Argon",
+      "provider": "google",
+      "weekly_tokens_processed": "846B",
+      "price_usd_per_1m_input": 2.0,
+      "price_usd_per_1m_output": 10.0
+    },
+    {
+      "rank": 40,
+      "slug": "deepseek/deepseek-v4-pro-0813",
+      "display_name": "DeepSeek V4 Pro 0813",
+      "provider": "deepseek",
+      "weekly_tokens_processed": "830B",
+      "price_usd_per_1m_input": 0.0999,
+      "price_usd_per_1m_output": 8.0
+    },
+    {
+      "rank": 41,
+      "slug": "thinkingmachines/inkling-2-small",
+      "display_name": "Inkling 2 Small",
+      "provider": "thinkingmachines",
+      "weekly_tokens_processed": "764B",
+      "price_usd_per_1m_input": 0.15,
+      "price_usd_per_1m_output": 0.5
+    },
+    {
+      "rank": 42,
+      "slug": "tencent/hy3",
+      "display_name": "Hy3",
+      "provider": "tencent",
+      "weekly_tokens_processed": "760B",
+      "price_usd_per_1m_input": 0.0825,
+      "price_usd_per_1m_output": 0.33
+    },
+    {
+      "rank": 43,
+      "slug": "google/gemini-3-flash-preview",
+      "display_name": "Gemini 3 Flash Preview",
+      "provider": "google",
+      "weekly_tokens_processed": "759B",
+      "price_usd_per_1m_input": 0.5,
+      "price_usd_per_1m_output": 3.0
+    },
+    {
+      "rank": 44,
+      "slug": "google/gemma-4-26b-a4b-it",
+      "display_name": "Gemma 4 26B A4B",
+      "provider": "google",
+      "weekly_tokens_processed": "705B",
+      "price_usd_per_1m_input": 0.05,
+      "price_usd_per_1m_output": 0.19
+    },
+    {
+      "rank": 45,
+      "slug": "openai/gpt-6-luna-pro",
+      "display_name": "GPT-6 Luna Pro",
+      "provider": "openai",
+      "weekly_tokens_processed": "678B",
+      "price_usd_per_1m_input": 0.1,
+      "price_usd_per_1m_output": 0.5
+    },
+    {
+      "rank": 46,
+      "slug": "deepseek/deepseek-v4-pro",
+      "display_name": "DeepSeek V4 Pro 0423",
+      "provider": "deepseek",
+      "weekly_tokens_processed": "664B",
+      "price_usd_per_1m_input": 0.6608,
+      "price_usd_per_1m_output": 1.322
+    },
+    {
+      "rank": 47,
+      "slug": "nvidia/nemotron-3.5-super-vl",
+      "display_name": "Nemotron 3.5 Super VL",
+      "provider": "nvidia",
+      "weekly_tokens_processed": "649B",
+      "price_usd_per_1m_input": 0.06,
+      "price_usd_per_1m_output": 0.35
+    },
+    {
+      "rank": 48,
+      "slug": "minimax/minimax-m3",
+      "display_name": "MiniMax M3",
+      "provider": "minimax",
+      "weekly_tokens_processed": "640B",
+      "price_usd_per_1m_input": 0.23,
+      "price_usd_per_1m_output": 0.96
+    },
+    {
+      "rank": 49,
+      "slug": "google/gemini-3.1-flash-lite",
+      "display_name": "Gemini 3.1 Flash Lite",
+      "provider": "google",
+      "weekly_tokens_processed": "601B",
+      "price_usd_per_1m_input": 0.25,
+      "price_usd_per_1m_output": 1.5
+    },
+    {
+      "rank": 50,
+      "slug": "google/gemma-4-31b-it",
+      "display_name": "Gemma 4 31B",
+      "provider": "google",
+      "weekly_tokens_processed": "589B",
+      "price_usd_per_1m_input": 0.1,
+      "price_usd_per_1m_output": 0.34
+    }
+  ]
+}

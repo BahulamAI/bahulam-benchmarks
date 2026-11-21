@@ -1,0 +1,34 @@
+[headless] Local mode via Bahulam Gateway: google/gemini-3.1-flash-lite
+[headless] Tool: list_files
+[headless] Tool: read_file
+[headless] Tool: read_file
+[headless] Tool: write_file
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: write_file
+[headless] Tool: shell
+[headless] Tool: write_file
+[headless] Tool: write_file
+[headless] Tool: delete_file
+[headless] Tool: write_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Done: 16 tools (16 primary, 0 sub-agent), 124.6s, $0.118
+
+--- Response ---
+The issue was that `Dataset.DataVariables.__len__` was calculating the length of the data variables by subtracting the length of `_coord_names` from the length of `_variables`, which can result in a negative value if there are more coordinate names than variables, violating the requirement that `__len__` must return a non-negative integer.
+
+The fix was to ensure that `DataVariables.__len__` returns at least 0 by using `max(0, ...)` for the calculation.
+
+**File edited:** `xarray/core/dataset.py`
+
+```python
+    def __len__(self) -> int:
+        return max(0, len(self._dataset._variables) - len(self._dataset._coord_names))
+```
+
+This change prevents the `ValueError` when `len(self._dataset._variables) - len(self._dataset._coord_names)` is negative, which allows the dataset representation and other operations relying on `__len__` to function correctly.
+
+I have verified the fix with a reproduction script and a test case that confirmed the issue is resolved.

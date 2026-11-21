@@ -1,0 +1,14 @@
+{
+  "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+  "instance_id": "pydata__xarray-6992",
+  "rc": 2,
+  "wall_clock_s": 1700,
+  "patch_lines": 42,
+  "resolved": "unresolved",
+  "complete_event": null,
+  "error_event": null,
+  "timeout_event": {
+    "type": "timeout",
+    "duration_s": 1700
+  }
+}

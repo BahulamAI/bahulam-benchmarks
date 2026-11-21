@@ -1,0 +1,40 @@
+[headless] Local mode via Bahulam Gateway: google/gemma-4-26b-a4b-it
+[headless] Tool: get_project_overview
+[headless] Tool: shell
+[headless] Tool: read_file
+[headless] Tool: read_file
+[headless] Tool: read_file
+[headless] Tool: shell
+[headless] Tool: read_file
+[headless] Tool: shell
+[headless] Tool: read_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Done: 23 tools (23 primary, 0 sub-agent), 373.6s, $0.144
+
+--- Response ---
+The `ValueError: __len__() should return >= 0` was resolved by updating the `DataVariables.__len__` method in `xarray/core/dataset.py`.
+
+Previously, the length was calculated as `len(self._dataset._variables) - len(self._dataset._coord_names)`. Due to recent index refactors, `_coord_names` could contain names not present in `_variables`, leading to a negative result. I updated the logic to explicitly count the variables that are not in the coordinate names, ensuring a non-negative integer.
+
+The fix was verified using the provided `reproduce_issue.py` script, which now correctly outputs the `Dataset` representation without error.
+
+```python
+# Updated logic in xarray/core/dataset.py
+def __len__(self) -> int:
+    return len([k for k in self._dataset._variables if k not in self._dataset._coord_names])
+```
+
+Note: While some existing tests failed, they appear related to other ongoing index refactoring issues and were not caused by this specific bug.

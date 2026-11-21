@@ -1,0 +1,74 @@
+[headless] Local mode via Bahulam Gateway: meta/muse-ember
+[headless] Tool: search_code
+[headless] Tool: read_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: search_code
+[headless] Tool: search_code
+[headless] Tool: shell
+[headless] Tool: read_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Done: 56 tools (56 primary, 0 sub-agent), 329.7s, $0.039
+
+--- Response ---
+Fix restored correct `reset_index`/`set_index` semantics so `_coord_names ⊆ _variables` (preventing `DataVariables.__len__` negative → `ValueError`):
+
+* **`xarray/core/dataset.py:Dataset.reset_index`**: Rewrote to use `set` tracking, deduplicate via `seen`, and `drop_or_convert()` helper. For `PandasMultiIndex`: drops the dimension variable always, converts kept levels to base `Variable`s (or drops them if `drop=True`), and if partially resetting levels replaces the index via `keep_levels()` (renaming single remaining level to dim for back-compat). Computes `coord_names = self._coord_names - drop_variables` and uses `_replace_with_new_dims` (recalculates dims, e.g. `reset_index('x',drop=True)` → no dims). Previously `coord_names = set(new_variables)|self._coord_names` retained dropped names (e.g. `z` after `set_index(z=[a,b]).reset_index('z',drop=True)` → `vars={a,b}, coord_names={a,b,z}`).
+* **`xarray/core/dataset.py:Dataset.set_index`**: Converted `maybe_drop_indexes/drop_variables` lists to sets, tracks `all_var_names`, drops all pre-existing index coords, re-adds de-indexed coords as base variables, preserves order trick for single-index case, `coord_names = _coord_names - drop_variables | set(new_variables)`.
+* **`xarray/core/indexes.py:PandasMultiIndex.keep_levels`**: Rename remaining single level index to `self.dim` (`index.rename(self.dim)`) for back-compat when multi-index reduces to single index.
+
+Verified with MVCE:
+```python
+ds = xr.Dataset(coords={"a":("x",[1,2,3]),"b":("x",['a','b','c'])})
+ds.set_index(z=['a','b']).reset_index("z",drop=True) # now empty dataset, repr works
+```
+Tests: `test_reset_index*`, `test_set_index*`, `test_reorder_levels` pass; `test_dataset/test_dataarray/test_indexes/test_groupby` pass (1 pre-existing `test_drop_index_labels` failure also on clean HEAD).
+
+

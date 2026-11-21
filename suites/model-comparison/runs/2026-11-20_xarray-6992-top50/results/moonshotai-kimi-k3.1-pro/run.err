@@ -1,0 +1,72 @@
+[headless] Local mode via Bahulam Gateway: moonshotai/kimi-k3.1-pro
+[headless] Tool: search_code
+[headless] Tool: list_files
+[headless] Tool: shell
+[headless] Tool: read_file
+[headless] Tool: search_code
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: get_project_overview
+[headless] Tool: read_file
+[headless] Tool: read_file
+[headless] Tool: read_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: query_code_graph
+[headless] Tool: write_file
+[headless] Tool: read_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: write_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: write_file
+[headless] Tool: write_file
+[headless] Done: 60 tools (60 primary, 0 sub-agent), 557.8s, $0.946
+
+--- Response ---
+Implemented the fix in:
+
+- `xarray/core/dataset.py`: `reset_index` now removes dropped coordinate names, converts retained levels to base variables, and recalculates dimensions. `set_index` correctly restores de-indexed coordinates.
+- `xarray/core/indexes.py`: a multi-index reduced to one level preserves the dimension coordinate name.
+
+The reported example now renders an empty Dataset without `ValueError`.
+
+**Verification:** full `xarray/tests` suite passed: **4,354 passed**, 5,981 skipped, 8 xfailed, 18 xpassed. `git diff --check` also passed.

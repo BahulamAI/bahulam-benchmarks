@@ -1,0 +1,119 @@
+[headless] Local mode via Bahulam Gateway: deepseek/deepseek-v4.1-flash-1017
+[headless] Tool: search_code
+[headless] Tool: shell
+[headless] Tool: search_code
+[headless] Tool: shell
+[headless] Tool: read_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: read_file
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: write_file
+[headless] Tool: write_file
+[headless] Tool: shell
+[headless] Done: 88 tools (88 primary, 0 sub-agent), 838.2s, $0.060
+
+--- Response ---
+The issue is fixed.
+
+## What was wrong
+
+`Dataset.reset_index()` computed the new coordinate names as
+
+```python
+coord_names = set(new_variables) | self._coord_names
+```
+
+so a coordinate that was *dropped* (e.g. the `z` multi-index dimension coordinate after `reset_index("z", drop=True)`) stayed in `_coord_names` even though it was removed from `_variables`. That broke the `DataVariables` assumption `len(_variables) - len(_coord_names) >= 0`, hence `ValueError: __len__() should return >= 0` from the repr (and other places relying on `data_vars`).
+
+## Changes (all under `/data/run/results/deepseek-deepseek-v4.1-flash-1017/repo`)
+
+1. `xarray/core/dataset.py`
+   - Rewrote `Dataset.reset_index()` body: dropped variables are now removed from `_coord_names` (`coord_names = self._coord_names - drop_variables`), de-indexed coordinates are either dropped or converted to base variables via `to_base_variable()` (preserving attrs), a multi-index reduced to a single level is renamed to its dimension name, indexes for reset coordinates are dropped consistently (`seen` guard so each index is processed once), and dimensions are recalculated with `_replace_with_new_dims`.
+   - `DataVariables.__len__` no longer assumes every `_coord_names` entry is present in `_variables`:
+     `len(_variables) - len(_coord_names & _variables.keys())`.
+
+2. `xarray/core/indexes.py`
+   - `PandasMultiIndex.keep_levels()` renames the last remaining level coordinate to the dimension name (`index.rename(self.dim)`), matching the new `reset_index` semantics.
+
+## Verification
+
+- MVCE now works and `_coord_names ⊆ _variables` holds for every `reset_index`/`reset_coords` variant I checked.
+- Full suite: `4353 passed`, only `test_drop_index_labels` fails — it also fails on the unmodified HEAD (pre-existing, unrelated: `Dataset.drop` validates `errors` before emitting its deprecation warning), so no regression.
+- All `reset_index` / `reset_index_drop_convert` / `reset_index_drop_dims` / `reset_index_keep_attrs` /

@@ -1,0 +1,46 @@
+[headless] Local mode via Bahulam Gateway: qwen/qwen4-max
+[headless] Tool: shell
+[headless] Tool: read_file
+[headless] Tool: shell
+[headless] Tool: read_file
+[headless] Tool: shell
+[headless] Tool: write_file
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Done: 34 tools (34 primary, 0 sub-agent), 781.6s, $0.000
+
+--- Response ---
+Now I fully understand the expected behavior from the updated tests. This requires reworking `reset_index` (the upstream fix for this issue also changed its semantics):
+
+1. When resetting a multi-index dimension coordinate, drop it along with **all** level coordinates (drop or convert to plain variables) — this fixes the `_coord_names` > `_variables` bug.
+2. When resetting a subset of levels, keep the remaining levels as a new index. A single remaining level becomes a `PandasIndex` renamed to the dimension name.
+3. Coordinates that are reset without `drop` become plain `Variable`s (attrs are preserved).
+4. Recompute dims so that dropped dimension coordinates actually remove the dimension.
+
+Let's rewrite `Dataset.reset_index`:

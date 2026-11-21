@@ -1,0 +1,14 @@
+[headless] Local mode via Bahulam Gateway: deepseek/deepseek-v4-pro-0813
+[headless] Tool: search_code
+[headless] Tool: read_file
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: search_code
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Done: 12 tools (12 primary, 0 sub-agent), 104.5s, $0.000

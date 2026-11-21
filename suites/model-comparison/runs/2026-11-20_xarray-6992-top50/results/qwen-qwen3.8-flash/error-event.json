@@ -1,0 +1,1 @@
+{"type":"error","error":"The provider budget cannot cover this request. Reduce the output limit or choose a lower-cost model.","code":"gateway_http_402","rate_limit":null}

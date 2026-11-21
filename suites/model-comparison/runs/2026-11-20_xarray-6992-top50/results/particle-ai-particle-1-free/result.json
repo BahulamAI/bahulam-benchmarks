@@ -1,0 +1,34 @@
+{
+  "model": "particle-ai/particle-1:free",
+  "instance_id": "pydata__xarray-6992",
+  "rc": 0,
+  "wall_clock_s": 3,
+  "patch_lines": 0,
+  "resolved": "no_patch",
+  "complete_event": {
+    "type": "complete",
+    "tools": 0,
+    "tools_primary": 0,
+    "tools_sub_agent": 0,
+    "tools_forwarded_sub_agent_events": 0,
+    "turns": null,
+    "tool_breakdown": {},
+    "tool_breakdown_primary": {},
+    "tool_breakdown_sub_agent": {},
+    "sub_agents": [],
+    "stagnation_triggers": 0,
+    "usage": {},
+    "duration_s": 2.8,
+    "cost_usd": 0,
+    "rate_limit": null,
+    "model": "particle-ai/particle-1:free",
+    "content_length": 0
+  },
+  "error_event": {
+    "type": "error",
+    "error": "The provider rejected the model request. Try another model.",
+    "code": "gateway_http_400",
+    "rate_limit": null
+  },
+  "timeout_event": null
+}

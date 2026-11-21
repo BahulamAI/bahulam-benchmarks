@@ -1,0 +1,15 @@
+instance_id: pydata__xarray-6992
+dataset: SWE-bench/SWE-bench_Verified
+difficulty: ">4 hours"
+why_this_instance: >
+  Unresolved by every model in the Aug 2026 screening baseline, including
+  the 67.8%-overall-resolve-rate champion (xiaomi/mimo-v2.5). The only
+  >4h-difficulty instance in that unresolved set. Used earlier the same
+  day to find and fix two real harness bugs: an inert context-retrieval
+  feature and a hardcoded 50-turn cap that cut off a correct fix in
+  progress — both fixed and shipped in @bahulam/code 0.2.6-beta.2.
+bahulam_code_version: 0.2.6-beta.2
+bahulam_code_source: local checkout (codekepler-npm, commit 84d55c3), not the published npm package
+harness_timeout_s: 1700
+harness_max_turns: 999
+mode: "--local (CLI-side agent loop, direct to Bahulam Gateway)"

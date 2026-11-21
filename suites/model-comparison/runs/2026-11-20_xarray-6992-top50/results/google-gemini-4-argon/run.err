@@ -1,0 +1,77 @@
+[headless] Local mode via Bahulam Gateway: google/gemini-4-argon
+[headless] Tool: search_code
+[headless] Tool: read_file
+[headless] Tool: search_code
+[headless] Tool: shell
+[headless] Tool: read_file
+[headless] Tool: read_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: read_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: read_file
+[headless] Tool: read_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: read_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: read_file
+[headless] Tool: read_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: search_code
+[headless] Tool: read_file
+[headless] Tool: read_file
+[headless] Tool: read_file
+[headless] Tool: write_file
+[headless] Tool: search_code
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: write_file
+[headless] Tool: write_file
+[headless] Done: 60 tools (60 primary, 0 sub-agent), 748.5s, $1.992
+
+--- Response ---
+The issue has been resolved in `xarray/core/dataset.py` and `xarray/core/indexes.py`:
+
+1. **`Dataset.reset_index` (`xarray/core/dataset.py`)**:
+   - Filtered `coord_names` with `& set(variables)` so dropped coordinate variables are removed from `_coord_names` (preventing `_coord_names` from having more elements than `_variables`).
+   - Used `_replace_with_new_dims` so dimensions with no remaining variables/coordinates are dropped.
+   - Properly handled `PandasMultiIndex` and single indexes when resetting by dimension or level names:
+     - Always drop the multi-index dimension coordinate when the multi-index itself is dropped/converted.
+     - Drop or convert (`.to_base_variable()`) reset multi-index levels and single-index coordinates depending on `drop=True/False`.
+     - Drop the old level coordinate variable when a multi-index is reduced to a single-level `PandasIndex` (renamed to the dimension).
+2. **`Dataset.set_index` (`xarray/core/dataset.py`)**:
+   - Converted de-indexed coordinate variables that are retained to base `Variable` objects via `.to_base_variable()`.
+3. **`PandasMultiIndex.keep_levels` (`xarray/core/indexes.py`)**:
+   - Renamed the remaining single level index to `self.dim` when a `MultiIndex` is reduced to a single `PandasIndex`.

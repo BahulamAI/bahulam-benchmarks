@@ -1,0 +1,71 @@
+[headless] Local mode via Bahulam Gateway: deepseek/deepseek-v4-flash
+[headless] Tool: search_code
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: read_file
+[headless] Tool: read_file
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: write_file
+[headless] Tool: write_file
+[headless] Done: 41 tools (41 primary, 0 sub-agent), 256.1s, $0.021
+
+--- Response ---
+Fixed the issue. The root cause was that `Dataset.set_index`/`reset_index` could leave `_coord_names` containing names no longer present in `_variables`, making `DataVariables.__len__` return a negative value and breaking the repr.
+
+Changes (matching upstream fix for this regression):
+
+- **`xarray/core/dataset.py` – `Dataset.set_index`**
+  - Track dropped indexes/variables as sets (`drop_indexes`, `drop_variables`, `all_var_names`) instead of lists with duplicates.
+  - Correctly drop all coordinates belonging to a pre-existing index, then re-add de-indexed coordinates converted to base variables (`to_base_variable()`).
+  - Preserve coordinate order when creating a single `PandasIndex`.
+
+- **`xarray/core/dataset.py` – `Dataset.reset_index`**
+  - Rewritten to properly drop or convert (based on `drop=`) multi-index dimension and level coordinates, using a `drop_or_convert` helper.
+  - Computes `coord_names = self._coord_names - drop_variables`, so stale coordinate names can no longer accumulate.
+  - Uses `_replace_with_new_dims` for correct dimension recalculation.
+
+- **`xarray/core/indexes.py` – `PandasMultiIndex.keep_levels`**
+  - When a multi-index is reduced to a single index, rename the remaining level coordinate to the dimension name (backward compatibility).
+
+Verification:
+
+```python
+ds = xr.Dataset(coords={"a": ("x", [1, 2, 3]), "b": ("x", ['a', 'b', 'c'])})
+ds.set_index(z=['a', 'b']).reset_index("z", drop=True)
+# returns a valid empty Dataset instead of raising ValueError
+```
+
+Tests: `test_dataset.py`, `test_indexes.py`, `test_dataarray.py`, `test_groupby.py` → **922 passed, 1 failed**. The single failure (`test_drop_index_labels`) is pre-existing and unrelated (a `pytest.warns` strictness issue that also fails on the unmodified source).

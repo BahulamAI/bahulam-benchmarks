@@ -1,0 +1,42 @@
+[headless] Local mode via Bahulam Gateway: anthropic/claude-sonnet-5.5
+[headless] Tool: search_code
+[headless] Tool: shell
+[headless] Tool: read_file
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Done: 20 tools (20 primary, 0 sub-agent), 293.6s, $1.648
+
+--- Response ---
+`Dataset.reset_index(..., drop=True)` no longer leaves coordinate names behind with no matching variable. Your example now returns a normal Dataset instead of raising `ValueError: __len__() should return >= 0`.
+
+I ran the full `xarray/tests` suite: 4353 passed and 1 failed. The failure is `test_drop_index_labels`, which expects a `DeprecationWarning` that `drop` doesn't emit. It fails the same way with my changes stashed, so my change didn't cause it.
+
+**Cause:** `reset_index` removed the dropped variables but built `coord_names` as `set(new_variables) | self._coord_names`. The dropped names stayed in `_coord_names`, so `DataVariables.__len__` went negative.
+
+**Changes:**
+- **`xarray/core/dataset.py`:** `reset_index` now removes dropped variables from `coord_names`. Beyond the one-line fix, I rewrote the body of `reset_index`. The updated tests in the working tree expect this behaviour:
+  - It drops or converts level coordinates to plain variables.
+  - It drops the multi-index dimension coordinate.
+  - It recalculates dimensions (via `_replace_with_new_dims`).
+- **`xarray/core/indexes.py`:** `PandasMultiIndex.keep_levels` now renames the remaining level to the dimension name when a multi-index reduces to a single index. The updated `test_reset_index` tests expect this.
+
+The working tree already had modified test files (`test_dataset.py`, `test_dataarray.py`, `test_groupby.py`) with new `reset_index` tests. I used those as the spec for the rewrite.
+
+I added a line to `.bahulam/tasks/done.md` recording the fix.
+
+I had to install `numpy<1.24` and `pandas<2` into the environment to run the tests, because the repo doesn't work with NumPy 2.

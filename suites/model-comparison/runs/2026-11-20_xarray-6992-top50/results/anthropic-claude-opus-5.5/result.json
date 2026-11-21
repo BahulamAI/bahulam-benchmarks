@@ -1,0 +1,46 @@
+{
+  "model": "anthropic/claude-opus-5.5",
+  "instance_id": "pydata__xarray-6992",
+  "rc": 0,
+  "wall_clock_s": 335,
+  "patch_lines": 133,
+  "resolved": "resolved",
+  "complete_event": {
+    "type": "complete",
+    "tools": 20,
+    "tools_primary": 20,
+    "tools_sub_agent": 0,
+    "tools_forwarded_sub_agent_events": 0,
+    "turns": 19,
+    "tool_breakdown": {
+      "search_code": 2,
+      "shell": 14,
+      "edit_file": 2,
+      "read_file": 1,
+      "write_file": 1
+    },
+    "tool_breakdown_primary": {
+      "search_code": 2,
+      "shell": 14,
+      "edit_file": 2,
+      "read_file": 1,
+      "write_file": 1
+    },
+    "tool_breakdown_sub_agent": {},
+    "sub_agents": [],
+    "stagnation_triggers": 0,
+    "usage": {
+      "input_tokens": 783066,
+      "output_tokens": 11592,
+      "cache_read": 0,
+      "cache_write": 0
+    },
+    "duration_s": 335.3,
+    "cost_usd": 1.9379916000000001,
+    "rate_limit": null,
+    "model": "anthropic/claude-opus-5.5",
+    "content_length": 2326
+  },
+  "error_event": null,
+  "timeout_event": null
+}

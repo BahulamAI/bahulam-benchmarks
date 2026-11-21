@@ -1,0 +1,42 @@
+{
+  "model": "google/gemini-4-carbon",
+  "instance_id": "pydata__xarray-6992",
+  "rc": 0,
+  "wall_clock_s": 1109,
+  "patch_lines": 0,
+  "resolved": "no_patch",
+  "complete_event": {
+    "type": "complete",
+    "tools": 80,
+    "tools_primary": 80,
+    "tools_sub_agent": 0,
+    "tools_forwarded_sub_agent_events": 0,
+    "turns": null,
+    "tool_breakdown": {
+      "search_code": 2,
+      "read_file": 6,
+      "shell": 72
+    },
+    "tool_breakdown_primary": {
+      "search_code": 2,
+      "read_file": 6,
+      "shell": 72
+    },
+    "tool_breakdown_sub_agent": {},
+    "sub_agents": [],
+    "stagnation_triggers": 0,
+    "usage": {},
+    "duration_s": 1109.4,
+    "cost_usd": 0,
+    "rate_limit": null,
+    "model": "google/gemini-4-carbon",
+    "content_length": 0
+  },
+  "error_event": {
+    "type": "error",
+    "error": "The provider denied access to this model. Choose another model or check model access.",
+    "code": "gateway_authentication_error",
+    "rate_limit": null
+  },
+  "timeout_event": null
+}

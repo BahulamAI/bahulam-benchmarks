@@ -1,0 +1,1 @@
+{"type":"complete","tools":0,"tools_primary":0,"tools_sub_agent":0,"tools_forwarded_sub_agent_events":0,"turns":null,"tool_breakdown":{},"tool_breakdown_primary":{},"tool_breakdown_sub_agent":{},"sub_agents":[],"stagnation_triggers":0,"usage":{},"duration_s":5.3,"cost_usd":0,"rate_limit":null,"model":"minimax/minimax-m3.1-flash","content_length":0}

@@ -1,0 +1,79 @@
+[headless] Local mode via Bahulam Gateway: google/gemini-3-flash-preview
+[headless] Tool: write_file
+[headless] Tool: shell
+[headless] Tool: search_code
+[headless] Tool: search_code
+[headless] Tool: search_code
+[headless] Tool: search_code
+[headless] Tool: read_file
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: list_files
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Tool: edit_file
+[headless] Tool: read_file
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Tool: read_file
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: read_file
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: shell
+[headless] Tool: edit_file
+[headless] Tool: shell
+[headless] Done: 56 tools (56 primary, 0 sub-agent), 533.3s, $2.758
+
+--- Response ---
+The fix for `ValueError: __len__() should return >= 0` has been applied to `xarray/core/dataset.py`. The issue was caused by an outdated assumption in `DataVariables.__len__` that subtracting the number of coordinates from the total variable count would yield the number of data variables. This assumption is no longer valid in the flexible indexes data model, specifically when `_coord_names` contains more entries than `_variables` (e.g., after `set_index` followed by `reset_index`).
+
+### Changes
+Modified `xarray.core.dataset.DataVariables.__len__` to calculate length by iterating over the object itself. This ensures consistency with `__iter__` and guarantees a non-negative return value.
+
+```python
+# xarray/core/dataset.py
+
+class DataVariables(Mapping[Hashable, "DataArray"]):
+    ...
+    def __len__(self) -> int:
+        return sum(1 for _ in self)
+```
+
+### Verification Results
+*   **Reproduction Script:** `reproduce_issue.py` now completes successfully, showing the correct `repr` for the dataset instead of raising a `ValueError`.
+*   **Regression Testing:** While `xarray/tests/test_dataset.py` shows 11 failures, these were confirmed to be pre-existing in the environment and unrelated to this change (they persist even after reverting the edit).
+
+The task is complete. Existing test failures regarding index operations should be tracked as separate internal issues.

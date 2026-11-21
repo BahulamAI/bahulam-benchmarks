@@ -1,0 +1,140 @@
+diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py
+index 620f32f8..ff0c877a 100644
+--- a/xarray/core/dataset.py
++++ b/xarray/core/dataset.py
+@@ -4088,9 +4088,13 @@ class Dataset(
+         }
+         indexes_.update(new_indexes)
+ 
+-        variables = {
+-            k: v for k, v in self._variables.items() if k not in drop_variables
+-        }
++        variables = {}
++        for k, v in self._variables.items():
++            if k not in drop_variables:
++                if k in maybe_drop_indexes:
++                    variables[k] = v.to_base_variable()
++                else:
++                    variables[k] = v
+         variables.update(new_variables)
+ 
+         # update dimensions if necessary, GH: 3512
+@@ -4141,33 +4145,65 @@ class Dataset(
+ 
+         drop_indexes: list[Hashable] = []
+         drop_variables: list[Hashable] = []
+-        replaced_indexes: list[PandasMultiIndex] = []
++        seen_indexes: list[Index] = []
+         new_indexes: dict[Hashable, Index] = {}
+-        new_variables: dict[Hashable, IndexVariable] = {}
++        new_variables: dict[Hashable, Variable] = {}
+ 
+         for name in dims_or_levels:
+             index = self._indexes[name]
+-            drop_indexes += list(self.xindexes.get_all_coords(name))
+-
+-            if isinstance(index, PandasMultiIndex) and name not in self.dims:
+-                # special case for pd.MultiIndex (name is an index level):
+-                # replace by a new index with dropped level(s) instead of just drop the index
+-                if index not in replaced_indexes:
+-                    level_names = index.index.names
+-                    level_vars = {
+-                        k: self._variables[k]
+-                        for k in level_names
+-                        if k not in dims_or_levels
+-                    }
+-                    if level_vars:
+-                        idx = index.keep_levels(level_vars)
+-                        idx_vars = idx.create_variables(level_vars)
+-                        new_indexes.update({k: idx for k in idx_vars})
+-                        new_variables.update(idx_vars)
+-                replaced_indexes.append(index)
++            if index in seen_indexes:
++                continue
++            seen_indexes.append(index)
++
++            idx_coord_names = set(self.xindexes.get_all_coords(name))
++            drop_indexes.extend(idx_coord_names)
+ 
+-            if drop:
+-                drop_variables.append(name)
++            if isinstance(index, PandasMultiIndex):
++                level_names = index.index.names
++                keep_level_vars = {
++                    k: self._variables[k]
++                    for k in level_names
++                    if k not in dims_or_levels
++                }
++
++                if index.dim not in dims_or_levels and keep_level_vars:
++                    # do not drop or convert the multi-index if there remains
++                    # at least one level and the dimension itself is not reset
++                    idx = index.keep_levels(keep_level_vars)
++                    idx_vars = idx.create_variables(keep_level_vars)
++                    new_indexes.update({k: idx for k in idx_vars})
++                    new_variables.update(idx_vars)
++                    if not isinstance(idx, PandasMultiIndex):
++                        # multi-index reduced to single index: level coordinate
++                        # is renamed to the dimension coordinate
++                        drop_variables.extend(keep_level_vars)
++                    drop_or_convert_names = [
++                        k for k in level_names if k in dims_or_levels
++                    ]
++                else:
++                    # always drop the multi-index dimension variable
++                    drop_variables.append(index.dim)
++                    drop_or_convert_names = list(level_names)
++
++                if drop:
++                    drop_variables.extend(drop_or_convert_names)
++                else:
++                    new_variables.update(
++                        {
++                            k: self._variables[k].to_base_variable()
++                            for k in drop_or_convert_names
++                        }
++                    )
++            else:
++                if drop:
++                    drop_variables.extend(idx_coord_names)
++                else:
++                    new_variables.update(
++                        {
++                            k: self._variables[k].to_base_variable()
++                            for k in idx_coord_names
++                        }
++                    )
+ 
+         indexes = {k: v for k, v in self._indexes.items() if k not in drop_indexes}
+         indexes.update(new_indexes)
+@@ -4177,9 +4213,11 @@ class Dataset(
+         }
+         variables.update(new_variables)
+ 
+-        coord_names = set(new_variables) | self._coord_names
++        coord_names = (set(new_variables) | self._coord_names) & set(variables)
+ 
+-        return self._replace(variables, coord_names=coord_names, indexes=indexes)
++        return self._replace_with_new_dims(
++            variables, coord_names=coord_names, indexes=indexes
++        )
+ 
+     def reorder_levels(
+         self: T_Dataset,
+diff --git a/xarray/core/indexes.py b/xarray/core/indexes.py
+index 6df5439b..1150cb6b 100644
+--- a/xarray/core/indexes.py
++++ b/xarray/core/indexes.py
+@@ -717,8 +717,11 @@ class PandasMultiIndex(PandasIndex):
+             level_coords_dtype = {k: self.level_coords_dtype[k] for k in index.names}
+             return self._replace(index, level_coords_dtype=level_coords_dtype)
+         else:
++            # backward compatibility: rename the level coordinate to the dimension name
+             return PandasIndex(
+-                index, self.dim, coord_dtype=self.level_coords_dtype[index.name]
++                index.rename(self.dim),
++                self.dim,
++                coord_dtype=self.level_coords_dtype[index.name],
+             )
+ 
+     def reorder_levels(
