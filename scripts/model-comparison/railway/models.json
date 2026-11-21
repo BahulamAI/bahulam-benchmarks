@@ -42,15 +42,6 @@
       "price_usd_per_1m_output": 1.251
     },
     {
-      "rank": 5,
-      "slug": "z-ai/glm-5.3-flash",
-      "display_name": "GLM 5.3 Flash",
-      "provider": "z-ai",
-      "weekly_tokens_processed": "12.2T",
-      "price_usd_per_1m_input": 0.0399,
-      "price_usd_per_1m_output": 0.0784
-    },
-    {
       "rank": 6,
       "slug": "openai/gpt-6-luna",
       "display_name": "GPT-6 Luna",
@@ -58,15 +49,6 @@
       "weekly_tokens_processed": "9.92T",
       "price_usd_per_1m_input": 0.1,
       "price_usd_per_1m_output": 0.5
-    },
-    {
-      "rank": 7,
-      "slug": "anthropic/claude-opus-5.5",
-      "display_name": "Claude Opus 5.5",
-      "provider": "anthropic",
-      "weekly_tokens_processed": "8.44T",
-      "price_usd_per_1m_input": 4.0,
-      "price_usd_per_1m_output": 20.0
     },
     {
       "rank": 8,
@@ -123,15 +105,6 @@
       "price_usd_per_1m_output": 0.0
     },
     {
-      "rank": 14,
-      "slug": "z-ai/glm-5.3",
-      "display_name": "GLM 5.3",
-      "provider": "z-ai",
-      "weekly_tokens_processed": "3.86T",
-      "price_usd_per_1m_input": 0.0699,
-      "price_usd_per_1m_output": 1.4
-    },
-    {
       "rank": 15,
       "slug": "meta/muse-spark-1.3-contributor",
       "display_name": "Muse Spark 1.3 Contributor",
@@ -150,15 +123,6 @@
       "price_usd_per_1m_output": 0.0
     },
     {
-      "rank": 17,
-      "slug": "anthropic/claude-sonnet-5.5",
-      "display_name": "Claude Sonnet 5.5",
-      "provider": "anthropic",
-      "weekly_tokens_processed": "3.25T",
-      "price_usd_per_1m_input": 2.0,
-      "price_usd_per_1m_output": 10.0
-    },
-    {
       "rank": 18,
       "slug": "openai/gpt-6.1-sol",
       "display_name": "GPT-6.1 Sol",
@@ -166,15 +130,6 @@
       "weekly_tokens_processed": "3.25T",
       "price_usd_per_1m_input": 2.0,
       "price_usd_per_1m_output": 10.0
-    },
-    {
-      "rank": 19,
-      "slug": "anthropic/claude-haiku-5.5",
-      "display_name": "Claude Haiku 5.5",
-      "provider": "anthropic",
-      "weekly_tokens_processed": "3.17T",
-      "price_usd_per_1m_input": 0.1,
-      "price_usd_per_1m_output": 0.5
     },
     {
       "rank": 20,
@@ -303,15 +258,6 @@
       "price_usd_per_1m_output": 0.0
     },
     {
-      "rank": 34,
-      "slug": "z-ai/glm-5.2",
-      "display_name": "GLM 5.2",
-      "provider": "z-ai",
-      "weekly_tokens_processed": "1.05T",
-      "price_usd_per_1m_input": 0.007,
-      "price_usd_per_1m_output": 6.8
-    },
-    {
       "rank": 35,
       "slug": "particle-ai/particle-1:free",
       "display_name": "Particle-1 (free)",
@@ -328,15 +274,6 @@
       "weekly_tokens_processed": "1T",
       "price_usd_per_1m_input": 0.387,
       "price_usd_per_1m_output": 0.783
-    },
-    {
-      "rank": 37,
-      "slug": "anthropic/claude-fable-5.2",
-      "display_name": "Claude Fable 5.2",
-      "provider": "anthropic",
-      "weekly_tokens_processed": "909B",
-      "price_usd_per_1m_input": 8.0,
-      "price_usd_per_1m_output": 40.0
     },
     {
       "rank": 38,
